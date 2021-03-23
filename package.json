@@ -1,0 +1,56 @@
+{
+  "name": "starter",
+  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jalo Moster",
+    "email": "jlvmoster@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jlvmoster/starter"
+  },
+  "bugs": {
+    "url": "https://github.com/jlvmoster/starter/issues"
+  },
+  "keywords": [
+    "gatsby"
+  ],
+  "license": "0BSD",
+  "scripts": {
+    "build": "gatsby build",
+    "develop": "gatsby develop",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "start": "npm run develop",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+  },
+  "dependencies": {
+    "clsx": "^1.1.1",
+    "gatsby": "^3.1.1",
+    "gatsby-plugin-image": "^1.1.1",
+    "gatsby-plugin-manifest": "^3.1.0",
+    "gatsby-plugin-offline": "^4.1.0",
+    "gatsby-plugin-react-helmet": "^4.1.0",
+    "gatsby-plugin-robots-txt": "^1.5.5",
+    "gatsby-plugin-sharp": "^3.1.1",
+    "gatsby-plugin-sitemap": "^3.1.0",
+    "gatsby-source-filesystem": "^3.1.0",
+    "gatsby-transformer-sharp": "^3.1.0",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
+    "react-spring": "^8.0.27",
+    "recoil": "^0.1.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.2.5",
+    "gatsby-plugin-postcss": "^4.1.0",
+    "postcss": "^8.2.8",
+    "prettier": "2.2.1",
+    "prettier-plugin-tailwind": "^2.2.10",
+    "tailwindcss": "^2.0.4"
+  }
+}
