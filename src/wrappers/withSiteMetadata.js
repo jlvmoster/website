@@ -10,6 +10,7 @@ const withSiteMetadata = Component => props => {
           links {
             label
             path
+            external
           }
         }
       }

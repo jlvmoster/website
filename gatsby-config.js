@@ -1,12 +1,12 @@
 module.exports = {
   siteMetadata: {
-    title: `Starter`,
-    description: `Custom Gatsby boilerplate for new personal projects`,
+    title: `moster.io`,
+    description: `My personal website`,
     author: `@jlvmoster`,
     siteUrl: `https://starter.moster.io`,
     links: [
-      { label: `Home`, path: `/` },
-      { label: `Example`, path: `/example` },
+      { label: `About`, path: `/` },
+      { label: `Blog`, path: `https://blog.moster.io`, external: true },
     ],
   },
   plugins: [
@@ -26,8 +26,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Starter`,
-        short_name: `Starter`,
+        name: `moster.io`,
+        short_name: `moster.io`,
         start_url: `/`,
         background_color: `#663399`,
         theme_color: `#663399`,

@@ -1,11 +1,12 @@
 import React from 'react';
 import SEO from '../components/shared/SEO';
+import About from '../components/About';
 
 const IndexPage = () => (
   <>
-    <SEO title='Home' />
+    <SEO title='About' />
     <div className='mt-4'>
-      <h1 className='text-5xl font-thin sm:text-4xl'>This is the home page</h1>
+      <About />
     </div>
   </>
 );
