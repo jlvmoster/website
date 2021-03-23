@@ -63,6 +63,7 @@ const Navbar = ({ title, links }) => {
                       label={link.label}
                       path={link.path}
                       selected={page === link.path}
+                      external={link.external}
                       onClick={onLinkClick(link.path)}
                     />
                   ))}
@@ -98,6 +99,7 @@ const Navbar = ({ title, links }) => {
                     label={link.label}
                     path={link.path}
                     selected={page === link.path}
+                    external={link.external}
                     onClick={onLinkClick(link.path)}
                   />
                 ))}
@@ -113,7 +115,8 @@ const Navbar = ({ title, links }) => {
 Navbar.propTypes = {
   title: PropTypes.string.isRequired,
   links: PropTypes.arrayOf(
-    PropTypes.shape({ label: PropTypes.string.isRequired, path: PropTypes.string.isRequired }).isRequired
+    PropTypes.shape({ label: PropTypes.string.isRequired, path: PropTypes.string.isRequired, external: PropTypes.bool })
+      .isRequired
   ).isRequired,
 };
 

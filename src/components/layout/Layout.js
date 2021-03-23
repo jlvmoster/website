@@ -15,7 +15,11 @@ Layout.propTypes = {
   metadata: PropTypes.shape({
     title: PropTypes.string.isRequired,
     links: PropTypes.arrayOf(
-      PropTypes.shape({ label: PropTypes.string.isRequired, path: PropTypes.string.isRequired }).isRequired
+      PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        path: PropTypes.string.isRequired,
+        external: PropTypes.bool,
+      }).isRequired
     ).isRequired,
   }).isRequired,
 };

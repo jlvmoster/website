@@ -1,17 +1,10 @@
 {
-  "name": "starter",
-  "description": "A simple starter to get up and developing quickly with Gatsby",
-  "version": "0.1.0",
+  "name": "website",
+  "description": "My personal website",
+  "version": "0.2.0",
   "author": {
     "name": "Jalo Moster",
     "email": "jlvmoster@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jlvmoster/starter"
-  },
-  "bugs": {
-    "url": "https://github.com/jlvmoster/starter/issues"
   },
   "keywords": [
     "gatsby"
