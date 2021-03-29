@@ -32,7 +32,7 @@ const Hobbies = () => (
         <h4 className='text-lg font-bold'>Cryptocurrency</h4>
         <p className='mt-1'>
           I watched in agony as Elon Musk single-handedly boosted Bitcoin's price the moment I sell off my meager
-          earnings. Such is the life of an amateur investor. Alas, I continue my struggle despite my rugged beginnings.
+          earnings. Such is the life of an amateur investor. Alas, I continue my struggle despite my losses.
         </p>
       </MediaObject>
     </Card>
