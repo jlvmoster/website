@@ -5,7 +5,7 @@ import About from '../components/about/About';
 const IndexPage = () => (
   <>
     <SEO title='About' />
-    <div className='mt-4'>
+    <div className='my-4'>
       <About />
     </div>
   </>
