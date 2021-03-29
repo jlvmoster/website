@@ -1,6 +1,6 @@
 import React from 'react';
 import SEO from '../components/shared/SEO';
-import About from '../components/About';
+import About from '../components/about/About';
 
 const IndexPage = () => (
   <>
