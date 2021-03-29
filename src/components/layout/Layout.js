@@ -1,12 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import Footer from './Footer';
 import Navbar from './Navbar';
 
 const Layout = ({ children, metadata }) => (
-  <div className='flex flex-col h-screen bg-gray-100 overflow-y-auto'>
+  <div className='flex flex-col h-screen bg-gray-100 overflow-hidden'>
     <Navbar title={metadata.title} links={metadata.links} />
-    <main className='container mx-auto px-4 max-w-7xl sm:px-6 lg:px-8'>{children}</main>
+    <div className='overflow-y-auto'>
+      <main className='container mx-auto px-4 max-w-7xl sm:px-6 lg:px-8'>{children}</main>
+      <Footer />
+    </div>
   </div>
 );
 
