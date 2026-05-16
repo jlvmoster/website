@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun *)",
+      "Bash(bunx *)",
+      "Bash(git *)"
+    ]
+  }
+}
