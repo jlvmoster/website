@@ -10,6 +10,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - §NFR-2.1.1 — Bun is the package manager, dev server, bundler, test runner.
 - §NFR-2.1.3 — Biome is the single lint + format tool.
 - §NFR-2.1.4 — TypeScript strict + `react-jsx` + bundler module resolution.
+- §FR-1.7.1 — The same bootstrap (`bun install`, `bun run setup:browsers`, `bun run check`, `bun test`) runs in CI. CI workflow shape is owned by [`features/ci-cd.md`](./ci-cd.md), not this spec.
 
 ## File layout
 - `package.json` — `scripts` block + deps.
@@ -50,7 +51,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
   3. `bun run check`
   4. `bun test`
   5. `bunx playwright test`
-- CI must include the same browser setup step before E2E tests so it does not depend on a machine-local Playwright cache.
+- CI must include the same browser setup step before E2E tests so it does not depend on a machine-local Playwright cache. Workflow lives at `.github/workflows/ci.yml`; see [`features/ci-cd.md`](./ci-cd.md).
 
 ## Test plan
 - **Clean install:** `rm -rf node_modules && bun install && bun run setup:browsers && bun run check && bun test && bunx playwright test` succeeds on a fresh clone.

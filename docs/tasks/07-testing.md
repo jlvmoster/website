@@ -81,6 +81,5 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
 - From a clean state: `bun install && bun run setup:browsers && bun test && bunx playwright test` all succeed (§NFR-2.4.4).
 
 ## Open questions to surface
-- Wire E2E into GitHub Actions on day 1, or defer until after first deploy? (Affects whether `.github/workflows/` needs to land in this task.)
 - Confirm visual regression remains out of scope — don't add it casually later.
 - Confirm we're comfortable deferring a DOM polyfill until a component actually needs one. If you'd rather have Happy DOM in place from day 1 (e.g. so a future contributor can `bun add` a testing-library without re-plumbing the preload), say so and we'll restore the Task 01 dep and a minimal `tests/setup-dom.ts`.

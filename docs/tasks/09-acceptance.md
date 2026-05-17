@@ -1,4 +1,4 @@
-# Task 08 — Acceptance verification
+# Task 09 — Acceptance verification
 
 ## Goal
 Run the §6 acceptance checklist from `requirements.md` end-to-end. v1 is "done" only when every line passes.
@@ -7,7 +7,7 @@ Run the §6 acceptance checklist from `requirements.md` end-to-end. v1 is "done"
 - [`requirements.md` §6 Acceptance criteria](../specs/requirements.md#6-acceptance-criteria-v1-done)
 
 ## Prereqs
-- Tasks 01–07 complete.
+- Tasks 01–08 complete.
 
 ## Checklist
 
@@ -16,7 +16,7 @@ Run each command from a clean state. Tick each box only after the corresponding 
 - [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS, and the contents of `public/`. Chromium installs successfully.
 - [ ] `bun run dev` serves the site locally with HMR (manual: edit a component, browser updates without full reload).
 - [ ] `bun run preview` (`wrangler dev`) serves the built site through the Workers runtime without errors.
-- [ ] `bun run deploy` publishes; `https://moster.dev` resolves over HTTPS and returns the SPA shell. *Requires the post-scaffold operational steps in architecture §7 (custom domain attached in Cloudflare dashboard).*
+- [ ] `bun run deploy` publishes; `https://moster.dev` resolves over HTTPS and returns the SPA shell. *Requires the post-scaffold operational steps in architecture §7 (custom domain attached in Cloudflare dashboard). This is the break-glass path; the canonical CD surface is GitHub Actions — see below.*
 - [ ] `bun run check` passes (`wrangler types && biome check && tsc --noEmit`).
 - [ ] `bun test` passes; at least one smoke test exists.
 - [ ] `bunx playwright test` passes the minimum coverage:
@@ -28,6 +28,8 @@ Run each command from a clean state. Tick each box only after the corresponding 
 - [ ] Hero copy matches §1.2.1.a verbatim. The three social links from §1.2.1.b each open the correct URL.
 - [ ] Dark mode applies automatically under `prefers-color-scheme: dark`.
 - [ ] An unknown path (e.g., `/foo`) returns the SPA shell, not a 404. *Verify this against `bun run preview` / `wrangler dev` after `bun run build`; the Task 07 E2E only covers the local Bun dev server fallback.*
+- [ ] CI is green on a fresh PR: GitHub Actions runs `check`, `bun test`, and the Playwright suite end-to-end (§FR-1.7.1).
+- [ ] CD is wired: a push to `master` triggers the GitHub Actions `deploy` job after `check` passes, `cloudflare/wrangler-action@v3` deploys without any local `wrangler deploy` invocation, and `https://moster.dev` reflects a visible change from the new commit (§FR-1.7.2).
 
 ## If a box won't tick
 
@@ -39,4 +41,4 @@ Run each command from a clean state. Tick each box only after the corresponding 
 
 - Open a PR against `origin/master`. Branch is already `jlvmoster/<feature-slug>`; first push uses `git push -u origin <branch>`.
 - PR title is imperative; body explains the *why*, not the *what*.
-- The post-scaffold ops in architecture §7 (custom domain attach, OG image, optional GitHub→Workers Builds wire-up) can ship in follow-up PRs.
+- The post-scaffold ops in architecture §7 (custom domain attach, OG image) can ship in follow-up PRs. The GitHub Actions deploy job is owned by Task 08.

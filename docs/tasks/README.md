@@ -21,7 +21,8 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 | 05 | [Nav & section components](./05-nav-and-sections.md) | `features/nav.md`, `features/hero.md`, `features/writing.md`, `features/about.md`, `features/contact.md` |
 | 06 | [Build pipeline & `public/`](./06-build-pipeline.md) | `features/build-pipeline.md` |
 | 07 | [Unit smoke + Playwright E2E](./07-testing.md) | `features/testing.md` |
-| 08 | [Acceptance verification](./08-acceptance.md) | `requirements.md` §6 |
+| 08 | [CI/CD bootstrap](./08-ci-cd.md) | `features/ci-cd.md` |
+| 09 | [Acceptance verification](./09-acceptance.md) | `requirements.md` §6 |
 
 ## Hard rules (lifted from `CLAUDE.md`)
 
