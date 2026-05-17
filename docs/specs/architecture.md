@@ -18,7 +18,7 @@ The whole v1 has to fit inside Cloudflare's free tier (requirements §2.2). The 
 
 - **Unlimited bandwidth and unlimited static-asset requests** — no credit card required.
 - **100,000 dynamic Worker requests per day.** Only counts when server-side code runs; static asset responses are free.
-- **Workers Builds (Git integration), free tier:** 3,000 build minutes/month, 1 concurrent build, 20-minute timeout per build, 2 vCPU / 8 GB RAM / 20 GB disk per builder. Local `wrangler deploy` doesn't count against this.
+- **GitHub Actions free tier:** unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free accounts. The v1 workflow is intentionally small enough to fit.
 - **20,000-file limit per deployment.**
 - **Custom domain + automatic HTTPS** included.
 
@@ -32,8 +32,10 @@ The same project supports four runtime contexts, in this order of "production-li
 |---|---|---|---|
 | Local dev | `bun run dev` | Bun.serve + HMR | Tight feedback loop. Fastest. |
 | Pre-deploy check | `bun run preview` | `wrangler dev` (Workers V8 runtime locally) | Sanity-check anything Worker-shaped before pushing. |
-| CI build | `bun run build` (then `wrangler deploy`) | Bun bundler → Cloudflare upload | Production artifact. |
-| Production | (auto, after deploy) | Cloudflare Workers + Static Assets edge | What users see. |
+| CI | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner | Runs `bun run check`, `bun test`, `bunx playwright test`. Merge gate. See §8.1. |
+| CD | GitHub Actions deploy job on push to `master` | `ubuntu-latest` runner + `cloudflare/wrangler-action@v3` | Runs after CI passes, builds `dist/`, then deploys with Wrangler. See §8.2. |
+| Break-glass deploy | `bun run deploy` | Local Bun bundler → `wrangler deploy` | Manual fallback when GitHub Actions is unavailable; not the default path. |
+| Production | (auto, after CD) | Cloudflare Workers + Static Assets edge | What users see. |
 
 `wrangler dev` matters because Bun.serve and Workers are *not* the same runtime. If a future `/api/og` branch uses a Workers-only API, only `wrangler dev` will catch it locally.
 
@@ -148,15 +150,103 @@ The check command order (`wrangler types && biome check && tsc --noEmit`) matter
 
 These aren't in the requirements doc because they're one-time setup performed in dashboards, not code:
 
-1. **Connect GitHub repo → Cloudflare Workers Builds** (optional). Alternative is to keep deploying from local CLI with `wrangler deploy`. Either way satisfies §FR-1.4.4 / §FR-1.5.4.
+1. **Create Cloudflare deploy credentials for GitHub Actions.** Required by §FR-1.7.2. In Cloudflare, create a scoped API token with Workers deploy permissions for this account/project. In GitHub repo settings, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as Actions secrets. Do not commit either value.
 2. **Add custom domain `moster.dev`** in the Cloudflare dashboard. SSL/HTTPS is automatic once the zone is attached.
 3. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
 
-## 8. Sources
+## 8. CI/CD
+
+Requirements §1.7 uses GitHub Actions for both CI and CD. Pull requests get the same quality gate as before; pushes to `master` run the gate first and only then deploy through Cloudflare's official Wrangler action.
+
+### 8.1 CI on GitHub Actions
+
+One workflow at `.github/workflows/ci.yml` runs on every PR against `master` and every push to `master`:
+
+```yaml
+name: ci
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - name: Cache Bun packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - run: bun install --frozen-lockfile
+      - run: bun run setup:browsers
+      - run: bun run check
+      - run: bun test
+      - run: bunx playwright test
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - name: Cache Bun packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
+
+The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
+
+### 8.2 CD Through GitHub Actions
+
+The `deploy` job runs only on pushes to `master`, after `check` succeeds:
+
+- Installs dependencies with `bun install --frozen-lockfile`.
+- Builds the static assets with `bun run build`.
+- Deploys with `cloudflare/wrangler-action@v3`, which runs Wrangler against the committed `wrangler.toml`.
+- Authenticates using GitHub Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+Branch protection should require `check` before merge. The deploy job is not a pull-request gate because it only runs on `master`.
+
+### 8.3 Why this shape
+
+- **One pipeline surface.** CI and CD both live in GitHub Actions, so deployment cannot race ahead of the quality gate.
+- **Official deploy action.** Cloudflare documents `cloudflare/wrangler-action@v3` as the GitHub Actions path for Workers deploys.
+- **Secrets stay out of source.** The Cloudflare API token and account ID live in GitHub Actions secrets, never in committed files (§FR-1.7.5).
+- **`bun run deploy` is unchanged** (§FR-1.5.4 / §FR-1.7.6). It still works as a break-glass path when GitHub Actions is degraded, but it is not the production source of truth.
+
+### 8.4 Tradeoffs accepted for v1
+
+- **GitHub now holds deploy credentials.** This is the direct tradeoff for keeping CI/CD in one GitHub Actions workflow. The token must be scoped narrowly in Cloudflare and stored only as a GitHub Actions secret.
+- **Cache package artifacts, not `node_modules`.** CI caches Bun's package cache and Playwright's browser archive using exact `bun.lock` keys. Playwright notes that browser-cache restore can be comparable to download time, so this is a measured tradeoff rather than a correctness dependency. The workflow still runs `bun install --frozen-lockfile` and `bun run setup:browsers`, which keeps it reproducible on cache misses and avoids relying on a committed or restored `node_modules` tree.
+
+## 9. Sources
 
 - [Static Assets · Cloudflare Workers docs](https://developers.cloudflare.com/workers/static-assets/)
 - [Migrate from Pages to Workers · Cloudflare Workers docs](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)
-- [Workers Builds — limits and pricing · Cloudflare Workers docs](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/)
+- [GitHub Actions · Cloudflare Workers docs](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
+- [cloudflare/wrangler-action](https://github.com/cloudflare/wrangler-action)
+- [Cache dependencies and build outputs in GitHub Actions](https://github.com/actions/cache)
+- [Playwright CI docs — caching browsers](https://playwright.dev/docs/ci#caching-browsers)
 - [TypeScript on Workers · Cloudflare Workers docs](https://developers.cloudflare.com/workers/languages/typescript/) — `wrangler types` and `worker-configuration.d.ts`
 - [HTML bundler · Bun docs](https://bun.com/docs/bundler/html) — clarifies that `public/` is not auto-copied
 - [Workers & Pages Pricing · Cloudflare](https://www.cloudflare.com/plans/developer-platform/)
+- [GitHub Actions billing & free-tier minutes · GitHub Docs](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
+- [oven-sh/setup-bun action](https://github.com/oven-sh/setup-bun)

@@ -51,6 +51,14 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.6.2** `tsconfig.json` lists `"./worker-configuration.d.ts"` alongside `"bun"` in `types` so generated types resolve.
 - **FR-1.6.3** `worker-configuration.d.ts` is gitignored; type generation is part of `bun run check` and CI.
 
+### 1.7 CI/CD
+- **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun test`, and `bunx playwright test`. A PR cannot merge until CI is green.
+- **FR-1.7.2** Pushes to `master` trigger an automated production deploy through GitHub Actions after CI passes. Production releases must not require an interactive `bun run deploy` from a developer's machine.
+- **FR-1.7.3** CI and CD both run on GitHub Actions. Deploys use Cloudflare's official `cloudflare/wrangler-action@v3`.
+- **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
+- **FR-1.7.5** Cloudflare API credentials needed for deploys are stored only as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed to the repository.
+- **FR-1.7.6** `bun run deploy` remains supported as a break-glass path (§FR-1.5.4) but is not the production source of truth.
+
 ## 2. Non-functional requirements
 
 ### 2.1 Tooling constraints
@@ -60,8 +68,9 @@ This document is the authoritative source of truth for what the implementation m
 - **NFR-2.1.4** TypeScript is in strict mode with `react-jsx` and bundler resolution.
 
 ### 2.2 Hosting and cost
-- **NFR-2.2.1** Hosting must stay within Cloudflare's free tier for v1 (unlimited static bandwidth, ≤100K dynamic Worker req/day, ≤3,000 build minutes/month, ≤20,000 files per deployment).
+- **NFR-2.2.1** Hosting must stay within Cloudflare's free tier for v1 (unlimited static bandwidth, ≤100K dynamic Worker req/day, ≤20,000 files per deployment). Cloudflare Workers Builds minutes are not applicable because production deploys run through GitHub Actions.
 - **NFR-2.2.2** No paid third-party services are introduced for v1.
+- **NFR-2.2.3** CI/CD stays within GitHub Actions' free tier where possible (unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free). Cloudflare hosting remains on the Workers free tier.
 
 ### 2.3 Project layout
 - **NFR-2.3.1** Source lives under `src/` with subdirectories `components/`, `content/`, `lib/`, `styles/`, plus the entry files `index.html`, `main.tsx`, `App.tsx`, and `worker.ts`.
@@ -102,6 +111,7 @@ Auth, database, comments, search, RSS, i18n, custom font hosting, theme toggle. 
 | Typography | System stack only |
 | Hosting | Cloudflare Workers + Static Assets |
 | Theme toggle | None (uses `prefers-color-scheme`) |
+| CI / CD | GitHub Actions for both CI and CD; deploy via `cloudflare/wrangler-action@v3` |
 
 ## 6. Acceptance criteria (v1 done)
 
@@ -117,3 +127,4 @@ The v1 release is complete when *all* of the following hold:
 - [ ] Hero copy matches §1.2.1.a verbatim; the three social links in §1.2.1.b each open the correct URL.
 - [ ] Dark mode applies automatically under `prefers-color-scheme: dark`.
 - [ ] An unknown path (e.g., `/foo`) returns the SPA shell, not a 404.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and the Playwright suite and reports green. On push to `master`, the GitHub Actions deploy job runs `cloudflare/wrangler-action@v3` after CI passes and `https://moster.dev` reflects a visible change from the new commit without any local `wrangler deploy`.

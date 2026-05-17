@@ -56,7 +56,7 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 | Dev server | `bun run dev` | post-scaffold (`scripts/dev.ts` + `Bun.serve` + HMR) |
 | Production build | `bun run build` | post-scaffold (`scripts/build.ts` → `dist/`) |
 | Local Workers runtime | `bun run preview` | post-scaffold (`wrangler dev`) |
-| Deploy | `bun run deploy` | post-scaffold (`wrangler deploy`) |
+| Deploy (break-glass only) | `bun run deploy` | post-scaffold (`wrangler deploy`); production deploys go through GitHub Actions on push to `master` — see `docs/specs/features/ci-cd.md` |
 | Type + lint check | `bun run check` | post-scaffold (`wrangler types && biome check && tsc --noEmit`) |
 | Regenerate Worker types | `bunx wrangler types` | works after `wrangler.toml` exists |
 | E2E (browser) | `bunx playwright test` | works after `playwright.config.ts` exists |
@@ -64,14 +64,19 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 ## Key files
 - `docs/specs/requirements.md` — authoritative requirements doc (read first).
 - `docs/specs/architecture.md` — rationale, code shapes, and operational notes that back the requirements.
-- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Writing, About, Contact, Nav, Theming, App Shell, Worker, Build Pipeline, Tooling, Testing). Read the relevant one before touching a feature.
+- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Writing, About, Contact, Nav, Theming, App Shell, Worker, Build Pipeline, Tooling, Testing, CI/CD). Read the relevant one before touching a feature.
+- `docs/tasks/README.md` — ordered, nine-step implementation playbook bridging the spec layer and the (still-missing) `src/` scaffold. Each task lists prereqs, steps, and a verification block. Start here when implementing.
 - `.claude/skills/changelog-generator/SKILL.md` — repo-local skill for release-note generation.
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
+- `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
+- `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
+- `.github/workflows/ci.yml` — _(post-scaffold)_ single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
 - `wrangler.toml`, `src/worker.ts` — _(post-scaffold)_ Cloudflare Workers + Static Assets config and pass-through fetch handler.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
 
 ## Docs conventions
 - **Three layers under `docs/specs/`:** `requirements.md` is *what must be true* (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is *why + canonical code shapes*; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
+- **Implementation playbook in `docs/tasks/`** is a separate layer: *order and gates*, not spec content. Numbered tasks (`01-…` through `09-…`) sequence the work and cite feature specs by path; they must not restate spec content. When a task is ambiguous, the spec is authoritative.
 - **Feature-spec template** (used by every file under `features/`): Goal → Requirements covered → File layout → Behavior & edge cases → Test plan → Open questions. Match it when adding a new feature spec.
 - **Open questions** at the bottom of each feature spec are unresolved decisions, not idle musings. Surface them (and resolve them) when implementing that feature.
 
