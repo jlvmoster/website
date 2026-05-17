@@ -5,7 +5,7 @@ Land the GitHub Actions workflow that gates PRs and deploys `master` through Clo
 
 ## Source spec
 - [`features/ci-cd.md`](../specs/features/ci-cd.md)
-- Architecture [§8 CI/CD](../specs/architecture.md#8-cicd) and [§7.1 Post-scaffold operational steps](../specs/architecture.md#7-post-scaffold-operational-steps)
+- Architecture [§8 CI/CD](../specs/architecture.md#8-cicd) and [§7 Post-scaffold operational steps](../specs/architecture.md#7-post-scaffold-operational-steps)
 - Requirements: §FR-1.7.1–§FR-1.7.6, §NFR-2.2.3
 
 ## Prereqs

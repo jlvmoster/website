@@ -56,7 +56,7 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 | Dev server | `bun run dev` | post-scaffold (`scripts/dev.ts` + `Bun.serve` + HMR) |
 | Production build | `bun run build` | post-scaffold (`scripts/build.ts` → `dist/`) |
 | Local Workers runtime | `bun run preview` | post-scaffold (`wrangler dev`) |
-| Deploy | `bun run deploy` | post-scaffold (`wrangler deploy`) |
+| Deploy (break-glass only) | `bun run deploy` | post-scaffold (`wrangler deploy`); production deploys go through GitHub Actions on push to `master` — see `docs/specs/features/ci-cd.md` |
 | Type + lint check | `bun run check` | post-scaffold (`wrangler types && biome check && tsc --noEmit`) |
 | Regenerate Worker types | `bunx wrangler types` | works after `wrangler.toml` exists |
 | E2E (browser) | `bunx playwright test` | works after `playwright.config.ts` exists |
@@ -68,6 +68,9 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 - `docs/tasks/README.md` — ordered, nine-step implementation playbook bridging the spec layer and the (still-missing) `src/` scaffold. Each task lists prereqs, steps, and a verification block. Start here when implementing.
 - `.claude/skills/changelog-generator/SKILL.md` — repo-local skill for release-note generation.
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
+- `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
+- `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
+- `.github/workflows/ci.yml` — _(post-scaffold)_ single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
 - `wrangler.toml`, `src/worker.ts` — _(post-scaffold)_ Cloudflare Workers + Static Assets config and pass-through fetch handler.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
 

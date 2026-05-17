@@ -5,7 +5,7 @@ Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `
 
 ## Source spec
 - [`features/build-pipeline.md`](../specs/features/build-pipeline.md)
-- Architecture: [§4.3 scripts/build.ts](../specs/architecture.md#43-scriptsbuildts-programmatic-build-public-copy)
+- Architecture: [§4.3 scripts/build.ts](../specs/architecture.md#43-scriptsbuildts-programmatic-build--public-copy)
 - Requirements: §FR-1.5.1, §FR-1.5.2, §NFR-2.1.2, §NFR-2.3.2, §NFR-2.3.4
 
 ## Prereqs

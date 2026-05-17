@@ -68,7 +68,7 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
    - **Hero copy verbatim**: substring `"It's my pleasure to invite you into my portfolio."` is visible (the "my pleasure" guard).
    - **Social links**: three anchors with `href` matching `github.com/jlvmoster`, `instagram.com/jlvmoster`, `linkedin.com/in/jlvmoster`.
    - **Dark mode**: launch a second context with `colorScheme: "dark"`; computed `background-color` of `<body>` differs from the light-scheme baseline.
-   - **Dev-server fallback**: `await page.goto("/some-unknown-path")` returns 200 and the body contains `<div id="root">` — keeps local dev behavior SPA-compatible. The Workers Static Assets fallback is verified in Task 08 against `bun run preview`.
+   - **Dev-server fallback**: `await page.goto("/some-unknown-path")` returns 200 and the body contains `<div id="root">` — keeps local dev behavior SPA-compatible. The Workers Static Assets fallback is verified in Task 09 against `bun run preview`.
 5. **Out of scope** (don't add): full-DOM snapshots, visual regression, multi-browser matrix, `@happy-dom/global-registrator`, `@testing-library/react`.
 
 ## Outputs
