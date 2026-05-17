@@ -113,5 +113,5 @@ chore(deps): bun update typescript to 5.9.4
 ## Tips
 - Run from the active worktree root (`git rev-parse --show-toplevel`) so `git log` sees the right history. In Conductor, this is usually a city-named worktree under the shared `website` project directory, and the city name may differ between sessions.
 - For a "weekly update post" framing, set the title to `# Week of <Monday's date>` instead of a version.
-- If `docs/spec.md` is relevant (e.g., a change touches the resolved-inputs table), mention the spec section in the rewrite — but only when it adds context for the reader.
+- If `docs/specs/requirements.md` is relevant (e.g., a change touches the resolved-inputs table), mention the section in the rewrite — but only when it adds context for the reader.
 - Before publishing, re-read the draft aloud. If a sentence sounds like a release engineer wrote it, rewrite it.

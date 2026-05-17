@@ -41,16 +41,17 @@ test("hello world", () => {
 
 # Project: moster.dev
 
-This repo is Jalo's personal website. **The authoritative product/architecture spec is `docs/spec.md` — read it before any non-trivial change.** It covers the deployment model, file layout, content sections, growth path, and the resolved decisions (domain, socials, hero copy, typography).
+This repo is Jalo's personal website. **The authoritative requirements doc is `docs/specs/requirements.md` — read it before any non-trivial change.** It covers the deployment model, file layout, content sections, growth path, and the resolved decisions (domain, socials, hero copy, typography).
 
-Current state: `bun init --empty` skeleton + `@playwright/test` installed. No `src/` yet — the scaffold step from the spec's build checklist hasn't run.
+Current state: `bun init --empty` skeleton + `@playwright/test` installed. No `src/` yet — the scaffold work implied by the requirements doc's acceptance criteria hasn't run.
 
 ## Commands
-These are the scripts the spec defines. Items marked _(post-scaffold)_ don't exist yet — `package.json` has no `scripts` block until the scaffold step runs.
+These are the scripts the requirements doc defines. Items marked _(post-scaffold)_ don't exist yet — `package.json` has no `scripts` block until the scaffold step runs.
 
 | Purpose | Command | Status |
 |---|---|---|
 | Install deps | `bun install` | works |
+| Install browser deps | `bun run setup:browsers` | post-scaffold (`playwright install chromium`) |
 | Unit tests | `bun test` | works (no specs yet) |
 | Dev server | `bun run dev` | post-scaffold (`scripts/dev.ts` + `Bun.serve` + HMR) |
 | Production build | `bun run build` | post-scaffold (`scripts/build.ts` → `dist/`) |
@@ -61,11 +62,18 @@ These are the scripts the spec defines. Items marked _(post-scaffold)_ don't exi
 | E2E (browser) | `bunx playwright test` | works after `playwright.config.ts` exists |
 
 ## Key files
-- `docs/spec.md` — authoritative product/architecture spec (read first).
+- `docs/specs/requirements.md` — authoritative requirements doc (read first).
+- `docs/specs/architecture.md` — rationale, code shapes, and operational notes that back the requirements.
+- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Writing, About, Contact, Nav, Theming, App Shell, Worker, Build Pipeline, Tooling, Testing). Read the relevant one before touching a feature.
 - `.claude/skills/changelog-generator/SKILL.md` — repo-local skill for release-note generation.
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `wrangler.toml`, `src/worker.ts` — _(post-scaffold)_ Cloudflare Workers + Static Assets config and pass-through fetch handler.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
+
+## Docs conventions
+- **Three layers under `docs/specs/`:** `requirements.md` is *what must be true* (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is *why + canonical code shapes*; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
+- **Feature-spec template** (used by every file under `features/`): Goal → Requirements covered → File layout → Behavior & edge cases → Test plan → Open questions. Match it when adding a new feature spec.
+- **Open questions** at the bottom of each feature spec are unresolved decisions, not idle musings. Surface them (and resolve them) when implementing that feature.
 
 ## Conductor workspace layout
 - This project is usually edited through Conductor, which creates separate git worktrees under a shared project directory. The shared project directory is named `website`; individual worktrees are city-named directories such as `dublin`, and future sessions may use a different city.
@@ -75,7 +83,7 @@ These are the scripts the spec defines. Items marked _(post-scaffold)_ don't exi
 ## Frontend conventions
 - Stack: Bun + React 19 + Tailwind v4 SPA, single page, deployed to Cloudflare Workers Static Assets via Wrangler.
 - Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--font-sans`, `--font-serif`.
-- System font stack only — no hosted fonts. Sans/serif/mono families are listed in `docs/spec.md`.
+- System font stack only — no hosted fonts. Sans/serif/mono families are listed in `docs/specs/requirements.md` §1.3.3.
 - Light + dark via `prefers-color-scheme`; no toggle.
 - Prose max-width ~65ch; generous line-height.
 - No component libraries (no shadcn, Radix, MUI, etc.). Handwritten components in `src/components/`.
@@ -84,7 +92,7 @@ These are the scripts the spec defines. Items marked _(post-scaffold)_ don't exi
 
 ## Testing
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`.
-- **Browser smoke (E2E):** `@playwright/test` is installed and Chromium is cached at `~/Library/Caches/ms-playwright/`. Place specs in `tests/e2e/*.spec.ts`, run with `bunx playwright test`. Run them against `bun run dev`.
+- **Browser smoke (E2E):** `@playwright/test` is installed, but each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) before `bunx playwright test`. Place specs in `tests/e2e/*.spec.ts` and run them against `bun run dev`.
   - Keep specs thin: page loads, hero copy renders, all three social links resolve, dark mode applies via `prefers-color-scheme`. Don't snapshot the whole DOM.
   - The runner is installed but unwired — `bunx playwright test` will fail with "no tests found" until `playwright.config.ts` and a spec under `tests/e2e/` exist.
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
@@ -93,7 +101,7 @@ These are the scripts the spec defines. Items marked _(post-scaffold)_ don't exi
 Plugins enabled in `.claude/settings.json`: `frontend-design`, `playwright`, `typescript-lsp`, `claude-md-management`, `skill-creator`, `superpowers`.
 
 Built-in subagents to lean on:
-- **`Explore`** — locating code under `src/` or facts in `docs/spec.md`.
+- **`Explore`** — locating code under `src/` or facts in `docs/specs/requirements.md`.
 - **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Worker fetch handler).
 
 Repo-local skills in `.claude/skills/`:
@@ -102,12 +110,12 @@ Repo-local skills in `.claude/skills/`:
 Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - `new-post` — scaffold an MDX file under `src/content/` with frontmatter, once the blog ships.
 - `deploy-check` — chain `bunx wrangler types && bun run check && bun run build && bunx wrangler deploy --dry-run` as a one-shot pre-push gate.
-- `spec-sync` — flag a diff between `docs/spec.md` and the implemented state if the spec starts drifting.
+- `requirements-sync` — flag a diff between `docs/specs/requirements.md` and the implemented state if requirements start drifting.
 
 ## Hard rules specific to this repo
 - Never paraphrase the hero copy. "my pleasure" stays.
-- Never reintroduce Pages-based hosting; the spec deliberately chose Workers + Static Assets.
-- Never add a component library or framework (Next.js, Vite, etc.). The spec deliberately picked Bun's HTML bundler.
+- Never reintroduce Pages-based hosting; the requirements doc deliberately chose Workers + Static Assets.
+- Never add a component library or framework (Next.js, Vite, etc.). The requirements doc deliberately picked Bun's HTML bundler.
 - Worker types (`Env`, `ExportedHandler`, `Fetcher`) come from generated `worker-configuration.d.ts` — run `bunx wrangler types` after changes to `wrangler.toml`. The file is gitignored.
 
 ## Git conventions
