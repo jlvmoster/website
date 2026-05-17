@@ -17,7 +17,7 @@ Create the HTML entry, React 19 root mount, and the top-level `App` that compose
    - `<html lang="en">`, charset, viewport.
    - `<title>` — default "Jalo Moster" unless the user provides a custom one.
    - `<meta name="description">` — one-line bio, doubles as OG description.
-   - `<meta property="og:title" / "og:description" / "og:image">` — image lives at `public/og-image.png` if present (Task 06).
+   - `<meta property="og:title">` and `<meta property="og:description">`. Add `<meta property="og:image" content="/og-image.png">` only if Task 06 will ship `public/og-image.png`; don't point crawlers at a missing image.
    - `<meta name="theme-color" media="(prefers-color-scheme: light)" content="…">` and dark counterpart, matching the `--bg` token values resolved in Task 03.
    - `<link rel="icon" href="/favicon.ico">` (file shipped in Task 06).
    - `<link rel="stylesheet" href="./styles/globals.css">` and `<script type="module" src="./main.tsx"></script>`.
@@ -36,7 +36,7 @@ Create the HTML entry, React 19 root mount, and the top-level `App` that compose
    );
    ```
 3. **Create `src/App.tsx`** as a function component that returns `<Nav />` followed by `<Hero />`, `<Writing />`, `<About />`, `<Contact />` in order.
-   - Until Task 05 creates the real components, stub each as `function Hero() { return <section id="hero" />; }` and friends so the shell type-checks. The IDs (`hero`, `writing`, `about`, `contact`) must be correct from day 1 — Task 05 fills in content.
+   - Import those five components from `src/components/`. Until Task 05 creates the real components, create one-line stub files there so the shell type-checks. The section stubs must use the correct IDs (`hero`, `writing`, `about`, `contact`) from day 1; `Nav` can return `null` until Task 05 fills in the anchor links.
 4. **No providers** in v1: no router, no theme context, no query client.
 
 ## Outputs
@@ -48,5 +48,5 @@ Create the HTML entry, React 19 root mount, and the top-level `App` that compose
 
 ## Open questions to surface
 - Final `<title>` and `<meta description>` strings.
-- OG image — ship a placeholder in v1 or defer (per architecture §7)?
+- OG image — ship a placeholder in v1 and include the `og:image` meta tag, or defer both to a follow-up (per architecture §7)?
 - `theme-color` values must match Task 03's resolved palette — confirm before writing the `<meta>` tags.
