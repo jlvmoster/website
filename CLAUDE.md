@@ -43,23 +43,22 @@ test("hello world", () => {
 
 This repo is Jalo's personal website. **The authoritative requirements doc is `docs/specs/requirements.md` — read it before any non-trivial change.** It covers the deployment model, file layout, content sections, growth path, and the resolved decisions (domain, socials, hero copy, typography).
 
-Current state: `bun init --empty` skeleton + `@playwright/test` installed. No `src/` yet — the scaffold work implied by the requirements doc's acceptance criteria hasn't run.
+Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav components, `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler, `wrangler.toml` + `src/worker.ts` handle Workers + Static Assets, and `.github/workflows/ci.yml` runs check + e2e on PR and deploys on push to `master`. See `README.md` for the user-facing summary.
 
 ## Commands
-These are the scripts the requirements doc defines. Items marked _(post-scaffold)_ don't exist yet — `package.json` has no `scripts` block until the scaffold step runs.
 
-| Purpose | Command | Status |
-|---|---|---|
-| Install deps | `bun install` | works |
-| Install browser deps | `bun run setup:browsers` | post-scaffold (`playwright install chromium`) |
-| Unit tests | `bun test` | works (no specs yet) |
-| Dev server | `bun run dev` | post-scaffold (`scripts/dev.ts` + `Bun.serve` + HMR) |
-| Production build | `bun run build` | post-scaffold (`scripts/build.ts` → `dist/`) |
-| Local Workers runtime | `bun run preview` | post-scaffold (`wrangler dev`) |
-| Deploy (break-glass only) | `bun run deploy` | post-scaffold (`wrangler deploy`); production deploys go through GitHub Actions on push to `master` — see `docs/specs/features/ci-cd.md` |
-| Type + lint check | `bun run check` | post-scaffold (`wrangler types && biome check && tsc --noEmit`) |
-| Regenerate Worker types | `bunx wrangler types` | works after `wrangler.toml` exists |
-| E2E (browser) | `bunx playwright test` | works after `playwright.config.ts` exists |
+| Purpose | Command |
+|---|---|
+| Install deps (also runs `husky` + `wrangler types` via `prepare`) | `bun install` |
+| Install browser deps | `bun run setup:browsers` (`playwright install chromium`) |
+| Dev server (HMR) | `bun run dev` (`scripts/dev.ts` + `Bun.serve`) |
+| Production build | `bun run build` (`scripts/build.ts` → `dist/`) |
+| Local Workers runtime | `bun run preview` (`wrangler dev`) |
+| Deploy (break-glass only) | `bun run deploy` — prod deploys run from GitHub Actions on push to `master`, see `docs/specs/features/ci-cd.md` |
+| Type + lint check | `bun run check` (`wrangler types && biome check && tsc --noEmit`) |
+| Regenerate Worker types | `bunx wrangler types` |
+| Unit tests | `bun test` |
+| E2E (browser) | `bunx playwright test` against `bun run dev` |
 
 ## Key files
 - `docs/specs/requirements.md` — authoritative requirements doc (read first).
@@ -70,9 +69,11 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
 - `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
-- `.github/workflows/ci.yml` — _(post-scaffold)_ single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
-- `wrangler.toml`, `src/worker.ts` — _(post-scaffold)_ Cloudflare Workers + Static Assets config and pass-through fetch handler.
+- `.github/workflows/ci.yml` — single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
+- `wrangler.toml`, `src/worker.ts` — Cloudflare Workers + Static Assets config and pass-through fetch handler.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
+- `README.md` — user-facing project summary (stack, quickstart, deploy flow); keep in sync when the project layout changes.
+- `.husky/` — pre-commit hook installed automatically by `prepare` on `bun install`.
 
 ## Docs conventions
 - **Three layers under `docs/specs/`:** `requirements.md` is *what must be true* (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is *why + canonical code shapes*; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
@@ -97,9 +98,8 @@ These are the scripts the requirements doc defines. Items marked _(post-scaffold
 
 ## Testing
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`.
-- **Browser smoke (E2E):** `@playwright/test` is installed, but each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) before `bunx playwright test`. Place specs in `tests/e2e/*.spec.ts` and run them against `bun run dev`.
+- **Browser smoke (E2E):** `bunx playwright test` runs specs under `tests/e2e/` against `bun run dev` (wired via `playwright.config.ts`). Each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) once before the first run.
   - Keep specs thin: page loads, hero copy renders, all three social links resolve, dark mode applies via `prefers-color-scheme`. Don't snapshot the whole DOM.
-  - The runner is installed but unwired — `bunx playwright test` will fail with "no tests found" until `playwright.config.ts` and a spec under `tests/e2e/` exist.
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
 
 ## Agents and skills
