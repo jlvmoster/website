@@ -10,6 +10,10 @@ not_found_handling = "single-page-application"  # serves index.html for unknown 
 [vars]
 # env vars here later
 
+[observability.logs]
+enabled = true
+invocation_logs = true
+
 # When you add a Worker fetch handler (forms, API, OG images), uncomment:
 # [[routes]]
 # pattern = "moster.dev/api/*"

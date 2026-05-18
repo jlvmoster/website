@@ -9,6 +9,9 @@
     "preview": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "bun test",
+    "test:e2e": "playwright test",
+    "test:e2e:built": "playwright test -c playwright.built.config.ts",
+    "test:e2e:production": "playwright test -c playwright.production.config.ts",
     "setup:browsers": "playwright install chromium",
     "check": "wrangler types && biome check && tsc --noEmit",
     "prepare": "husky && wrangler types"

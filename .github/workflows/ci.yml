@@ -29,6 +29,7 @@ jobs:
       - run: bun run build
       - run: bun test
       - run: bunx playwright test
+      - run: bunx playwright test -c playwright.built.config.ts
 
   deploy:
     needs: check
