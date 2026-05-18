@@ -18,6 +18,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - `tsconfig.json` — already strict; ensure `types: ["bun", "./worker-configuration.d.ts"]`.
 - `biome.json` — formatter + linter config.
 - `bunfig.toml` — Bun-specific config; registers `bun-plugin-tailwind` under `[serve.static]`.
+- `package.json` — adds `react-router-dom@^7` (runtime) and `@tailwindcss/typography@^0.5` (dev). Optionally `clsx@^2` (runtime) — see open questions.
 
 ## Behavior & edge cases
 - `package.json` scripts (canonical):
@@ -56,6 +57,9 @@ The non-runtime config that makes the project install, build, lint, type-check, 
   4. `bun test`
   5. `bunx playwright test`
 - CI must include the same browser setup step before E2E tests so it does not depend on a machine-local Playwright cache. Workflow lives at `.github/workflows/ci.yml`; see [`features/ci-cd.md`](./ci-cd.md).
+- `react-router-dom` is a routing utility, not a UI/component library; it is permitted under §FR-1.3.5.
+- `clsx` is a class-name utility, not a UI library; permitted. The alternative is a six-liner at `src/lib/clsx.ts`.
+- `@tailwindcss/typography` is loaded CSS-first via `@plugin "@tailwindcss/typography";` in `globals.css` — no `tailwind.config.ts`.
 
 ## Test plan
 - **Clean install:** `rm -rf node_modules && bun install && bun run setup:browsers && bun run check && bun test && bunx playwright test` succeeds on a fresh clone.
@@ -65,3 +69,4 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 ## Open questions
 - Override any Biome recommended rules? **Resolved:** no — use the recommended ruleset as-is. Document this as the default for future agents.
 - Pre-commit hook: **Resolved:** wired in Task 01 via `husky` (v9). Hook script lives at `.husky/pre-commit`; `"prepare": "husky"` installs it automatically on `bun install`. Chosen over `simple-git-hooks` because Conductor worktrees (where the user develops day-to-day) have `.git` as a file rather than a directory; `simple-git-hooks` blindly `mkdir`s `.git/hooks/` and fails silently in worktrees, while `husky` uses `core.hooksPath` and works everywhere.
+- Pull `clsx@^2` (~500 bytes) or inline a six-liner at `src/lib/clsx.ts`? Default: inline (no new dep).

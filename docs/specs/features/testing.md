@@ -33,6 +33,13 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
     - **Social links** — three anchors with `href` matching `github.com/jlvmoster`, `instagram.com/jlvmoster`, `linkedin.com/in/jlvmoster`.
     - **Dark mode** — second context launched with `colorScheme: "dark"`; computed `background-color` of `<body>` differs from the light baseline.
   - Out of scope per the requirements: full-DOM snapshots, visual regression, multi-browser matrix.
+  - Additional v2 assertions:
+    - Navigate to each route (`/about`, `/articles`, `/projects`, `/uses`) via Header NavLinks; verify no full reload (scroll-position trick) and URL updates.
+    - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses`: each returns 200 and the page renders (Workers SPA fallback).
+    - Theme toggle: click cycles `html.dark`; reload persists the choice via `localStorage["theme"]`.
+    - `/about` renders an `<img src="/images/portrait.jpg">`.
+    - `/articles` renders ≥ 1 article card; clicking it navigates to `/articles/:slug`.
+    - Footer renders on every route.
 
 ## Test plan
 - `bun test` passes (the smoke file is the test).
