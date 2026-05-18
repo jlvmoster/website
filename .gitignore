@@ -37,6 +37,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 test-results
 playwright-report
 playwright/.cache
+.playwright-mcp/
 
 # Wrangler / Cloudflare Workers
 .wrangler/
