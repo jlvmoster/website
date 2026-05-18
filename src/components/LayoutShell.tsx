@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 export function LayoutShell({ children }: { children: ReactNode }) {
   return (
@@ -9,7 +11,9 @@ export function LayoutShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <div className="relative flex w-full flex-col">
+        <Header />
         <main className="flex-auto">{children}</main>
+        <Footer />
       </div>
     </>
   );
