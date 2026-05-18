@@ -76,6 +76,7 @@ Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav 
 - `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
 - `README.md` — user-facing project summary (stack, quickstart, deploy flow); keep in sync when the project layout changes.
+- `CHANGELOG.md` — reader-facing release notes (output of the `changelog-generator` skill); append a new dated section per release rather than rewriting prior entries.
 - `.husky/` — pre-commit hook installed automatically by `prepare` on `bun install`.
 
 ## Docs conventions
