@@ -11,7 +11,7 @@
     "test": "bun test",
     "setup:browsers": "playwright install chromium",
     "check": "wrangler types && biome check && tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky && wrangler types"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",

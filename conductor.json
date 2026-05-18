@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "setup": "bun install && bunx wrangler types",
+    "setup": "bun install",
     "run": "bun run dev"
   }
 }
