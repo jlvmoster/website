@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #fafafa;
+  --fg: #0a0a0a;
+  --muted: #6b6b6b;
+  --accent: #1a1410;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0a;
+    --fg: #fafafa;
+    --muted: #a3a3a3;
+    --accent: #faf5ec;
+  }
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+article,
+.prose {
+  max-width: 65ch;
+  line-height: 1.7;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
