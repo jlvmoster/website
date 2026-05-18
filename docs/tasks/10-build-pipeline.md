@@ -17,8 +17,8 @@ Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `
 
 1. **Create `scripts/dev.ts`** using `Bun.serve` with HMR enabled (run via `bun --hot ./scripts/dev.ts` — the script in `package.json` already does this from Task 01).
    - Register `src/index.html` as the root route so Bun's HTML imports resolve bundled JS/CSS automatically.
-   - **Add a catch-all `fetch` handler that returns the bundled `src/index.html` for any unknown path** (any request that didn't match an asset emitted by the bundler). This mirrors the Workers Static Assets `not_found_handling = "single-page-application"` fallback in `wrangler.toml`, so local dev behaves the same as production for unknown routes. Task 07's E2E asserts this against `bun run dev`.
-   - Pin port `3000` and log it on startup. Task 07's `playwright.config.ts` hardcodes the same value.
+   - **Add a catch-all `fetch` handler that returns the bundled `src/index.html` for any unknown path** (any request that didn't match an asset emitted by the bundler). This mirrors the Workers Static Assets `not_found_handling = "single-page-application"` fallback in `wrangler.toml`, so local dev behaves the same as production for unknown routes. Task 11's E2E asserts this against `bun run dev`.
+   - Pin port `3000` and log it on startup. Task 11's `playwright.config.ts` hardcodes the same value.
 2. **Create `scripts/build.ts`** verbatim from architecture §4.3. The key invariants:
    - Delete `dist/` first (idempotent rebuild).
    - `Bun.build({ entrypoints: ["src/index.html"], outdir: "dist", minify: true, sourcemap: "linked" })`.

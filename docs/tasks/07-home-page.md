@@ -16,7 +16,7 @@ Replace the temporary v1 Hero rendering with the full Spotlight Home composition
 1. **Drop the user-provided assets** into `public/images/photos/`, `public/images/logos/`, and `public/cv.pdf`.
 2. **Create `src/content/resume.ts`** — typed `Role[]` (companies/titles/logos/dates provided by user).
 3. **Create `src/components/home/Photos.tsx`** — five rotated `<img>` elements.
-4. **Create `src/components/home/Resume.tsx`** — work timeline with logos, dates, "Download CV" button (`<Button href="/cv.pdf" variant="secondary">`).
+4. **Create `src/components/home/Resume.tsx`** — work timeline with logos, dates, "Download CV" button (`<Button href="/cv.pdf" variant="secondary" download>`).
 5. **Create `src/components/home/ArticleCard.tsx`** — Card variant tailored to the Home grid (Eyebrow date, Title link to `/articles/<slug>`, Description, Cta).
 6. **Rewrite `src/pages/HomePage.tsx`**:
    - Hero block inline: `<Container className="mt-9">` containing the verbatim §FR-1.2.1.a copy in a `<p>` and three `<SocialLink>` icons (GitHub, Instagram, LinkedIn).

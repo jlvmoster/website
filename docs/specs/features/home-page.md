@@ -22,7 +22,7 @@ The `/` route. Hero (verbatim copy + three social links) + Photos strip + 4 most
 - Social row: GitHub, Instagram, LinkedIn (X is omitted — Jalo has three socials). Each is a `<SocialLink>` opening in a new tab.
 - Photos strip: `<Photos />` renders `<img>` for `/images/photos/image-{1..5}.jpg` with rotations `["rotate-2", "-rotate-2", "rotate-2", "rotate-2", "-rotate-2"]`. `aspect-9/10`, `w-44 sm:w-72`.
 - Body grid: `mt-24 md:mt-28 grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2`. Left column: `<getAllArticles().slice(0, 4).map(a => <ArticleCard key={a.slug} article={a} />)>`. Right column: `<Resume />`.
-- Resume: array of `{ company, title, logo, start, end }` from `src/content/resume.ts`. Each row: logo disc + company/title/dates. Button: `<Button href="/cv.pdf" variant="secondary">Download CV <ArrowDownIcon /></Button>`.
+- Resume: array of `{ company, title, logo, start, end }` from `src/content/resume.ts`. Each row: logo disc + company/title/dates. Button: `<Button href="/cv.pdf" variant="secondary" download>Download CV <ArrowDownIcon /></Button>` so the PDF is fetched as a static asset rather than handled by the client router.
 - No newsletter signup.
 
 ## Test plan

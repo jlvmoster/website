@@ -347,7 +347,7 @@ Modules are hand-registered because Bun's HTML bundler statically resolves the i
 
 `Card` is a compound component with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, and `.Link` static properties. The pattern is lifted from Spotlight `src/components/Card.tsx`. `next/link` is swapped for `react-router-dom`'s `Link`; for external URLs (`href.startsWith("http")`) the Card.Link renders a plain `<a target="_blank" rel="noopener noreferrer">`.
 
-`Button` has primary/secondary variants and renders either `<button>` or `<Link>` based on whether `href` is provided.
+`Button` has primary/secondary variants and renders `<button>` when no `href` is provided. For in-app route hrefs (`/about`, `/articles/...`) it renders `react-router-dom`'s `<Link>`; for external URLs, static assets such as `/cv.pdf`, or `download` links, it renders a plain `<a>`.
 
 `SimpleLayout` wraps About / Articles / Projects / Uses pages with a title + intro header + body in a `Container`.
 

@@ -49,8 +49,9 @@ Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark 
      --color-accent: var(--accent);
      --color-panel: var(--panel);
      --color-ring: var(--ring);
-     --font-sans: var(--font-sans);
-     --font-serif: var(--font-serif);
+     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+       "Helvetica Neue", Arial, sans-serif;
+     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
    }
 
    html { scroll-behavior: smooth; scroll-padding-top: 4rem; }

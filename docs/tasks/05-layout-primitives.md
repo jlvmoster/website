@@ -25,7 +25,7 @@ Create the Spotlight primitive components used by every page: Container compound
 3. **Create `src/components/Container.tsx`** — Outer, Inner, composed Container (canonical shape in `architecture.md` §4.6).
 4. **Create `src/components/icons.tsx`** — paste SVG paths from Spotlight `src/components/SocialIcons.tsx` and inline glyphs. 14 named exports per `features/iconography.md`.
 5. **Create `src/components/Card.tsx`** — compound `Card` with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, `.Link` (lift from Spotlight `src/components/Card.tsx`; swap `next/link`'s `Link` for `react-router-dom`'s `Link`; for external `href` (starts with `http`) render `<a target="_blank" rel="noopener noreferrer">`).
-6. **Create `src/components/Button.tsx`** — primary/secondary variants (lift from Spotlight `src/components/Button.tsx`).
+6. **Create `src/components/Button.tsx`** — primary/secondary variants (lift from Spotlight `src/components/Button.tsx`). Use `Link` only for in-app route hrefs; render a plain `<a>` for external URLs, static assets such as `/cv.pdf`, or `download` links.
 7. **Create `src/components/SimpleLayout.tsx`** — title + intro + body in a `Container` (lift from Spotlight `src/components/SimpleLayout.tsx`).
 8. **Create `src/components/Section.tsx`** — left-bordered title + children grid using `useId()` (lift from Spotlight `src/components/Section.tsx`).
 9. **Create `src/components/Prose.tsx`** — `<div className="prose dark:prose-invert">`.
