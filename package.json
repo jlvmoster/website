@@ -19,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@playwright/test": "^1.60.0",
+    "@tailwindcss/typography": "^0.5",
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "react-router-dom": "^7"
   }
 }
