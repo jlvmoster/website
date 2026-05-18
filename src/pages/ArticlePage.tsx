@@ -1,6 +1,36 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ArticleLayout } from "../components/ArticleLayout";
+import { Container } from "../components/Container";
+import { getArticleBySlug } from "../content/articles";
 
 export function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
-  return <h1>Article: {slug}</h1>;
+  const article = slug ? getArticleBySlug(slug) : undefined;
+
+  if (!article) {
+    return (
+      <Container className="mt-16 sm:mt-32">
+        <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
+          Article not found.
+        </h1>
+        <p className="mt-6 text-base text-zinc-600 dark:text-zinc-400">
+          That article does not exist (yet).{" "}
+          <Link
+            to="/articles"
+            className="text-teal-500 transition hover:text-teal-600 dark:text-teal-400 dark:hover:text-teal-300"
+          >
+            Back to all articles
+          </Link>
+          .
+        </p>
+      </Container>
+    );
+  }
+
+  const Body = article.Component;
+  return (
+    <ArticleLayout article={article}>
+      <Body />
+    </ArticleLayout>
+  );
 }
