@@ -1,4 +1,5 @@
 import { cp, rm } from "node:fs/promises";
+import tailwindPlugin from "bun-plugin-tailwind";
 
 await rm("dist", { recursive: true, force: true });
 
@@ -8,6 +9,7 @@ const result = await Bun.build({
   publicPath: "/",
   minify: true,
   sourcemap: "linked",
+  plugins: [tailwindPlugin],
 });
 
 if (!result.success) {

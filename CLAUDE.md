@@ -43,7 +43,7 @@ test("hello world", () => {
 
 This repo is Jalo's personal website. **The authoritative requirements doc is `docs/specs/requirements.md` — read it before any non-trivial change.** It covers the deployment model, file layout, content sections, growth path, and the resolved decisions (domain, socials, hero copy, typography).
 
-Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav components, `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler, `wrangler.toml` + `src/worker.ts` handle Workers + Static Assets, and `.github/workflows/ci.yml` runs check + e2e on PR and deploys on push to `master`. See `README.md` for the user-facing summary.
+Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav components, `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler, `wrangler.toml` + `src/worker.ts` handle Workers + Static Assets, and `.github/workflows/ci.yml` runs check + dev/built E2E on PR and deploys on push to `master`. See `README.md` for the user-facing summary.
 
 ## Commands
 
@@ -58,7 +58,9 @@ Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav 
 | Type + lint check | `bun run check` (`wrangler types && biome check && tsc --noEmit`) |
 | Regenerate Worker types | `bunx wrangler types` |
 | Unit tests | `bun test` |
-| E2E (browser) | `bunx playwright test` against `bun run dev` |
+| E2E (dev server) | `bun run test:e2e` against `bun run dev` |
+| E2E (built artifact) | `bun run test:e2e:built` against `bun run preview` |
+| E2E (production) | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev` |
 
 ## Key files
 - `docs/specs/requirements.md` — authoritative requirements doc (read first).
@@ -71,8 +73,10 @@ Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav 
 - `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
 - `.github/workflows/ci.yml` — single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
 - `wrangler.toml`, `src/worker.ts` — Cloudflare Workers + Static Assets config and pass-through fetch handler.
+- `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.
 - `worker-configuration.d.ts` — _(generated, gitignored)_ Worker runtime types, refreshed by `bunx wrangler types`.
 - `README.md` — user-facing project summary (stack, quickstart, deploy flow); keep in sync when the project layout changes.
+- `CHANGELOG.md` — reader-facing release notes (output of the `changelog-generator` skill); append a new dated section per release rather than rewriting prior entries.
 - `.husky/` — pre-commit hook installed automatically by `prepare` on `bun install`.
 
 ## Docs conventions
@@ -98,8 +102,11 @@ Current state: v1 complete. `src/` ships Hero / Writing / About / Contact / Nav 
 
 ## Testing
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`.
-- **Browser smoke (E2E):** `bunx playwright test` runs specs under `tests/e2e/` against `bun run dev` (wired via `playwright.config.ts`). Each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) once before the first run.
-  - Keep specs thin: page loads, hero copy renders, all three social links resolve, dark mode applies via `prefers-color-scheme`. Don't snapshot the whole DOM.
+- **Browser smoke (dev E2E):** `bun run test:e2e` runs `tests/e2e/site.e2e.ts` against `bun run dev` (wired via `playwright.config.ts`).
+- **Built artifact acceptance:** `bun run test:e2e:built` runs `tests/e2e/built.e2e.ts` after `bun run build`, served through `wrangler dev` (wired via `playwright.built.config.ts`).
+- **Production acceptance:** `bun run test:e2e:production` runs `tests/e2e/production.e2e.ts` against `PRODUCTION_URL` or `https://moster.dev` (wired via `playwright.production.config.ts`).
+  - Each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) once before the first run.
+  - Keep specs thin: page loads, hero copy renders, all three social links resolve, dark mode applies via `prefers-color-scheme`, Tailwind utilities are present, and SPA fallback works. Don't snapshot the whole DOM.
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
 
 ## Agents and skills

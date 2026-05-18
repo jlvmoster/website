@@ -2,15 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "tests/e2e",
-  testMatch: "**/site.e2e.ts",
+  testMatch: "**/production.e2e.ts",
   fullyParallel: true,
   use: {
-    baseURL: "http://localhost:3000",
-  },
-  webServer: {
-    command: "bun run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    baseURL: process.env.PRODUCTION_URL ?? "https://moster.dev",
   },
   projects: [
     {

@@ -2,7 +2,7 @@
 
 Jalo Moster's personal website — a single-page React SPA deployed to Cloudflare Workers with Static Assets.
 
-**Status:** v1 complete. Hero, Writing (empty state), About, and Contact sections live; light/dark theming via `prefers-color-scheme`; smoke + Playwright E2E coverage; CI and production deploys on push to `master`.
+**Status:** v1 complete. Hero, Writing (empty state), About, and Contact sections live; light/dark theming via `prefers-color-scheme`; smoke + Playwright E2E coverage for dev, built, and production targets; CI and production deploys on push to `master`.
 
 ## Stack
 
@@ -33,7 +33,9 @@ bun run dev              # http://localhost:3000 with HMR
 | `bun run deploy` | `wrangler deploy` — break-glass only; prod deploys run from GitHub Actions. |
 | `bun run check` | `wrangler types && biome check && tsc --noEmit`. |
 | `bun test` | Unit / integration tests. |
-| `bunx playwright test` | Browser E2E specs under `tests/e2e/`. |
+| `bun run test:e2e` | Browser E2E against the Bun dev server. |
+| `bun run test:e2e:built` | Browser E2E against a freshly built `dist/` served by `wrangler dev`. |
+| `bun run test:e2e:production` | Browser E2E against `PRODUCTION_URL` or `https://moster.dev`. |
 | `bun run setup:browsers` | `playwright install chromium`. |
 
 ## Project layout
@@ -51,7 +53,9 @@ scripts/
   build.ts              # Bun.build + public/ copy
 tests/
   smoke.test.ts         # bun test
-  e2e/site.e2e.ts       # Playwright
+  e2e/site.e2e.ts       # Playwright against bun run dev
+  e2e/built.e2e.ts      # Playwright against bun run preview
+  e2e/production.e2e.ts # Playwright against moster.dev / PRODUCTION_URL
 public/                 # static assets outside the bundler graph (favicon, robots.txt)
 docs/
   specs/                # requirements, architecture, per-feature specs
@@ -67,14 +71,16 @@ Light and dark schemes are driven by `prefers-color-scheme` — no toggle. Desig
 ## Testing
 
 - **Unit:** `bun test` — specs colocated with source or under `tests/`.
-- **E2E:** `bunx playwright test` against `bun run dev`. Coverage: page loads, hero copy renders verbatim, all three social links resolve, dark mode applies via `prefers-color-scheme`.
+- **Dev E2E:** `bun run test:e2e` against `bun run dev`. Coverage: page loads, hero copy renders verbatim, all three social links resolve, dark mode applies via `prefers-color-scheme`.
+- **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `wrangler dev`, and verifies Tailwind output plus SPA fallback behavior.
+- **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`.
 - A fresh machine can recreate the full test environment with `bun install && bun run setup:browsers`.
 
 ## Deployment
 
 Production deploys run automatically on push to `master`:
 
-1. `check` job: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`.
+1. `check` job: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`.
 2. `deploy` job (depends on `check`): builds and ships `dist/` via `cloudflare/wrangler-action@v3`.
 
 Cloudflare credentials live as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed. `bun run deploy` from a developer machine is supported as a break-glass path but is not the source of truth.
