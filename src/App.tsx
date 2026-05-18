@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Route, Routes } from "react-router-dom";
+import { LayoutShell } from "./components/LayoutShell";
 import { AboutPage } from "./pages/AboutPage";
 import { ArticlePage } from "./pages/ArticlePage";
 import { ArticlesPage } from "./pages/ArticlesPage";
@@ -7,10 +7,6 @@ import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { UsesPage } from "./pages/UsesPage";
-
-function LayoutShell({ children }: { children: ReactNode }) {
-  return <>{children}</>;
-}
 
 export function App() {
   return (
