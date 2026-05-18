@@ -27,7 +27,6 @@ Create the HTML entry, React 19 root mount, and the top-level `App` that compose
    import { StrictMode } from "react";
    import { createRoot } from "react-dom/client";
    import { App } from "./App";
-   import "./styles/globals.css";
 
    createRoot(document.getElementById("root")!).render(
      <StrictMode>
@@ -35,6 +34,7 @@ Create the HTML entry, React 19 root mount, and the top-level `App` that compose
      </StrictMode>,
    );
    ```
+   Do **not** `import "./styles/globals.css"` here — `index.html`'s `<link rel="stylesheet">` is the canonical loading path, and adding the JS import would make Bun's HTML bundler register the CSS twice.
 3. **Create `src/App.tsx`** as a function component that returns `<Nav />` followed by `<Hero />`, `<Writing />`, `<About />`, `<Contact />` in order.
    - Import those five components from `src/components/`. Until Task 05 creates the real components, create one-line stub files there so the shell type-checks. The section stubs must use the correct IDs (`hero`, `writing`, `about`, `contact`) from day 1; `Nav` can return `null` until Task 05 fills in the anchor links.
 4. **No providers** in v1: no router, no theme context, no query client.

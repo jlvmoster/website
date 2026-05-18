@@ -22,7 +22,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 - **`bunx playwright test`:**
   - Config:
     - `testDir: "tests/e2e"`.
-    - `webServer: { command: "bun run dev", url: "http://localhost:<port>", reuseExistingServer: !process.env.CI }`.
+    - `webServer: { command: "bun run dev", url: "http://localhost:3000", reuseExistingServer: !process.env.CI }` (port matches `scripts/dev.ts`).
     - Chromium project only — no Firefox / WebKit in v1.
     - No trace / video by default; opt in via CLI when debugging.
   - Fresh-machine setup requires `bun install` followed by `bun run setup:browsers` before the first E2E run.

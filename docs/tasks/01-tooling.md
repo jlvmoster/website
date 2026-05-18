@@ -40,7 +40,7 @@ Get `package.json` scripts, dependencies, TypeScript, Biome, and Bun configured 
 ## Verification
 - `bun install` succeeds.
 - `bunx biome check` runs (may report zero files initially — that's fine).
-- `bunx tsc --noEmit` runs without errors. (`wrangler types` hasn't run yet, so `tsconfig.json` should not reference `./worker-configuration.d.ts` until Task 02.)
+- `bunx tsc --showConfig` parses `tsconfig.json` without error. Full `tsc --noEmit` is deferred to Task 02 — at this stage there are no `.ts`/`.tsx` files yet (`index.ts` was deleted in step 6, and `src/` doesn't exist), so a bare `tsc --noEmit` emits `TS18003: No inputs were found`. (`wrangler types` also hasn't run, so `tsconfig.json` should not reference `./worker-configuration.d.ts` until Task 02.)
 
 ## Open questions to surface
 - Override any Biome recommended rules? Default to "no" unless the user objects.

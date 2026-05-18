@@ -11,8 +11,7 @@ Light + dark themes via `prefers-color-scheme`, design tokens as CSS variables, 
 - §FR-1.3.5 — No third-party UI library.
 
 ## File layout
-- `src/styles/globals.css` — Tailwind v4 import, `:root` token definitions, dark overrides, base typography rules.
-- `tailwind.config.ts` — extends theme to expose the CSS variables as Tailwind utilities (e.g., `bg-bg`, `text-fg`).
+- `src/styles/globals.css` — Tailwind v4 import, `@theme` block exposing tokens as utilities, `:root` token definitions, dark overrides, base typography rules. Tailwind v4 is CSS-first; there is no `tailwind.config.ts`.
 
 ## Behavior & edge cases
 - Tokens declared on `:root`:
@@ -26,8 +25,8 @@ Light + dark themes via `prefers-color-scheme`, design tokens as CSS variables, 
 - No `data-theme` attribute, no class-based dark mode, no JS for theme detection.
 
 ## Test plan
-- **Unit:** snapshot of computed `background-color` / `color` for a sample component under light and dark color schemes (using JSDOM's `matchMedia` mock).
-- **E2E:** Playwright emulates `colorScheme: "dark"` and asserts the page background differs from the light-scheme baseline.
+- **Unit:** not applicable — the v1 theming surface is pure CSS and has no JS branches worth unit-testing. DOM-dependent assertions (computed styles, `matchMedia`) live in Playwright per [`features/testing.md`](./testing.md) so we don't have to introduce a DOM polyfill.
+- **E2E:** Playwright launches a second browser context with `colorScheme: "dark"` and asserts the computed `<body>` `background-color` differs from the light-scheme baseline. Lives in `tests/e2e/site.spec.ts`.
 
 ## Open questions
 - Concrete color values for each of the four color tokens in light and dark. Suggestion: near-white / near-black backgrounds, slightly muted foreground, single accent.

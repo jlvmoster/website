@@ -7,7 +7,7 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 1. Read `docs/specs/requirements.md` and `docs/specs/architecture.md` first — they are the source of truth. The tasks here orchestrate *order* and *gates*; they do not restate spec content.
 2. Work tasks in numeric order. Each task lists its prereqs at the top; do not skip ahead.
 3. Each task ends with a **Verification** block. The task is not done until those commands pass.
-4. Each task also lists **Open questions** that the corresponding feature spec flagged. Surface them to the user *before* implementing — don't silently pick a default.
+4. Each task also lists **Open questions** that the corresponding feature spec flagged. Surface them to the user *before* implementing. Where a task lists a "Default to X unless …" fallback, treat it as advisory — only apply the default after the user has been asked and either confirms or defers. Never pick a default silently.
 5. When a task creates files that appear in `docs/specs/architecture.md` §4 (canonical code shapes), copy from there verbatim; don't paraphrase.
 
 ## Order
