@@ -3,9 +3,30 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --hot ./scripts/dev.ts",
+    "build": "bun ./scripts/build.ts",
+    "preview": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "bun test",
+    "setup:browsers": "playwright install chromium",
+    "check": "wrangler types && biome check && tsc --noEmit",
+    "prepare": "husky"
+  },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
     "@playwright/test": "^1.60.0",
     "@types/bun": "latest",
-    "typescript": "^6"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "bun-plugin-tailwind": "^0.1.2",
+    "husky": "^9.1.7",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6",
+    "wrangler": "^4.92.0"
+  },
+  "dependencies": {
+    "react": "^19",
+    "react-dom": "^19"
   }
 }
