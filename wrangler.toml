@@ -1,0 +1,16 @@
+name = "personal-site"
+main = "src/worker.ts"
+compatibility_date = "2026-05-17"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"  # serves index.html for unknown paths → SPA routes work
+
+[vars]
+# env vars here later
+
+# When you add a Worker fetch handler (forms, API, OG images), uncomment:
+# [[routes]]
+# pattern = "moster.dev/api/*"
+# zone_name = "moster.dev"
