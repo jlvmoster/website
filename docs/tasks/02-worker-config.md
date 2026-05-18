@@ -14,7 +14,7 @@ Stand up `wrangler.toml`, the pass-through `src/worker.ts`, and run `wrangler ty
 ## Steps
 
 1. **Create `wrangler.toml`** at repo root using the canonical config in architecture §4.1. Leave the `[[routes]]` block commented out — it stays off until the first `/api/*` handler exists.
-   - `compatibility_date` should be the date of the most recent meaningful edit (currently `"2026-05-17"` per the architecture doc).
+   - `compatibility_date` pins the Cloudflare Workers runtime semantics — it controls which version of the runtime your Worker sees, not when the file was edited. Copy the value verbatim from architecture §4.1 (`"2026-05-17"`). Only bump it when you deliberately want newer runtime behavior, and update architecture §4.1 in the same change.
 2. **Create `src/worker.ts`** with the canonical pass-through handler in architecture §4.2. One expression — `return env.ASSETS.fetch(req)`. Don't add error handling or routing branches yet.
 3. **Generate Worker types**: run `bunx wrangler types`. This writes `worker-configuration.d.ts` at repo root.
    - Confirm `.gitignore` still excludes it (Task 01 verified this). Do **not** commit the generated file.

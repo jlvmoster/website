@@ -21,7 +21,7 @@ The Workers entrypoint, `wrangler.toml` config, SPA fallback for unknown paths, 
 
 ## Behavior & edge cases
 - `worker.ts` is intentionally one expression — `env.ASSETS.fetch(req)`. The point of having it from day 1 is so the deploy shape never has to change when the first dynamic route arrives.
-- `wrangler.toml` sets `compatibility_date` to the date of the most recent meaningful edit (currently `"2026-05-17"`).
+- `wrangler.toml` pins `compatibility_date` to the Cloudflare Workers runtime semantics selected in architecture §4.1 (currently `"2026-05-17"`). Only bump it when deliberately opting into newer runtime behavior, and update architecture §4.1 in the same change.
 - The `[[routes]]` block stays commented out until the first `/api/*` handler is added, at which point uncomment and set `pattern = "moster.dev/api/*"`, `zone_name = "moster.dev"`.
 - `worker-configuration.d.ts` is **not** committed. Anyone cloning fresh runs `bunx wrangler types` before `tsc`.
 - `tsconfig.json` `compilerOptions.types` array must list both `"bun"` and `"./worker-configuration.d.ts"` — order doesn't matter, but both must be present, otherwise `Env` resolves to `any`.

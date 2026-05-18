@@ -13,10 +13,11 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - §FR-1.7.1 — The same bootstrap (`bun install`, `bun run setup:browsers`, `bun run check`, `bun test`) runs in CI. CI workflow shape is owned by [`features/ci-cd.md`](./ci-cd.md), not this spec.
 
 ## File layout
-- `package.json` — `scripts` block + deps.
+- `package.json` — `scripts` block + deps + `"prepare": "husky"`.
+- `.husky/pre-commit` — shell script that runs `bun run check`.
 - `tsconfig.json` — already strict; ensure `types: ["bun", "./worker-configuration.d.ts"]`.
 - `biome.json` — formatter + linter config.
-- `bunfig.toml` — Bun-specific defaults (test runner, install).
+- `bunfig.toml` — Bun-specific config; registers `bun-plugin-tailwind` under `[serve.static]`.
 
 ## Behavior & edge cases
 - `package.json` scripts (canonical):
@@ -29,21 +30,24 @@ The non-runtime config that makes the project install, build, lint, type-check, 
       "deploy": "wrangler deploy",
       "test": "bun test",
       "setup:browsers": "playwright install chromium",
-      "check": "wrangler types && biome check && tsc --noEmit"
+      "check": "wrangler types && biome check && tsc --noEmit",
+      "prepare": "husky"
     }
   }
   ```
+  `"prepare"` runs automatically after `bun install`. Husky points `core.hooksPath` at `.husky/_/`, so fresh clones — including Conductor worktrees — get the pre-commit hook without writing to `.git/hooks/`. The hook itself lives at `.husky/pre-commit` and is a one-liner: `bun run check`.
 - `tsconfig.json` `compilerOptions`:
   - `strict: true`, `noUncheckedIndexedAccess: true` (recommended), `noImplicitOverride: true`.
-  - `jsx: "react-jsx"`, `moduleResolution: "bundler"`, `module: "ESNext"`, `target: "ES2022"`.
+  - `jsx: "react-jsx"`, `moduleResolution: "bundler"`, `module: "Preserve"`, `target: "ESNext"`.
+  - `verbatimModuleSyntax: true` — pairs with `module: "Preserve"`, Bun's modern idiomatic combination.
   - `types: ["bun", "./worker-configuration.d.ts"]` — both entries required.
-  - `lib: ["ES2022", "DOM", "DOM.Iterable"]`.
+  - `lib: ["ESNext", "DOM", "DOM.Iterable"]`.
 - `biome.json`:
-  - Enable formatter + linter with Biome's recommended ruleset.
-  - `files.ignore`: `dist/`, `.wrangler/`, `worker-configuration.d.ts`, `node_modules/`.
-  - Formatter: 2-space indent, single quotes off (use double), trailing commas as default.
+  - Enable formatter + linter with Biome's recommended ruleset (no rule overrides).
+  - `files.includes`: include `**`, then negate `dist`, `.wrangler`, `worker-configuration.d.ts`, `node_modules` (Biome 2.x folder-ignore form; no trailing `/**`).
+  - Formatter: 2-space indent, double quotes, trailing commas `"all"`.
 - `bunfig.toml`:
-  - Defaults are fine; set explicit test root if needed (`[test] root = "."`).
+  - `[serve.static] plugins = ["bun-plugin-tailwind"]` — registers Tailwind v4 with Bun's HTML bundler.
 - Wrangler is installed as a dev dependency so `bunx wrangler …` works offline against the lockfile version.
 - Fresh development environment bootstrap on any new machine or CI worker:
   1. `bun install`
@@ -59,5 +63,5 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - **Type guard:** introduce a type error in a component, confirm `tsc --noEmit` flags it; revert.
 
 ## Open questions
-- Override any Biome recommended rules? Defaults are fine to start.
-- Pre-commit hook (`lefthook` / `simple-git-hooks`) to run `bun run check` on staged files — set up now, or wait until it becomes painful?
+- Override any Biome recommended rules? **Resolved:** no — use the recommended ruleset as-is. Document this as the default for future agents.
+- Pre-commit hook: **Resolved:** wired in Task 01 via `husky` (v9). Hook script lives at `.husky/pre-commit`; `"prepare": "husky"` installs it automatically on `bun install`. Chosen over `simple-git-hooks` because Conductor worktrees (where the user develops day-to-day) have `.git` as a file rather than a directory; `simple-git-hooks` blindly `mkdir`s `.git/hooks/` and fails silently in worktrees, while `husky` uses `core.hooksPath` and works everywhere.

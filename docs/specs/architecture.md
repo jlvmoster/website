@@ -124,7 +124,6 @@ The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic 
 │   └── specs/
 │       ├── requirements.md
 │       └── architecture.md # this file
-├── tailwind.config.ts
 ├── tsconfig.json
 ├── biome.json
 ├── bunfig.toml

@@ -59,8 +59,8 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
 2. **Install Playwright browsers**: `bun run setup:browsers` (runs `playwright install chromium`). CI must run the same step before E2E — do not rely on a machine-local cache (§NFR-2.4.4).
 3. **`playwright.config.ts`** at repo root:
    - `testDir: "tests/e2e"`.
-   - `webServer: { command: "bun run dev", url: "http://localhost:<port>", reuseExistingServer: !process.env.CI }` — port must match Task 06's `scripts/dev.ts`.
-   - `use: { baseURL: "http://localhost:<port>" }` so specs can call `page.goto("/")` and `page.goto("/some-unknown-path")`.
+   - `webServer: { command: "bun run dev", url: "http://localhost:3000", reuseExistingServer: !process.env.CI }` — port matches Task 06's `scripts/dev.ts`.
+   - `use: { baseURL: "http://localhost:3000" }` so specs can call `page.goto("/")` and `page.goto("/some-unknown-path")`.
    - Chromium project only (no Firefox / WebKit in v1).
    - No trace / video by default; opt in via CLI when debugging.
 4. **`tests/e2e/site.spec.ts`** covering §NFR-2.4.3:

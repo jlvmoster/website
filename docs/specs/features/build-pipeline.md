@@ -18,6 +18,8 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
 ## Behavior & edge cases
 - `scripts/dev.ts`:
   - `Bun.serve({ static: { ... }, fetch: req => ... })` configured to serve `src/index.html` as the root document with bundled JS/CSS resolved by Bun's HTML imports.
+  - SPA fallback: the `fetch` handler returns the bundled `src/index.html` for any unknown path, mirroring the Workers Static Assets `not_found_handling = "single-page-application"` behavior in `wrangler.toml` so local dev matches production for unknown routes.
+  - Listens on port `3000` (matched by `playwright.config.ts`).
   - HMR is enabled by running with `bun --hot`.
 - `scripts/build.ts`:
   - Deletes `dist/` first (idempotent rebuild).
