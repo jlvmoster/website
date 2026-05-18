@@ -102,20 +102,287 @@ await cp("public", "dist", { recursive: true });
 
 The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic choice. Bun's HTML bundler only emits files reachable from the HTML / CSS / JS import graph; it does **not** auto-copy a `public/` directory. Anything that has to ship without being imported — `favicon.ico`, `robots.txt`, OG images referenced only by meta tags resolved at runtime — lives in `public/` and gets copied by this step.
 
+### 4.4 Routing & app shell
+
+`react-router-dom` was picked because it is the conventional, well-known SPA router (vs. tiny alternatives like `wouter`), declarative, no SSR overhead, and plays cleanly with the Workers `not_found_handling = "single-page-application"` setting — Workers returns `index.html` for any non-asset path, and the client router resolves the URL after mount.
+
+```tsx
+// src/main.tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { App } from "./App";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+);
+```
+
+```tsx
+// src/App.tsx
+import { Routes, Route } from "react-router-dom";
+import { LayoutShell } from "./components/LayoutShell";
+import { HomePage } from "./pages/HomePage";
+import { AboutPage } from "./pages/AboutPage";
+import { ArticlesPage } from "./pages/ArticlesPage";
+import { ArticlePage } from "./pages/ArticlePage";
+import { ProjectsPage } from "./pages/ProjectsPage";
+import { UsesPage } from "./pages/UsesPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+
+export function App() {
+  return (
+    <LayoutShell>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/articles" element={<ArticlesPage />} />
+        <Route path="/articles/:slug" element={<ArticlePage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/uses" element={<UsesPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </LayoutShell>
+  );
+}
+```
+
+### 4.5 LayoutShell
+
+The Spotlight visual hallmark is a fixed centered background panel that the content scrolls over. The shell is a fixed sibling layer (panel) plus a `relative` content column containing Header / main / Footer.
+
+```tsx
+// src/components/LayoutShell.tsx
+import type { ReactNode } from "react";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+
+export function LayoutShell({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <div className="fixed inset-0 flex justify-center sm:px-8">
+        <div className="flex w-full max-w-7xl lg:px-8">
+          <div className="w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]" />
+        </div>
+      </div>
+      <div className="relative flex w-full flex-col">
+        <Header />
+        <main className="flex-auto">{children}</main>
+        <Footer />
+      </div>
+    </>
+  );
+}
+```
+
+Body uses `bg-bg` (the page-behind-the-panel color, zinc-50 / zinc-950). The panel reads `--panel` and `--ring` from the token definitions in `globals.css`.
+
+### 4.6 Container compound
+
+```tsx
+// src/components/Container.tsx
+import { forwardRef, type ReactNode, type Ref } from "react";
+import { clsx } from "../lib/clsx";
+
+type ContainerProps = { children: ReactNode; className?: string };
+
+export const ContainerOuter = forwardRef<HTMLDivElement, ContainerProps>(
+  function ContainerOuter({ children, className }, ref) {
+    return (
+      <div ref={ref} className={clsx("sm:px-8", className)}>
+        <div className="mx-auto w-full max-w-7xl lg:px-8">{children}</div>
+      </div>
+    );
+  },
+);
+
+export const ContainerInner = forwardRef<HTMLDivElement, ContainerProps>(
+  function ContainerInner({ children, className }, ref) {
+    return (
+      <div ref={ref} className={clsx("relative px-4 sm:px-8 lg:px-12", className)}>
+        <div className="mx-auto max-w-2xl lg:max-w-5xl">{children}</div>
+      </div>
+    );
+  },
+);
+
+export const Container = forwardRef<HTMLDivElement, ContainerProps>(
+  function Container({ children, className }, ref) {
+    return (
+      <ContainerOuter ref={ref} className={className}>
+        <ContainerInner>{children}</ContainerInner>
+      </ContainerOuter>
+    );
+  },
+);
+```
+
+`forwardRef` is load-bearing — the Header's avatar scroll math reads container offsets via a ref.
+
+### 4.7 Header with avatar scroll
+
+The Spotlight Header is a single component with three behaviors that toggle based on `useLocation()`:
+
+1. **Home route (`/`)**: a large 64×64 avatar sits in the page flow above the nav pill. As the user scrolls, the avatar shrinks to 36×36 and slides into the pill. The shrink is driven by CSS custom properties (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`) set on `document.documentElement` by a `useEffect` scroll listener. React does **not** re-render on scroll.
+2. **Other routes**: the avatar renders at 36×36 inside the nav pill from page mount.
+3. **All routes**: desktop (≥`md`) shows a nav pill with NavLinks (About / Articles / Projects / Uses) on the right, with a theme toggle. Mobile (<`md`) shows a "Menu" button that opens a handwritten popover (no `@headlessui/react`).
+
+The scroll math is transliterated verbatim from Spotlight `src/components/Header.tsx`. The Next-specific APIs are swapped:
+
+- `usePathname()` → `useLocation()` from `react-router-dom`
+- `next/link`'s `Link` → `react-router-dom`'s `Link`
+- `next/image` → plain `<img src="/images/avatar.jpg">` (`public/` is copied to `dist/` by `scripts/build.ts` and Workers serves `/images/avatar.jpg` from there)
+
+Mobile popover (handwritten, not HeadlessUI) outline:
+- A button toggles an `open: boolean` state.
+- Backdrop: `fixed inset-0 z-50 bg-zinc-800/40 backdrop-blur-xs` with click-to-close.
+- Panel: `fixed inset-x-4 top-8 z-50` rounded card with a close button.
+- Close on Esc (handled by a `useEffect` keydown listener), close on backdrop click, close on NavLink click.
+
+The "no component libraries" rule (§FR-1.3.5) is honored by writing the popover by hand — ~80 lines.
+
+### 4.8 Theme toggle
+
+Three-state user choice — `light` / `dark` / `system` — persisted in `localStorage["theme"]`. System mode honors `prefers-color-scheme` and subscribes to its `change` event so the page tracks the OS when the user is in system mode.
+
+Class strategy (not media query) because the toggle has to override the OS. `globals.css` declares `@custom-variant dark (&:where(.dark, .dark *));` (Tailwind v4 idiom; lifted from Spotlight `tailwind.css`) so `dark:` utilities key off `html.dark`.
+
+```tsx
+// src/lib/useTheme.ts (canonical shape)
+import { useEffect, useState } from "react";
+
+export type ThemeChoice = "light" | "dark" | "system";
+
+function readChoice(): ThemeChoice {
+  try {
+    const v = localStorage.getItem("theme");
+    return v === "light" || v === "dark" || v === "system" ? v : "system";
+  } catch {
+    return "system";
+  }
+}
+
+function applyChoice(choice: ThemeChoice) {
+  const prefersDark =
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = choice === "dark" || (choice === "system" && prefersDark);
+  document.documentElement.classList.toggle("dark", isDark);
+}
+
+export function useTheme() {
+  const [choice, setChoice] = useState<ThemeChoice>(readChoice);
+  useEffect(() => {
+    try { localStorage.setItem("theme", choice); } catch {}
+    applyChoice(choice);
+  }, [choice]);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => { if (choice === "system") applyChoice("system"); };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [choice]);
+  return [choice, setChoice] as const;
+}
+```
+
+Anti-flicker: an inline `<script>` in `src/index.html` runs synchronously before React mounts. Three lines, no deps:
+
+```html
+<script>
+  (function () {
+    try {
+      var c = localStorage.getItem("theme") || "system";
+      var d = c === "dark" || (c === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", d);
+    } catch (e) {}
+  })();
+</script>
+```
+
+### 4.9 Article content model
+
+Articles are typed TS modules. Each post is `src/content/articles/<slug>.tsx` exporting `meta` (typed) and a default React component (the body). No MDX, no markdown parsing, no runtime globbing.
+
+```ts
+// src/content/articles/index.ts
+import type { ComponentType } from "react";
+
+export type ArticleMeta = {
+  title: string;
+  description: string;
+  date: string; // "YYYY-MM-DD"
+  author?: string;
+};
+
+export type ArticleWithSlug = ArticleMeta & {
+  slug: string;
+  Component: ComponentType;
+};
+
+import * as helloWorld from "./hello-world";
+
+const modules: Record<string, { meta: ArticleMeta; default: ComponentType }> = {
+  "hello-world": helloWorld,
+};
+
+export function getAllArticles(): ArticleWithSlug[] {
+  return Object.entries(modules)
+    .map(([slug, m]) => ({ slug, Component: m.default, ...m.meta }))
+    .sort((a, b) => +new Date(b.date) - +new Date(a.date));
+}
+
+export function getArticleBySlug(slug: string): ArticleWithSlug | undefined {
+  return getAllArticles().find((a) => a.slug === slug);
+}
+```
+
+Modules are hand-registered because Bun's HTML bundler statically resolves the import graph at build time — runtime `import.meta.glob` is not available. Adding an article is two edits: drop a new TSX file and add the import + the record key. Worth the friction; the cadence is low.
+
+### 4.10 Primitives (Card, Button, SimpleLayout, Section, Prose)
+
+`Card` is a compound component with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, and `.Link` static properties. The pattern is lifted from Spotlight `src/components/Card.tsx`. `next/link` is swapped for `react-router-dom`'s `Link`; for external URLs (`href.startsWith("http")`) the Card.Link renders a plain `<a target="_blank" rel="noopener noreferrer">`.
+
+`Button` has primary/secondary variants and renders either `<button>` or `<Link>` based on whether `href` is provided.
+
+`SimpleLayout` wraps About / Articles / Projects / Uses pages with a title + intro header + body in a `Container`.
+
+`Section` (used by the Uses page) renders a left-bordered title with a right-column grid of children. Uses `useId()` for `aria-labelledby`.
+
+`Prose` is a thin wrapper applying `prose dark:prose-invert` so article bodies pick up the `@tailwindcss/typography` plugin styles.
+
+A small `clsx` helper at `src/lib/clsx.ts` is used by all primitives. Either pull `clsx@^2` from npm (~500 bytes) or inline a six-liner:
+
+```ts
+// src/lib/clsx.ts
+export function clsx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+```
+
+### 4.11 Iconography
+
+Single icon catalog at `src/components/icons.tsx` — no `@heroicons/react`, no `lucide-react`. Each icon is a named export taking `React.ComponentPropsWithoutRef<"svg">`. The catalog: `GitHubIcon`, `InstagramIcon`, `LinkedInIcon`, `XIcon`, `MailIcon`, `BriefcaseIcon`, `ArrowDownIcon`, `ArrowLeftIcon`, `SunIcon`, `MoonIcon`, `ChevronRightIcon`, `ChevronDownIcon`, `CloseIcon`, `LinkIcon`. SVG paths are copied verbatim from Spotlight `src/components/SocialIcons.tsx` and the inline `Icon` components in Spotlight's Header / Card / ArticleLayout / Projects pages.
+
 ## 5. Project structure
 
 ```
 .
 ├── src/
-│   ├── index.html          # Bun HTML entry
-│   ├── main.tsx            # createRoot, mounts <App/>
-│   ├── App.tsx
+│   ├── index.html          # Bun HTML entry; anti-flicker theme script in <head>
+│   ├── main.tsx            # createRoot + BrowserRouter wrap
+│   ├── App.tsx             # LayoutShell + Routes table
 │   ├── worker.ts           # Workers fetch handler (pass-through today)
-│   ├── components/
-│   ├── content/            # (future) markdown/MDX posts
-│   ├── lib/
-│   └── styles/globals.css  # Tailwind + base
-├── public/                 # favicon, og-image, robots.txt — copied into dist/
+│   ├── pages/              # one .tsx per route (Home/About/Articles/Article/Projects/Uses/NotFound)
+│   ├── components/         # Header, Footer, LayoutShell, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, icons, home/{Photos,Resume,ArticleCard}
+│   ├── content/            # articles/{index.ts, <slug>.tsx}, projects.ts, uses.ts, resume.ts
+│   ├── lib/                # useTheme.ts, formatDate.ts, clsx.ts
+│   └── styles/globals.css  # Tailwind v4 + @plugin typography + zinc/teal tokens
+├── public/                 # favicon, og-image, robots.txt, images/{avatar,portrait}.jpg, images/photos/, images/logos/, cv.pdf — copied into dist/
 ├── scripts/
 │   ├── dev.ts              # Bun.serve with HMR
 │   └── build.ts            # bun build → dist/
@@ -123,7 +390,8 @@ The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic 
 ├── docs/
 │   └── specs/
 │       ├── requirements.md
-│       └── architecture.md # this file
+│       ├── architecture.md # this file
+│       └── features/       # per-feature implementation specs
 ├── tsconfig.json
 ├── biome.json
 ├── bunfig.toml
@@ -152,6 +420,7 @@ These aren't in the requirements doc because they're one-time setup performed in
 1. **Create Cloudflare deploy credentials for GitHub Actions.** Required by §FR-1.7.2. In Cloudflare, create a scoped API token with Workers deploy permissions for this account/project. In GitHub repo settings, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as Actions secrets. Do not commit either value.
 2. **Add custom domain `moster.dev`** in the Cloudflare dashboard. SSL/HTTPS is automatic once the zone is attached.
 3. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
+4. **Drop avatar + portrait + photos + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/photos/image-1.jpg`, etc.). `scripts/build.ts`'s `cp("public", "dist", { recursive: true })` step ships them to production.
 
 ## 8. CI/CD
 
