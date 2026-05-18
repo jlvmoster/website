@@ -1,4 +1,4 @@
-# Task 07 — Unit smoke + Playwright E2E
+# Task 11 — Unit smoke + Playwright E2E
 
 ## Goal
 Add the smoke unit test and the Playwright config + spec that cover the minimum E2E surface required by §NFR-2.4.3, without pulling in a DOM polyfill.
@@ -70,6 +70,12 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
    - **Dark mode**: launch a second context with `colorScheme: "dark"`; computed `background-color` of `<body>` differs from the light-scheme baseline.
    - **Dev-server fallback**: `await page.goto("/some-unknown-path")` returns 200 and the body contains `<div id="root">` — keeps local dev behavior SPA-compatible. The Workers Static Assets fallback is verified in Task 09 against `bun run preview`.
 5. **Out of scope** (don't add): full-DOM snapshots, visual regression, multi-browser matrix, `@happy-dom/global-registrator`, `@testing-library/react`.
+6. **Add the new v2 E2E assertions** to `tests/e2e/site.e2e.ts`, `tests/e2e/built.e2e.ts`, and `tests/e2e/production.e2e.ts`:
+   - Hard-refresh on `/about`, `/articles`, `/articles/hello-world`, `/projects`, `/uses` returns 200 and the right page renders.
+   - Theme toggle cycles and persists.
+   - `/about` has the portrait `<img src="/images/portrait.jpg">` and the mailto link.
+   - `/articles` has ≥ 1 card; clicking it lands on `/articles/<slug>`.
+   - Footer renders on every route.
 
 ## Outputs
 - New: `tests/smoke.test.ts`, `tests/e2e/site.spec.ts`, `playwright.config.ts`.

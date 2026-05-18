@@ -1,50 +1,79 @@
 # Task 03 — Theming & global styles
 
 ## Goal
-Lay down `src/styles/globals.css` with Tailwind v4, the six CSS variable tokens, dark-mode overrides via `prefers-color-scheme`, and base typography rules. No JS, no toggle, no hosted fonts.
+Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark mode, `@plugin "@tailwindcss/typography";`, and the six existing CSS-variable tokens plus the two new `--panel` and `--ring` tokens.
 
 ## Source spec
 - [`features/theming.md`](../specs/features/theming.md)
-- Requirements: §FR-1.3.1–§FR-1.3.5
+- [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
+- Requirements: §FR-1.3.1–§FR-1.3.8
 
 ## Prereqs
-- Task 01 (Tailwind v4 + Biome installed).
+- Task 01 (deps installed including `@tailwindcss/typography`).
 
 ## Steps
 
-1. **Resolve open questions first.** Ask the user before writing CSS:
-   - Concrete hex/oklch values for `--bg`, `--fg`, `--muted`, `--accent` in light and dark.
-   - Accent color: greyscale-only neutral, or a hue?
-   - Suggested defaults if the user defers: near-white `#fafafa` / near-black `#0a0a0a` backgrounds, foreground at high contrast, muted at ~60% luminance, neutral accent matching the foreground.
-2. **Create `src/styles/globals.css`** with:
-   - Tailwind v4 entry (`@import "tailwindcss";`).
-   - `:root` block declaring all six tokens. Font tokens use the verbatim stacks from §FR-1.3.3.
-   - `@media (prefers-color-scheme: dark) { :root { ... } }` overriding the four color tokens.
-   - Base rules: `body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); }`.
-   - Prose rule: `article, .prose { max-width: 65ch; line-height: 1.7; }` (or tune within 1.6–1.75).
-   - Mono stack applied to `code, pre, kbd, samp` directly (no `--font-mono` variable unless a need appears).
-3. **Expose the tokens as Tailwind utilities via `@theme` in `globals.css`.** Tailwind v4 is CSS-first — there is no `tailwind.config.ts`. Inside `globals.css`, add a `@theme { … }` block that maps each token into the Tailwind theme namespace:
+1. **Confirm token values.** The defaults (zinc-50/950, zinc-900/200, zinc-600/400, teal-500/400, white/zinc-900 panel, zinc-100/zinc-300-20 ring) are resolved unless the user changes them. Only re-ask if Jalo specifies a different accent.
+
+2. **Rewrite `src/styles/globals.css`:**
    ```css
+   @import "tailwindcss";
+   @plugin "@tailwindcss/typography";
+   @custom-variant dark (&:where(.dark, .dark *));
+
+   :root {
+     --bg: #fafafa;
+     --fg: #18181b;
+     --muted: #52525b;
+     --accent: #14b8a6;
+     --panel: #ffffff;
+     --ring: rgb(244 244 245);
+     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+       "Helvetica Neue", Arial, sans-serif;
+     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+   }
+
+   :root.dark {
+     --bg: #09090b;
+     --fg: #e4e4e7;
+     --muted: #a1a1aa;
+     --accent: #2dd4bf;
+     --panel: #18181b;
+     --ring: rgb(212 212 216 / 0.2);
+   }
+
    @theme {
      --color-bg: var(--bg);
      --color-fg: var(--fg);
      --color-muted: var(--muted);
      --color-accent: var(--accent);
-     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+     --color-panel: var(--panel);
+     --color-ring: var(--ring);
+     --font-sans: var(--font-sans);
+     --font-serif: var(--font-serif);
    }
+
+   html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+   body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); }
+   article, .prose { max-width: 65ch; line-height: 1.7; }
+   code, pre, kbd, samp { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
    ```
-   Tailwind generates `bg-bg`, `text-fg`, `text-muted`, `text-accent`, `font-sans`, `font-serif` from these entries. The color aliases point at the `:root` CSS variables so the `prefers-color-scheme` swap in step 2 automatically flows through the utilities — no `dark:` variants needed. The font entries use the same literal stacks as the required `:root` tokens to avoid defining `--font-sans` or `--font-serif` in terms of themselves.
-4. **Do not add** `data-theme`, class-based dark mode, any JS theme detection, or a `tailwind.config.ts` / `@config` directive — Tailwind v4 is configured entirely via the `@theme` block in `globals.css`. The whole feature is CSS.
+
+3. **Remove the old `@media (prefers-color-scheme: dark) { :root { ... } }` block.** Class-based dark mode replaces it.
+
+4. **Update `src/index.html` `<head>`** with the anti-flicker script (Task 04 step 1) and updated theme-color meta tags using the new palette:
+   ```html
+   <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+   <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
+   ```
 
 ## Outputs
-- New: `src/styles/globals.css`.
+- Rewritten: `src/styles/globals.css`.
+- Edited: `src/index.html` (theme-color meta only at this step; anti-flicker script lands in Task 04).
 
 ## Verification
-- File loads under Task 04's `index.html` without console warnings (verified when Task 06's dev server runs).
-- Manual: emulate dark mode in DevTools; `body` background flips.
-- Will be exercised by the Playwright dark-mode assertion in Task 07.
+- `bunx tsc --noEmit` passes (no TS impact).
+- Manual DevTools dark-mode emulation no longer flips colors (it's class-based now). The flip happens after Task 04 (anti-flicker script) and Task 06 (theme toggle).
 
-## Open questions to surface
-- Concrete color token values for light + dark (see step 1).
-- Accent color preference — neutral vs hued.
+## Open questions
+- Override teal-500/400 with a warmer accent? Default: keep teal.

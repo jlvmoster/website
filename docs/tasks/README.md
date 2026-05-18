@@ -16,20 +16,25 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 |---|---|---|
 | 01 | [Tooling & TS config](./01-tooling.md) | `features/tooling.md` |
 | 02 | [Worker config & types](./02-worker-config.md) | `features/worker.md` |
-| 03 | [Theming & global styles](./03-theming.md) | `features/theming.md` |
-| 04 | [App shell](./04-app-shell.md) | `features/app-shell.md` |
-| 05 | [Nav & section components](./05-nav-and-sections.md) | `features/nav.md`, `features/hero.md`, `features/writing.md`, `features/about.md`, `features/contact.md` |
-| 06 | [Build pipeline & `public/`](./06-build-pipeline.md) | `features/build-pipeline.md` |
-| 07 | [Unit smoke + Playwright E2E](./07-testing.md) | `features/testing.md` |
-| 08 | [CI/CD bootstrap](./08-ci-cd.md) | `features/ci-cd.md` |
-| 09 | [Acceptance verification](./09-acceptance.md) | `requirements.md` §6 |
+| 03 | [Theming & global styles](./03-theming.md) | `features/theming.md`, `features/theme-toggle.md` |
+| 04 | [App shell & router](./04-app-shell.md) | `features/app-shell.md`, `features/routing.md` |
+| 05 | [Layout primitives](./05-layout-primitives.md) | `features/layout-shell.md`, `features/iconography.md` |
+| 06 | [Header & Footer](./06-header-footer.md) | `features/header.md`, `features/footer.md` |
+| 07 | [Home page](./07-home-page.md) | `features/home-page.md`, `features/hero.md` |
+| 08 | [About & Articles](./08-about-articles.md) | `features/about-page.md`, `features/articles-page.md`, `features/content-model.md` |
+| 09 | [Projects & Uses](./09-projects-uses.md) | `features/projects-page.md`, `features/uses-page.md` |
+| 10 | [Build pipeline & `public/`](./10-build-pipeline.md) | `features/build-pipeline.md` |
+| 11 | [Unit smoke + Playwright E2E](./11-testing.md) | `features/testing.md` |
+| 12 | [CI/CD bootstrap](./12-ci-cd.md) | `features/ci-cd.md` |
+| 13 | [Acceptance verification](./13-acceptance.md) | `requirements.md` §6 |
 
-## Hard rules (lifted from `CLAUDE.md`)
+## Hard rules (v2)
 
 - Never paraphrase the hero copy. "my pleasure" stays verbatim.
 - Never reintroduce Pages-based hosting. Workers + Static Assets only.
-- Never add a component library (shadcn, Radix, MUI) or a framework (Next.js, Vite).
+- Never add Next.js, Vite, MDX, or a third-party UI component library (shadcn, Radix, MUI). `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 - Worker types live in the gitignored `worker-configuration.d.ts`. Regenerate after `wrangler.toml` changes.
+- The avatar/portrait/photos/CV PDF live under `public/` and ride along via `scripts/build.ts`.
 - Pre-approved Bash: `bun *`, `bunx *`, `git *`. Other tools may prompt.
 
 ## Branch & PR convention
