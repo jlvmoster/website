@@ -462,11 +462,17 @@ on:
     branches: [master]
   push:
     branches: [master]
+  schedule:
+    - cron: '0 7 * * *'
 jobs:
   check:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
       - uses: oven-sh/setup-bun@v2
       - name: Cache Bun packages
         uses: actions/cache@v5
@@ -481,8 +487,10 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run setup:browsers
       - run: bun run check
+      - run: bun run build
       - run: bun test
       - run: bunx playwright test
+      - run: bunx playwright test -c playwright.built.config.ts
 
   deploy:
     needs: check
@@ -490,6 +498,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
       - uses: oven-sh/setup-bun@v2
       - name: Cache Bun packages
         uses: actions/cache@v5
@@ -503,9 +514,27 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  lighthouse:
+    needs: deploy
+    if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Wait for deploy to propagate
+        if: github.event_name == 'push'
+        run: sleep 30
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
 ```
 
 The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
+
+`actions/setup-node@v6` is provisioned before `oven-sh/setup-bun@v2` because `bun run check` invokes `wrangler types` (Node-based) and `cloudflare/wrangler-action@v3` in the `deploy` job also expects Node available on PATH. `bun run build` runs in `check` to catch bundler breakage before merge; the second `bunx playwright test -c playwright.built.config.ts` exercises the built artifact through `wrangler dev`, so PR gating covers both the dev-server and the built-artifact code paths described in `features/testing.md`.
 
 ### 8.2 CD Through GitHub Actions
 
@@ -530,6 +559,19 @@ Branch protection should require `check` before merge. The deploy job is not a p
 - **GitHub now holds deploy credentials.** This is the direct tradeoff for keeping CI/CD in one GitHub Actions workflow. The token must be scoped narrowly in Cloudflare and stored only as a GitHub Actions secret.
 - **Cache package artifacts, not `node_modules`.** CI caches Bun's package cache and Playwright's browser archive using exact `bun.lock` keys. Playwright notes that browser-cache restore can be comparable to download time, so this is a measured tradeoff rather than a correctness dependency. The workflow still runs `bun install --frozen-lockfile` and `bun run setup:browsers`, which keeps it reproducible on cache misses and avoids relying on a committed or restored `node_modules` tree.
 
+### 8.5 Post-deploy Lighthouse CI
+
+Requirements §1.8 adds a third job, `lighthouse`, to the same `ci.yml`. It runs `@lhci/cli` via [`treosh/lighthouse-ci-action@v12`](https://github.com/treosh/lighthouse-ci-action) against `https://moster.dev` after every production deploy and on a daily `schedule:` cron, asserting Core Web Vitals budgets defined in `lighthouserc.json` at the repo root. The per-feature implementation spec is at [features/lighthouse-ci.md](features/lighthouse-ci.md).
+
+**Why this shape:**
+
+- **Post-deploy, not PR-gating.** Lighthouse runs on a shared GitHub runner are noisy; per-PR enforcement would block merges on jitter rather than real regressions. Running against the *deployed* site, against absolute Core Web Vitals cutoffs, with N=3 runs and `aggregationMethod: "median"`, gives a trustworthy signal at the cost of detecting regressions slightly after they ship. Recovery is a roll-back, not a merge block.
+- **One workflow, three jobs.** `check` and `deploy` are unchanged; `lighthouse` chains off `deploy` via `needs:`. The `if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')` guard makes the job fire on both `push` (after a successful deploy) and `schedule` (where `deploy` is skipped). The `check` job adds `if: github.event_name != 'schedule'` so the cron run does not re-run the full test suite.
+- **`treosh/lighthouse-ci-action` over rolling our own.** The official `GoogleChrome/lighthouse-ci` repo points readers at this community action; it's a thin wrapper around `@lhci/cli` with GH-native artifact and public-storage upload paths.
+- **No LHCI Server.** Historical diffs and a status-check integration require self-hosting Postgres + a server. For a personal site, the `temporary-public-storage` link in the workflow log plus the uploaded HTML artifact are enough; this stays consistent with §NFR-2.2.2 (no paid third-party services for v1).
+
+**Cost.** One ubuntu-latest runner × ~5 min × (push frequency + nightly) is well under the GitHub Actions free tier ceiling per §NFR-2.2.3.
+
 ## 9. Sources
 
 - [Static Assets · Cloudflare Workers docs](https://developers.cloudflare.com/workers/static-assets/)
@@ -543,3 +585,6 @@ Branch protection should require `check` before merge. The deploy job is not a p
 - [Workers & Pages Pricing · Cloudflare](https://www.cloudflare.com/plans/developer-platform/)
 - [GitHub Actions billing & free-tier minutes · GitHub Docs](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
 - [oven-sh/setup-bun action](https://github.com/oven-sh/setup-bun)
+- [Lighthouse CI · GoogleChrome](https://github.com/GoogleChrome/lighthouse-ci) — `@lhci/cli`, assertions, presets
+- [treosh/lighthouse-ci-action](https://github.com/treosh/lighthouse-ci-action) — GitHub Actions wrapper used in `ci.yml`
+- [Core Web Vitals thresholds · web.dev](https://web.dev/articles/vitals) — LCP/CLS/INP "good" cutoffs anchoring §NFR-2.5

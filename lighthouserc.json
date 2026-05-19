@@ -1,0 +1,38 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "url": [
+        "https://moster.dev/",
+        "https://moster.dev/about",
+        "https://moster.dev/articles"
+      ],
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": [
+          "error",
+          { "maxNumericValue": 2500, "aggregationMethod": "median" }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          { "maxNumericValue": 0.1, "aggregationMethod": "median" }
+        ],
+        "total-blocking-time": [
+          "warn",
+          { "maxNumericValue": 200, "aggregationMethod": "median" }
+        ],
+        "categories:performance": [
+          "error",
+          { "minScore": 0.9, "aggregationMethod": "median" }
+        ]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
