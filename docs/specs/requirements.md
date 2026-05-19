@@ -4,32 +4,53 @@ This document is the authoritative source of truth for what the implementation m
 
 ## 1. Functional requirements
 
-### 1.1 Site shape
-- **FR-1.1.1** The site is a single-page React SPA — one vertical scroll.
-- **FR-1.1.2** Navigation between sections uses in-page anchor links in a sticky/minimal nav.
-- **FR-1.1.3** Each content section is implemented as its own component so it can be lifted to a dedicated route later without rewriting.
-- **FR-1.1.4** No client-side routing library is added until a second route exists.
+> **Preserved from v1 — must not be loosened:**
+> - §FR-1.2.1.a Hero copy (the "my pleasure" Chick-fil-A tie-in) stays verbatim.
+> - §FR-1.3.3 System-stack fonts only — no hosted fonts.
+> - §NFR-2.1.2 No Next.js, no Vite, no MDX runtime.
+> - §FR-1.4.x Workers + Static Assets deployment shape.
+> - §FR-1.5.x Bun HTML bundler + scripts/build.ts copy step.
+> - The Husky `.husky/pre-commit` hook stays.
 
-### 1.2 Sections (v1)
-- **FR-1.2.1 Hero** — renders the user's name, one-line bio, and primary links.
+### 1.1 Site shape & routing
+- **FR-1.1.1** The site is a multi-page client-side React SPA. Routes are mounted by a router and rendered without a full page reload.
+- **FR-1.1.2** Navigation uses a fixed Header (avatar + nav pill + theme toggle) plus a Footer (NavLinks + copyright). The Header collapses the avatar from 64px → 36px on scroll on the Home page only.
+- **FR-1.1.3** Each page is a routed component under `src/pages/`; sections are subcomponents that can be lifted to their own route later without rewriting.
+- **FR-1.1.4** Client-side routing uses `react-router-dom`. The router lives in `src/main.tsx`/`src/App.tsx` and routes are statically declared. (Note: the v1 wording of this ID has been flipped — routing is now in.)
+- **FR-1.1.5** Routes registered with `react-router-dom`: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`. A wildcard route renders a minimal NotFoundPage.
+- **FR-1.1.6** Deep links to any route serve the SPA shell via Workers `not_found_handling = "single-page-application"` (§FR-1.4.3) and react-router resolves the route client-side.
+- **FR-1.1.7** Navigation between routes does not trigger a full document load. In-app links use `Link` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`.
+- **FR-1.1.8** The Header is fixed across all routes. Home (`/`) shows a large avatar that scales from 64px to 36px on scroll; other routes show the avatar at 36px from page load.
+- **FR-1.1.9** The Footer is present across all routes and contains NavLinks for About / Articles / Projects / Uses plus a copyright line.
+
+### 1.2 Pages & content (v1)
+- **FR-1.2.1 Hero** — renders on the Home page only. Shows the user's name, one-line bio, and primary links.
   - **FR-1.2.1.a** Hero copy must appear *verbatim*: *"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."* The phrase "my pleasure" must not be paraphrased or removed.
   - **FR-1.2.1.b** Hero exposes three social links, each opening the correct destination:
     - GitHub → `https://github.com/jlvmoster`
     - Instagram → `https://instagram.com/jlvmoster`
     - LinkedIn → `https://linkedin.com/in/jlvmoster`
-- **FR-1.2.2 Writing** — present as an empty state ("first post coming soon") with placement reserved for a future post list.
-- **FR-1.2.3 About** — short paragraph covering current focus and location.
-- **FR-1.2.4 Contact** — a `mailto:` link to `jalo@moster.dev`; designed so it can later be swapped for a form posting to `/api/contact` without restructuring.
+- **FR-1.2.2 Articles** — `/articles` lists articles in reverse-chronological order using the Card compound. `/articles/:slug` renders an individual article using SimpleLayout + Prose. If zero articles exist, the list page renders an empty-state line; v2 ships with at least one placeholder article.
+- **FR-1.2.3 About** — `/about` renders a two-column layout: portrait image (left on desktop) + prose biography + a social links column. Prose blocks remain capped at ~65ch (§FR-1.3.4).
+- **FR-1.2.4 Contact** — A `mailto:jalo@moster.dev` link appears in the About-page social column. The mailto can later be swapped for a `/api/contact` form (§GP-3.2) without restructuring the About layout.
+- **FR-1.2.5 Home page** — `/` renders Hero (per §FR-1.2.1.a/b) + a two-column body (left: 4 most-recent article cards; right: Resume timeline with a "Download CV" button). No newsletter signup.
+- **FR-1.2.6 Projects page** — `/projects` renders a SimpleLayout title + intro and a three-column grid of project cards. Each project has `{ name, description, link: { href, label }, logo }`. Source list at `src/content/projects.ts`.
+- **FR-1.2.7 Uses page** — `/uses` renders a SimpleLayout + multiple `<Section title="…">` blocks. Each Section contains a list of `<Tool>` items with `{ title, href?, description }`. Source list at `src/content/uses.ts`.
+- **FR-1.2.8 Articles content model** — Articles are typed TS modules under `src/content/articles/<slug>.tsx`. Each module exports `meta: ArticleMeta` (`{ title, description, date, author? }`) and a default React component. A loader (`getAllArticles()`) in `src/content/articles/index.ts` returns the union sorted by `meta.date` descending. No MDX, no markdown parsing, no `fast-glob` runtime.
 
 ### 1.3 Styling and theming
-- **FR-1.3.1** Light and dark color schemes are driven by `prefers-color-scheme`. No user-facing toggle in v1.
+- **FR-1.3.1** Light and dark color schemes are user-controllable via a Header theme toggle that switches between the resolved light and dark themes. System mode honors `prefers-color-scheme` by default on first load (no stored value). Preference is persisted in `localStorage` under key `theme`. An inline anti-flicker script in `src/index.html` reads `localStorage` and the media query synchronously before React mounts to avoid an FOUC.
 - **FR-1.3.2** Design tokens are exposed as CSS variables: `--bg`, `--fg`, `--muted`, `--accent`, `--font-sans`, `--font-serif`.
+  - Token values map to a zinc base with Chick-fil-A red accents: `--bg` = zinc-50 / zinc-950, `--fg` = zinc-900 / zinc-200, `--muted` = zinc-600 / zinc-400, `--accent` = `#e51636` / `#ff4f5e`. Two additional tokens model the Spotlight panel chrome — see §FR-1.3.6.
 - **FR-1.3.3** Typography uses system stacks only — no hosted fonts.
   - Sans: `ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`
   - Serif: `ui-serif, Georgia, Cambria, "Times New Roman", serif`
   - Mono: `ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace`
 - **FR-1.3.4** Prose blocks are capped at ~65ch with generous line-height.
 - **FR-1.3.5** No third-party component library (shadcn, Radix, MUI, etc.) is introduced.
+- **FR-1.3.6** Two additional CSS tokens model the Spotlight panel chrome: `--panel` (the fixed centered background card; near-white in light, zinc-900 in dark) and `--ring` (the panel ring color; zinc-100 in light, zinc-300 at 20% opacity in dark).
+- **FR-1.3.7** Prose blocks use the `@tailwindcss/typography` plugin (loaded CSS-first via `@plugin "@tailwindcss/typography";` in `globals.css`) wrapped by a `<Prose>` component that applies `prose dark:prose-invert`.
+- **FR-1.3.8** The Header's avatar scroll effect is implemented in vanilla JS via a `useEffect` on the Home route that sets CSS custom properties (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`) on `document.documentElement` in response to scroll/resize events. React does not re-render on scroll.
 
 ### 1.4 Deployment
 - **FR-1.4.1** The site deploys to Cloudflare Workers with Static Assets (not Pages).
@@ -45,6 +66,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.5.4** `bun run deploy` ships `dist/` via `wrangler deploy`.
 - **FR-1.5.5** `bun run check` runs `wrangler types && biome check && tsc --noEmit`.
 - **FR-1.5.6** `bun test` runs unit tests.
+- **FR-1.5.7** `scripts/build.ts` and `scripts/dev.ts` continue to copy `public/` → `dist/` so `public/images/{avatar,portrait}.jpg`, `public/images/logos/`, and `public/cv.pdf` ride along to production.
 
 ### 1.6 Type generation
 - **FR-1.6.1** Worker runtime types (`Env`, `ExportedHandler`, `Fetcher`) are generated by `bunx wrangler types` into `worker-configuration.d.ts`.
@@ -81,22 +103,24 @@ This document is the authoritative source of truth for what the implementation m
 ### 2.4 Quality gates
 - **NFR-2.4.1** At least one smoke test exists under `tests/` (per the build checklist).
 - **NFR-2.4.2** Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
-- **NFR-2.4.3** E2E coverage minimum: page loads, hero copy renders verbatim, all three social links resolve, dark mode applies via `prefers-color-scheme`.
+- **NFR-2.4.3** E2E coverage minimum: every route loads (page-load + hard-refresh deep link), hero copy renders verbatim on `/`, all three social links resolve on `/` and `/about`, theme toggle cycles and persists across reload, portrait image renders on `/about`, footer renders on every route, SPA fallback handles unknown paths.
 - **NFR-2.4.4** A fresh machine or CI worker can fully recreate the test environment with `bun install && bun run setup:browsers`; E2E must not depend on a pre-existing Playwright browser cache.
 
 ## 3. Growth path (designed-in, not built)
 
 These are not v1 requirements; the architecture must leave room for them without restructuring.
-- **GP-3.1** Blog with MDX: posts under `src/content/`, route per file generated at build, prerendered to static HTML. Adds React Router. No deploy shape change.
+- **GP-3.1** Blog with MDX — deferred (currently using typed TSX modules per §FR-1.2.8 instead of MDX).
 - **GP-3.2** Contact form / newsletter: `/api/contact` branch in `src/worker.ts` using Resend or Loops.
 - **GP-3.3** OG image generation: `/api/og` branch using `workers-og`.
 - **GP-3.4** CMS: Tina or markdown-via-PR. Deferred.
 - **GP-3.5** Analytics: Cloudflare Web Analytics snippet.
 - **GP-3.6** Edge data: Workers KV / D1 / R2 wired through `wrangler.toml`.
+- **GP-3.7** RSS feed: `/feed.xml` generated by a Worker fetch handler that reads the same article loader.
+- **GP-3.8** Per-route metadata: `react-helmet-async` or hand-rolled `<title>` updates per route. Deferred until a concrete per-route SEO need exists.
 
 ## 4. Out of scope (v1)
 
-Auth, database, comments, search, RSS, i18n, custom font hosting, theme toggle. Each must have a clean future-extension point but is explicitly not delivered in v1.
+Auth, database, comments, search, i18n, custom font hosting, MDX runtime, image optimization pipeline, newsletter signup, blog comments, third-party article fetching, Speaking page. Each must have a clean future-extension point but is explicitly not delivered in v2.
 
 ## 5. Resolved inputs
 
@@ -110,21 +134,28 @@ Auth, database, comments, search, RSS, i18n, custom font hosting, theme toggle. 
 | Hero copy | "Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio." |
 | Typography | System stack only |
 | Hosting | Cloudflare Workers + Static Assets |
-| Theme toggle | None (uses `prefers-color-scheme`) |
+| Theme toggle | Spotlight-style light/dark switch; persisted in `localStorage["theme"]`; default `system` |
 | CI / CD | GitHub Actions for both CI and CD; deploy via `cloudflare/wrangler-action@v3` |
+| Avatar image | `public/images/avatar.jpg` |
+| Portrait image | `public/images/portrait.jpg` |
+| Color palette | Zinc + Chick-fil-A red accent |
 
-## 6. Acceptance criteria (v1 done)
+## 6. Acceptance criteria (v2 done)
 
-The v1 release is complete when *all* of the following hold:
-- [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS assets, and the contents of `public/`, and installs the Chromium browser needed for E2E.
+The v2 release is complete when *all* of the following hold:
+- [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS assets, and the contents of `public/` (including `public/images/` and `public/cv.pdf`).
 - [ ] `bun run dev` serves the site locally with HMR.
-- [ ] `bun run preview` (wrangler dev) serves the built site through the Workers runtime.
+- [ ] `bun run preview` serves the built site through `wrangler dev`.
 - [ ] `bun run deploy` publishes the site; `moster.dev` resolves over HTTPS and returns the SPA.
 - [ ] `bun run check` passes (wrangler types regen + biome + `tsc --noEmit`).
-- [ ] `bun test` passes; at least one smoke test exists.
-- [ ] Playwright E2E suite passes the minimum coverage in NFR-2.4.3.
-- [ ] All four sections (Hero, Writing, About, Contact) render with the content specified in §1.2.
-- [ ] Hero copy matches §1.2.1.a verbatim; the three social links in §1.2.1.b each open the correct URL.
-- [ ] Dark mode applies automatically under `prefers-color-scheme: dark`.
-- [ ] An unknown path (e.g., `/foo`) returns the SPA shell, not a 404.
-- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and the Playwright suite and reports green. On push to `master`, the GitHub Actions deploy job runs `cloudflare/wrangler-action@v3` after CI passes and `https://moster.dev` reflects a visible change from the new commit without any local `wrangler deploy`.
+- [ ] `bun test` passes; smoke test asserts the verbatim hero substring.
+- [ ] Playwright E2E suite passes the minimum coverage (§NFR-2.4.3).
+- [ ] All six routes load: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
+- [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Workers SPA fallback.
+- [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
+- [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
+- [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 64px and scales to 36px on scroll.
+- [ ] Articles list renders ≥ 1 article card; clicking it loads `/articles/<slug>`.
+- [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
+- [ ] Footer renders on every route.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. On push to `master`, CD deploys via `cloudflare/wrangler-action@v3`.

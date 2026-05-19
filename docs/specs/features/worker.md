@@ -26,6 +26,7 @@ The Workers entrypoint, `wrangler.toml` config, SPA fallback for unknown paths, 
 - `worker-configuration.d.ts` is **not** committed. Anyone cloning fresh runs `bunx wrangler types` before `tsc`.
 - `tsconfig.json` `compilerOptions.types` array must list both `"bun"` and `"./worker-configuration.d.ts"` — order doesn't matter, but both must be present, otherwise `Env` resolves to `any`.
 - `bun run check` order: `wrangler types` → `biome check` → `tsc --noEmit`. Regen comes first so the type check sees current bindings.
+- SPA fallback semantics matter for v2: hard-refreshing any of `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses` must return the SPA shell so `react-router-dom` can resolve the route client-side. This is satisfied by `not_found_handling = "single-page-application"` in `wrangler.toml` — no Worker code change is needed.
 
 ## Test plan
 - **Pre-deploy smoke:** `bun run preview` (wrangler dev) serves the built site without errors.

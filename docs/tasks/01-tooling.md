@@ -41,6 +41,10 @@ Get `package.json` scripts, dependencies, TypeScript, Biome, and Bun configured 
    Task 07 deliberately avoids a DOM polyfill, so no `[test] preload` section is needed.
 6. **Delete the stub `index.ts`** at repo root left over from `bun init --empty`. The real entry is `src/index.html` (added in Task 04).
 7. **Confirm `.gitignore`** already ignores `dist/`, `.wrangler/`, `worker-configuration.d.ts`, `node_modules/`. (It does as of this writing — verify only.)
+8. **Add Spotlight redesign dependencies.**
+   - `bun add react-router-dom@^7` (runtime).
+   - `bun add -d @tailwindcss/typography@^0.5` (dev).
+   - Optional: `bun add clsx@^2` (runtime). Decide per the open question in `features/tooling.md`; default is no — inline a six-liner at `src/lib/clsx.ts`.
 
 ## Outputs
 - Updated: `package.json`, `tsconfig.json`, `bun.lock`.
@@ -56,3 +60,4 @@ Get `package.json` scripts, dependencies, TypeScript, Biome, and Bun configured 
 ## Open questions to surface
 - Override any Biome recommended rules? **Resolved:** no — recommended ruleset, no overrides. Kept as the documented default for future agents.
 - Set up a pre-commit hook now or defer? **Resolved:** wired now via `husky` v9 (`.husky/pre-commit` runs `bun run check`). `simple-git-hooks` was the original choice but fails silently in Conductor worktrees because it `mkdir`s `.git/hooks/`, and `.git` is a file in a worktree. Husky's `core.hooksPath` approach sidesteps that.
+- Pull `clsx@^2` from npm (~500 bytes) or inline a six-liner. Default: inline.

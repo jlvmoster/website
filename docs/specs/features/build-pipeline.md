@@ -30,6 +30,9 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
   - `favicon.ico` — small favicon, referenced from `index.html` via `<link rel="icon" href="/favicon.ico">`.
   - `robots.txt` — `User-agent: *` + `Allow: /` (open by default; switch to `Disallow: /` only if you want to delay indexing).
   - `og-image.png` — 1200×630 OG card, referenced from `<meta property="og:image">`. Acceptable to omit in v1 and add post-scaffold.
+  - `public/images/avatar.jpg`, `public/images/portrait.jpg` — Header and About page imagery.
+  - `public/images/logos/<n>.svg` — Resume and Projects logos.
+  - `public/cv.pdf` — referenced by the "Download CV" button on Home.
 
 ## Test plan
 - **Build smoke:** `bun run build` produces `dist/index.html` plus hashed `dist/*.js` and `dist/*.css`.

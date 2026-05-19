@@ -1,52 +1,64 @@
-# Task 04 — App shell
+# Task 04 — App shell & Router
 
 ## Goal
-Create the HTML entry, React 19 root mount, and the top-level `App` that composes nav + four sections (the section components are stubs until Task 05).
+Wire `react-router-dom` BrowserRouter, set up `src/App.tsx` with the Routes table, add the anti-flicker theme script to `src/index.html`, and create page-component stubs so the router compiles.
 
 ## Source spec
 - [`features/app-shell.md`](../specs/features/app-shell.md)
-- Requirements: §FR-1.1.1, §FR-1.5.2, §NFR-2.1.4, §NFR-2.3.1
+- [`features/routing.md`](../specs/features/routing.md)
+- [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
+- Requirements: §FR-1.1.1, §FR-1.1.4, §FR-1.1.5, §FR-1.1.6, §FR-1.3.1
 
 ## Prereqs
-- Task 01 (React installed, tsconfig has `jsx: "react-jsx"`).
-- Task 03 (`src/styles/globals.css` exists — `index.html` links to it).
+- Task 01 (`react-router-dom` installed).
+- Task 03 (globals.css uses class-based dark).
 
 ## Steps
 
-1. **Create `src/index.html`** per the feature spec §Behavior. Required elements:
-   - `<html lang="en">`, charset, viewport.
-   - `<title>` — default "Jalo Moster" unless the user provides a custom one.
-   - `<meta name="description">` — one-line bio, doubles as OG description.
-   - `<meta property="og:title">` and `<meta property="og:description">`. Add `<meta property="og:image" content="/og-image.png">` only if Task 06 will ship `public/og-image.png`; don't point crawlers at a missing image.
-   - `<meta name="theme-color" media="(prefers-color-scheme: light)" content="…">` and dark counterpart, matching the `--bg` token values resolved in Task 03.
-   - `<link rel="icon" href="/favicon.ico">` (file shipped in Task 06).
-   - `<link rel="stylesheet" href="./styles/globals.css">` and `<script type="module" src="./main.tsx"></script>`.
-   - Body contains only `<div id="root"></div>`.
-2. **Create `src/main.tsx`**:
+1. **Add the anti-flicker `<script>`** to `src/index.html` `<head>`, before the React script:
+   ```html
+   <script>
+     (function () {
+       try {
+         var c = localStorage.getItem("theme") || "system";
+         var d = c === "dark" || (c === "system" &&
+           window.matchMedia("(prefers-color-scheme: dark)").matches);
+         document.documentElement.classList.toggle("dark", d);
+       } catch (e) {}
+     })();
+   </script>
+   ```
+
+2. **Edit `src/main.tsx`** to wrap with `<BrowserRouter>`:
    ```tsx
    import { StrictMode } from "react";
    import { createRoot } from "react-dom/client";
+   import { BrowserRouter } from "react-router-dom";
    import { App } from "./App";
 
    createRoot(document.getElementById("root")!).render(
      <StrictMode>
-       <App />
+       <BrowserRouter>
+         <App />
+       </BrowserRouter>
      </StrictMode>,
    );
    ```
-   Do **not** `import "./styles/globals.css"` here — `index.html`'s `<link rel="stylesheet">` is the canonical loading path, and adding the JS import would make Bun's HTML bundler register the CSS twice.
-3. **Create `src/App.tsx`** as a function component that returns `<Nav />` followed by `<Hero />`, `<Writing />`, `<About />`, `<Contact />` in order.
-   - Import those five components from `src/components/`. Until Task 05 creates the real components, create one-line stub files there so the shell type-checks. The section stubs must use the correct IDs (`hero`, `writing`, `about`, `contact`) from day 1; `Nav` can return `null` until Task 05 fills in the anchor links.
-4. **No providers** in v1: no router, no theme context, no query client.
+
+3. **Rewrite `src/App.tsx`** with the Routes table (canonical shape in `architecture.md` §4.4). Use a stub `LayoutShell` that returns `{children}` for now — the real shell lands in Task 05.
+
+4. **Create page stubs under `src/pages/`** so the router compiles. Each stub returns `<h1>{name}</h1>`. Files: `HomePage.tsx`, `AboutPage.tsx`, `ArticlesPage.tsx`, `ArticlePage.tsx`, `ProjectsPage.tsx`, `UsesPage.tsx`, `NotFoundPage.tsx`.
+
+5. **Temporary: render the v1 Hero inside `HomePage.tsx`** so the verbatim-hero E2E assertion continues to pass through Tasks 05–07. Delete the v1 components and inline the Hero block in Task 07.
 
 ## Outputs
-- New: `src/index.html`, `src/main.tsx`, `src/App.tsx`, plus stub `src/components/{Nav,Hero,Writing,About,Contact}.tsx` (one-line returns) so `App.tsx` resolves.
+- Edited: `src/index.html`, `src/main.tsx`.
+- New: `src/App.tsx`, `src/pages/*.tsx` (7 stubs).
 
 ## Verification
-- `bunx tsc --noEmit` passes.
-- Once Task 06 lands, `bun run dev` serves a blank page with the four section IDs in the DOM.
+- `bun run check` passes.
+- `bun run dev` serves all six routes; clicking around shows the stub bodies; URL updates without a full page load.
+- `/` still renders the verbatim hero substring.
 
-## Open questions to surface
-- Final `<title>` and `<meta description>` strings.
-- OG image — ship a placeholder in v1 and include the `og:image` meta tag, or defer both to a follow-up (per architecture §7)?
-- `theme-color` values must match Task 03's resolved palette — confirm before writing the `<meta>` tags.
+## Open questions
+- See `routing.md` (wildcard 404 strategy).

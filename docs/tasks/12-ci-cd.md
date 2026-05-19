@@ -1,4 +1,4 @@
-# Task 08 — CI/CD bootstrap
+# Task 12 — CI/CD bootstrap
 
 ## Goal
 Land the GitHub Actions workflow that gates PRs and deploys `master` through Cloudflare's official Wrangler action. Manual `bun run deploy` becomes break-glass, not the production path.
