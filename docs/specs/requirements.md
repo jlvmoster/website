@@ -78,12 +78,19 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.6.3** `worker-configuration.d.ts` is gitignored; type generation is part of `bun run check` and CI.
 
 ### 1.7 CI/CD
-- **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun test`, and `bunx playwright test`. A PR cannot merge until CI is green.
+- **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. A PR cannot merge until CI is green.
 - **FR-1.7.2** Pushes to `master` trigger an automated production deploy through GitHub Actions after CI passes. Production releases must not require an interactive `bun run deploy` from a developer's machine.
 - **FR-1.7.3** CI and CD both run on GitHub Actions. Deploys use Cloudflare's official `cloudflare/wrangler-action@v3`.
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
 - **FR-1.7.5** Cloudflare API credentials needed for deploys are stored only as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed to the repository.
 - **FR-1.7.6** `bun run deploy` remains supported as a break-glass path (§FR-1.5.4) but is not the production source of truth.
+
+### 1.8 Performance monitoring
+- **FR-1.8.1** Production deploys are followed by an automated Lighthouse CI run against the live site that measures Core Web Vitals (LCP, CLS) and total blocking time on a representative set of routes.
+- **FR-1.8.2** Lighthouse thresholds live in a committed `lighthouserc.json` at the repo root and are asserted via `@lhci/cli` invoked through `treosh/lighthouse-ci-action`.
+- **FR-1.8.3** The Lighthouse job runs after the `deploy` job on push to `master`, and also on a daily `schedule` trigger so regressions surface even when no code changes have shipped. It is not a PR merge gate.
+- **FR-1.8.4** Each Lighthouse run executes ≥ 3 audits per URL and asserts against the median, to absorb runner variance.
+- **FR-1.8.5** Each run uploads its HTML report to Google's temporary public storage (link in workflow logs) and as a GitHub Actions artifact; no self-hosted LHCI Server is introduced for v1.
 
 ## 2. Non-functional requirements
 
@@ -109,6 +116,12 @@ This document is the authoritative source of truth for what the implementation m
 - **NFR-2.4.2** Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
 - **NFR-2.4.3** E2E coverage minimum: every route loads (page-load + hard-refresh deep link), hero copy renders verbatim on `/`, all three social links resolve on `/` and `/about`, theme toggle cycles and persists across reload, portrait image renders on `/about`, footer renders on every route, SPA fallback handles unknown paths.
 - **NFR-2.4.4** A fresh machine or CI worker can fully recreate the test environment with `bun install && bun run setup:browsers`; E2E must not depend on a pre-existing Playwright browser cache.
+
+### 2.5 Performance budgets
+- **NFR-2.5.1** Largest Contentful Paint (LCP) median ≤ 2500 ms on every audited route — Core Web Vitals "good" threshold; asserted at `error` level.
+- **NFR-2.5.2** Cumulative Layout Shift (CLS) median ≤ 0.1 on every audited route — Core Web Vitals "good" threshold; asserted at `error` level.
+- **NFR-2.5.3** Total Blocking Time (TBT) median ≤ 200 ms — asserted at `warn` level (lab-only signal; the production constraint is INP, which Lighthouse cannot measure synthetically).
+- **NFR-2.5.4** Lighthouse `categories:performance` median score ≥ 0.9 on every audited route; asserted at `error` level.
 
 ## 3. Growth path (designed-in, not built)
 

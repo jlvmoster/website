@@ -4,7 +4,7 @@
 Automated CI on every PR and push to `master`, and automated production deploys on push to `master` through GitHub Actions using Cloudflare's official Wrangler action.
 
 ## Requirements covered
-- §FR-1.7.1 — CI on every PR and push runs `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun test`, `bunx playwright test`.
+- §FR-1.7.1 — CI on every PR and push runs `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`.
 - §FR-1.7.2 — Push to `master` triggers an automated production deploy after CI passes.
 - §FR-1.7.3 — CI and CD both run on GitHub Actions; deploys use `cloudflare/wrangler-action@v3`.
 - §FR-1.7.4 — Workflow files committed under `.github/workflows/`.
@@ -19,11 +19,12 @@ Automated CI on every PR and push to `master`, and automated production deploys 
 
 ## Behavior & edge cases
 - **Workflow (`.github/workflows/ci.yml`):**
-  - Triggers: `pull_request` against `master`, and `push` to `master`.
-  - `check` job runs on `ubuntu-latest`.
-  - `check` steps in order: `actions/checkout@v6` → `oven-sh/setup-bun@v2` → restore Bun package cache → restore Playwright browser cache → `bun install --frozen-lockfile` → `bun run setup:browsers` → `bun run check` → `bun test` → `bunx playwright test`.
+  - Triggers: `pull_request` against `master`, `push` to `master`, and a `schedule: '0 7 * * *'` cron that fires only the `lighthouse` job (see `features/lighthouse-ci.md`).
+  - `check` job runs on `ubuntu-latest` and is gated with `if: github.event_name != 'schedule'` so cron runs do not re-execute the suite.
+  - `check` steps in order: `actions/checkout@v6` → `actions/setup-node@v6` (node 22) → `oven-sh/setup-bun@v2` → restore Bun package cache → restore Playwright browser cache → `bun install --frozen-lockfile` → `bun run setup:browsers` → `bun run check` → `bun run build` → `bun test` → `bunx playwright test` → `bunx playwright test -c playwright.built.config.ts`.
   - `deploy` job has `needs: check` and only runs when `github.event_name == 'push' && github.ref == 'refs/heads/master'`.
-  - `deploy` steps: `actions/checkout@v6` → `oven-sh/setup-bun@v2` → restore Bun package cache → `bun install --frozen-lockfile` → `bun run build` → `cloudflare/wrangler-action@v3`.
+  - `deploy` steps: `actions/checkout@v6` → `actions/setup-node@v6` (node 22) → `oven-sh/setup-bun@v2` → restore Bun package cache → `bun install --frozen-lockfile` → `bun run build` → `cloudflare/wrangler-action@v3`.
+  - `lighthouse` job (`needs: deploy`, `if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')`) runs post-deploy and on the daily cron; see `features/lighthouse-ci.md` for behavior.
   - The Wrangler action receives `apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}` and `accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}`.
   - `--frozen-lockfile` enforces that PRs touching dependencies update `bun.lock`.
   - Cache Bun packages with `actions/cache@v5`, path `~/.bun/install/cache`, key `bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}`.
