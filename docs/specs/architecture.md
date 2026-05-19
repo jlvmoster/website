@@ -464,6 +464,8 @@ on:
     branches: [master]
   schedule:
     - cron: '0 7 * * *'
+permissions:
+  contents: read
 jobs:
   check:
     if: github.event_name != 'schedule'
@@ -532,7 +534,7 @@ jobs:
           temporaryPublicStorage: true
 ```
 
-The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
+The workflow scopes `GITHUB_TOKEN` to `contents: read`, which is enough for checkout while leaving deploy authentication to Cloudflare secrets. The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
 
 `actions/setup-node@v6` is provisioned before `oven-sh/setup-bun@v2` because `bun run check` invokes `wrangler types` (Node-based) and `cloudflare/wrangler-action@v3` in the `deploy` job also expects Node available on PATH. `bun run build` runs in `check` to catch bundler breakage before merge; the second `bunx playwright test -c playwright.built.config.ts` exercises the built artifact through `wrangler dev`, so PR gating covers both the dev-server and the built-artifact code paths described in `features/testing.md`.
 
