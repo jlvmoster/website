@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { clsx } from "../lib/clsx";
 import { Avatar, AvatarContainer } from "./Avatar";
-import { ContainerInner } from "./Container";
+import { ContainerInner, ContainerOuter } from "./Container";
 import { MobileNavigation } from "./MobileNavigation";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -13,6 +13,11 @@ const navItems = [
   { label: "Uses", href: "/uses" },
 ];
 
+const avatarDockDistance = 136;
+const navHideDistance = 64;
+const homeNavHideStart = avatarDockDistance;
+const pageNavHideStart = 64;
+
 function NavLink({ href, label }: { href: string; label: string }) {
   const { pathname } = useLocation();
   const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -22,14 +27,12 @@ function NavLink({ href, label }: { href: string; label: string }) {
         to={href}
         className={clsx(
           "relative block px-3 py-2 transition",
-          active
-            ? "text-teal-500 dark:text-teal-400"
-            : "hover:text-teal-500 dark:hover:text-teal-400",
+          active ? "text-accent" : "hover:text-accent",
         )}
       >
         {label}
         {active ? (
-          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-teal-500/0 via-teal-500/40 to-teal-500/0 dark:from-teal-400/0 dark:via-teal-400/40 dark:to-teal-400/0" />
+          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-accent/0 via-accent/40 to-accent/0" />
         ) : null}
       </Link>
     </li>
@@ -55,25 +58,50 @@ function clamp(n: number, min: number, max: number): number {
 export function Header() {
   const { pathname } = useLocation();
   const isHome = pathname === "/";
+  const homeAvatarRef = useRef<HTMLAnchorElement>(null);
+  const homeAvatarSlotRef = useRef<HTMLDivElement>(null);
+  const navAvatarSlotRef = useRef<HTMLDivElement>(null);
+  const navShellRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (!isHome) {
-      root.style.removeProperty("--avatar-image-transform");
-      return;
-    }
-
-    const fromScale = 1;
-    const toScale = 36 / 64;
-    const downDelay = 256;
+  useLayoutEffect(() => {
+    const navShell = navShellRef.current;
+    if (!navShell) return;
 
     function update() {
-      const scrollY = clamp(window.scrollY, 0, downDelay);
-      const scale = fromScale + (toScale - fromScale) * (scrollY / downDelay);
-      root.style.setProperty(
-        "--avatar-image-transform",
-        `translate3d(0, 0, 0) scale(${scale})`,
+      const navShell = navShellRef.current;
+      if (!navShell) return;
+
+      const hideDistance = clamp(
+        window.scrollY - (isHome ? homeNavHideStart : pageNavHideStart),
+        0,
+        navHideDistance,
       );
+      navShell.style.transform = `translate3d(0, ${-hideDistance}px, 0)`;
+
+      if (!isHome) return;
+
+      const avatar = homeAvatarRef.current;
+      const homeSlot = homeAvatarSlotRef.current;
+      const navSlot = navAvatarSlotRef.current;
+      if (!avatar || !homeSlot || !navSlot) return;
+
+      const dockScrollY = clamp(window.scrollY, 0, avatarDockDistance);
+      const dockProgress = dockScrollY / avatarDockDistance;
+
+      const homeRect = homeSlot.getBoundingClientRect();
+      const navRect = navSlot.getBoundingClientRect();
+      const startTop = homeRect.top;
+      const startLeft = homeRect.left;
+      const targetTop = navRect.top + 2;
+      const targetLeft = navRect.left + 2;
+      const top = startTop + (targetTop - startTop) * dockProgress;
+      const left = startLeft + (targetLeft - startLeft) * dockProgress;
+      const scale = 1 + (36 / 64 - 1) * dockProgress;
+
+      avatar.style.opacity = "1";
+      avatar.style.left = `${left}px`;
+      avatar.style.top = `${top}px`;
+      avatar.style.transform = `translate3d(0, 0, 0) scale(${scale})`;
     }
 
     update();
@@ -87,37 +115,61 @@ export function Header() {
 
   return (
     <header className="pointer-events-none relative z-50 flex flex-none flex-col">
-      {isHome ? (
-        <div className="order-last mt-16 pt-6">
+      <div
+        ref={navShellRef}
+        className="fixed inset-x-0 top-0 z-10 h-16 pt-6 will-change-transform"
+      >
+        <ContainerOuter>
           <ContainerInner className="w-full">
-            <div className="relative origin-left">
-              <Avatar large className="block origin-left" />
-            </div>
-          </ContainerInner>
-        </div>
-      ) : null}
-      <div className="top-0 z-10 h-16 pt-6">
-        <ContainerInner className="w-full">
-          <div className="relative flex gap-4">
-            <div className="flex flex-1">
-              {!isHome ? (
-                <AvatarContainer className="pointer-events-auto">
-                  <Avatar />
-                </AvatarContainer>
-              ) : null}
-            </div>
-            <div className="flex flex-1 justify-end md:justify-center">
-              <MobileNavigation />
-              <DesktopNav />
-            </div>
-            <div className="flex justify-end md:flex-1">
-              <div className="pointer-events-auto">
-                <ThemeToggle />
+            <div className="relative flex gap-4">
+              <div className="flex flex-1">
+                {isHome ? (
+                  <div
+                    ref={navAvatarSlotRef}
+                    className="h-10 w-10"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <AvatarContainer className="pointer-events-auto">
+                    <Avatar />
+                  </AvatarContainer>
+                )}
+              </div>
+              <div className="flex flex-1 justify-end md:justify-center">
+                <div className="pointer-events-auto md:hidden">
+                  <MobileNavigation />
+                </div>
+                <DesktopNav />
+              </div>
+              <div className="flex justify-end md:flex-1">
+                <div className="pointer-events-auto">
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
-          </div>
-        </ContainerInner>
+          </ContainerInner>
+        </ContainerOuter>
       </div>
+      <div className="h-16" />
+      {isHome ? (
+        <div className="mt-16 pt-6">
+          <ContainerOuter>
+            <ContainerInner className="w-full">
+              <div
+                ref={homeAvatarSlotRef}
+                className="relative h-16 w-16 origin-left"
+              >
+                <Avatar
+                  ref={homeAvatarRef}
+                  large
+                  className="fixed z-20 block origin-top-left will-change-transform"
+                  style={{ opacity: 0 }}
+                />
+              </div>
+            </ContainerInner>
+          </ContainerOuter>
+        </div>
+      ) : null}
     </header>
   );
 }

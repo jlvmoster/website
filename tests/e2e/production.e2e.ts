@@ -34,32 +34,25 @@ test("production exposes the three canonical social links", async ({
 test("production applies Tailwind utility classes", async ({ page }) => {
   await page.goto("/");
 
-  const heroStyles = await page.locator("#hero").evaluate((el) => {
-    const cs = getComputedStyle(el);
-    return {
-      maxWidth: cs.maxWidth,
-      paddingLeft: parseFloat(cs.paddingLeft),
-      paddingTop: parseFloat(cs.paddingTop),
-    };
+  const heroHeading = page.getByRole("heading", {
+    name: "Software engineer building data systems at Chick-fil-A.",
   });
-  expect(heroStyles.maxWidth).not.toBe("none");
-  expect(heroStyles.paddingLeft).toBeGreaterThan(0);
-  expect(heroStyles.paddingTop).toBeGreaterThan(0);
-
-  const heroHeadingStyles = await page.locator("#hero h1").evaluate((el) => {
+  const heroHeadingStyles = await heroHeading.evaluate((el) => {
     const cs = getComputedStyle(el);
     return {
-      fontFamily: cs.fontFamily,
       fontSize: parseFloat(cs.fontSize),
+      fontWeight: Number(cs.fontWeight),
+      marginTop: parseFloat(cs.marginTop),
     };
   });
-  expect(heroHeadingStyles.fontFamily.toLowerCase()).toContain("serif");
-  expect(heroHeadingStyles.fontSize).toBeGreaterThanOrEqual(24);
+  expect(heroHeadingStyles.fontSize).toBeGreaterThanOrEqual(36);
+  expect(heroHeadingStyles.fontWeight).toBeGreaterThanOrEqual(700);
+  expect(heroHeadingStyles.marginTop).toBe(0);
 
-  const ghLinkDisplay = await page
+  const ghLinkPadding = await page
     .locator("a[href='https://github.com/jlvmoster']")
-    .evaluate((el) => getComputedStyle(el).display);
-  expect(ghLinkDisplay).toBe("inline-flex");
+    .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
+  expect(ghLinkPadding).toBeGreaterThan(0);
 });
 
 test("production applies dark mode via prefers-color-scheme", async ({

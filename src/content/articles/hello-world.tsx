@@ -6,12 +6,10 @@ export const meta = {
 
 export default function HelloWorld() {
   return (
-    <>
-      <p>
-        This is the first post on moster.dev. It's a placeholder while the site
-        fills out — expect notes on the data platforms I work on, the tools I
-        rely on, and the occasional latte digression.
-      </p>
-    </>
+    <p>
+      This is the first post on moster.dev. It's a placeholder while the site
+      fills out — expect notes on the data platforms I work on, the tools I rely
+      on, and the occasional latte digression.
+    </p>
   );
 }

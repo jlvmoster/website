@@ -20,7 +20,7 @@
   - `<img src={project.logo} alt="" className="h-8 w-8">` inside the disc.
   - `<Card.Title as="h2" href={project.link.href}>{project.name}</Card.Title>` — external link, `target="_blank" rel="noopener noreferrer"`.
   - `<Card.Description>{project.description}</Card.Description>`.
-  - `<p className="relative z-10 mt-6 flex text-sm font-medium text-zinc-400 transition group-hover:text-teal-500 dark:text-zinc-200">` containing `<LinkIcon className="h-6 w-6 flex-none" />` + `<span className="ml-2">{project.link.label}</span>`.
+  - `<p className="relative z-10 mt-6 flex text-sm font-medium text-zinc-400 transition group-hover:text-accent dark:text-zinc-200">` containing `<LinkIcon className="h-6 w-6 flex-none" />` + `<span className="ml-2">{project.link.label}</span>`.
 - External links: `target="_blank" rel="noopener noreferrer"`.
 
 ## Test plan

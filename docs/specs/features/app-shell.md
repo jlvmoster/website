@@ -22,7 +22,7 @@ Mount the React root with `BrowserRouter`, wire the Routes through `<LayoutShell
   - existing `<script type="module" src="./main.tsx">`
   - new: `<script>` block (see `theme-toggle.md`) before the React script
   - existing `<div id="root">`
-  - `<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">` and `<meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">` matching the new zinc/teal palette
+  - `<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">` and `<meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">` matching the new zinc/red palette
 - `main.tsx` keeps `StrictMode`. The only change is wrapping `<App />` in `<BrowserRouter>`.
 - `App.tsx` is new — it exports `App`, composes `<LayoutShell>` with `<Routes>`, and is the single place new routes get added.
 - `NotFoundPage` is a minimal page (h1 "Page not found." + link to `/`).

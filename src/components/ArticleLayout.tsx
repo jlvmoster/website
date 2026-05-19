@@ -14,11 +14,7 @@ export function ArticleLayout({ article, children }: ArticleLayoutProps) {
   const navigate = useNavigate();
 
   function goBack() {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/articles");
-    }
+    navigate("/articles");
   }
 
   return (

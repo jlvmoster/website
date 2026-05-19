@@ -1,7 +1,7 @@
 # Theming — Implementation Spec
 
 ## Goal
-Zinc + teal palette via CSS variables, class-based dark mode, three-state theme toggle, system-stack typography, Tailwind v4 typography plugin for Prose.
+Zinc + red palette via CSS variables, class-based dark mode, three-state theme toggle, system-stack typography, Tailwind v4 typography plugin for Prose.
 
 ## Requirements covered
 - §FR-1.3.1 — Theme toggle (light/dark/system), `localStorage` persistence, anti-flicker.
@@ -23,14 +23,14 @@ Zinc + teal palette via CSS variables, class-based dark mode, three-state theme 
   - `--bg: #fafafa;` (zinc-50)
   - `--fg: #18181b;` (zinc-900)
   - `--muted: #52525b;` (zinc-600)
-  - `--accent: #14b8a6;` (teal-500)
+  - `--accent: #e51636;` (Chick-fil-A red)
   - `--panel: #ffffff;`
   - `--ring: rgb(244 244 245);` (zinc-100)
 - Dark tokens on `:root.dark`:
   - `--bg: #09090b;` (zinc-950)
   - `--fg: #e4e4e7;` (zinc-200)
   - `--muted: #a1a1aa;` (zinc-400)
-  - `--accent: #2dd4bf;` (teal-400)
+  - `--accent: #ff4f5e;` (red accent, dark)
   - `--panel: #18181b;` (zinc-900)
   - `--ring: rgb(212 212 216 / 0.2);` (zinc-300/20)
 - `--font-sans` and `--font-serif` keep verbatim system stacks from v1.
@@ -45,4 +45,4 @@ Zinc + teal palette via CSS variables, class-based dark mode, three-state theme 
 
 ## Open questions
 - Hero h1 font: keep `font-serif` from v1 or switch to sans? (Defaults to sans — see `hero.md`.)
-- Accent: teal-500 is the Spotlight default. A warmer accent (terracotta, Chick-fil-A red) is on the table. Default: teal-500.
+- Accent: Chick-fil-A red is the selected brand accent.

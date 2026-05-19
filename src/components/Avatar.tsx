@@ -1,4 +1,8 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  forwardRef,
+} from "react";
 import { Link } from "react-router-dom";
 import { clsx } from "../lib/clsx";
 
@@ -22,16 +26,18 @@ export const AvatarContainer = forwardRef<HTMLDivElement, AvatarContainerProps>(
 type AvatarProps = {
   large?: boolean;
   className?: string;
+  style?: CSSProperties;
 };
 
 export const Avatar = forwardRef<HTMLAnchorElement, AvatarProps>(
-  function Avatar({ large = false, className }, ref) {
+  function Avatar({ large = false, className, style }, ref) {
     return (
       <Link
         ref={ref}
         to="/"
         aria-label="Home"
         className={clsx(className, "pointer-events-auto")}
+        style={style}
       >
         <img
           src="/images/avatar.jpg"
@@ -40,7 +46,6 @@ export const Avatar = forwardRef<HTMLAnchorElement, AvatarProps>(
             "rounded-full bg-zinc-100 object-cover dark:bg-zinc-800",
             large ? "h-16 w-16" : "h-9 w-9",
           )}
-          style={{ transform: "var(--avatar-image-transform)" }}
         />
       </Link>
     );

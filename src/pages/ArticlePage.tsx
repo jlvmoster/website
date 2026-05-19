@@ -17,7 +17,7 @@ export function ArticlePage() {
           That article does not exist (yet).{" "}
           <Link
             to="/articles"
-            className="text-teal-500 transition hover:text-teal-600 dark:text-teal-400 dark:hover:text-teal-300"
+            className="text-accent transition hover:opacity-80"
           >
             Back to all articles
           </Link>

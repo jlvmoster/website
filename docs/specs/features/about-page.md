@@ -17,7 +17,7 @@
 - Grid: `grid-cols-1 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-y-12`.
 - Portrait (left on desktop, top on mobile): `<img src="/images/portrait.jpg" class="aspect-square rotate-3 rounded-2xl bg-zinc-100 object-cover dark:bg-zinc-800 max-w-xs px-2.5 lg:max-w-none">`.
 - Right column (top): headline `text-4xl font-bold tracking-tight sm:text-5xl` + four short prose paragraphs (each ~65ch, `mt-6 text-base text-zinc-600 dark:text-zinc-400`).
-- Social column (right column, bottom on desktop; below prose on mobile): a `<ul>` of four list items — GitHub, Instagram, LinkedIn, `mailto:jalo@moster.dev`. Each item has icon (left) + text label (right). Hover tints to `teal-500 dark:teal-400`.
+- Social column (right column, bottom on desktop; below prose on mobile): a `<ul>` of four list items — GitHub, Instagram, LinkedIn, `mailto:jalo@moster.dev`. Each item has icon (left) + text label (right). Hover tints to `text-accent`.
 - A border-top `border-zinc-100 dark:border-zinc-700/40` separates the mailto from the other three.
 
 ## Test plan

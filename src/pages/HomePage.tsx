@@ -1,6 +1,5 @@
 import { Container } from "../components/Container";
 import { ArticleCard } from "../components/home/ArticleCard";
-import { Photos } from "../components/home/Photos";
 import { Resume } from "../components/home/Resume";
 import { GitHubIcon, InstagramIcon, LinkedInIcon } from "../components/icons";
 import { SocialLink } from "../components/SocialLink";
@@ -38,7 +37,6 @@ export function HomePage() {
           </div>
         </div>
       </Container>
-      <Photos />
       <Container className="mt-24 md:mt-28">
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2">
           <div className="flex flex-col gap-16">

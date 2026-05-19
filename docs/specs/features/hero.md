@@ -10,7 +10,7 @@ Top-of-page section that introduces Jalo with a fixed one-line copy and three so
 - §FR-1.1.3 — Implemented as its own component for future route-lifting.
 
 ## File layout
-- `src/pages/HomePage.tsx` — composes the Hero block (inline JSX, no separate component) along with Photos, Articles preview, and Resume.
+- `src/pages/HomePage.tsx` — composes the Hero block (inline JSX, no separate component) along with Articles preview and Resume.
 - (Optional) `src/components/home/Hero.tsx` if the inline block grows past ~30 lines.
 - Container wrapping: `<Container className="mt-9">`.
 

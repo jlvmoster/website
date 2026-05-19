@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { clsx } from "../lib/clsx";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 
 const navItems = [
@@ -9,7 +10,7 @@ const navItems = [
   { label: "Uses", href: "/uses" },
 ];
 
-export function MobileNavigation() {
+export function MobileNavigation({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -25,7 +26,10 @@ export function MobileNavigation() {
     <>
       <button
         type="button"
-        className="group flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20"
+        className={clsx(
+          className,
+          "group flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20",
+        )}
         onClick={() => setOpen(true)}
         aria-label="Open menu"
       >

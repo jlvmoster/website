@@ -20,7 +20,7 @@ export function Footer() {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className="transition hover:text-teal-500 dark:hover:text-teal-400"
+                    className="transition hover:text-accent"
                   >
                     {item.label}
                   </Link>

@@ -378,11 +378,11 @@ Single icon catalog at `src/components/icons.tsx` — no `@heroicons/react`, no 
 │   ├── App.tsx             # LayoutShell + Routes table
 │   ├── worker.ts           # Workers fetch handler (pass-through today)
 │   ├── pages/              # one .tsx per route (Home/About/Articles/Article/Projects/Uses/NotFound)
-│   ├── components/         # Header, Footer, LayoutShell, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, icons, home/{Photos,Resume,ArticleCard}
+│   ├── components/         # Header, Footer, LayoutShell, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, icons, home/{Resume,ArticleCard}
 │   ├── content/            # articles/{index.ts, <slug>.tsx}, projects.ts, uses.ts, resume.ts
 │   ├── lib/                # useTheme.ts, formatDate.ts, clsx.ts
-│   └── styles/globals.css  # Tailwind v4 + @plugin typography + zinc/teal tokens
-├── public/                 # favicon, og-image, robots.txt, images/{avatar,portrait}.jpg, images/photos/, images/logos/, cv.pdf — copied into dist/
+│   └── styles/globals.css  # Tailwind v4 + @plugin typography + zinc/red tokens
+├── public/                 # favicon, og-image, robots.txt, images/{avatar,portrait}.jpg, images/logos/, cv.pdf — copied into dist/
 ├── scripts/
 │   ├── dev.ts              # Bun.serve with HMR
 │   └── build.ts            # bun build → dist/
@@ -420,7 +420,7 @@ These aren't in the requirements doc because they're one-time setup performed in
 1. **Create Cloudflare deploy credentials for GitHub Actions.** Required by §FR-1.7.2. In Cloudflare, create a scoped API token with Workers deploy permissions for this account/project. In GitHub repo settings, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as Actions secrets. Do not commit either value.
 2. **Add custom domain `moster.dev`** in the Cloudflare dashboard. SSL/HTTPS is automatic once the zone is attached.
 3. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
-4. **Drop avatar + portrait + photos + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/photos/image-1.jpg`, etc.). `scripts/build.ts`'s `cp("public", "dist", { recursive: true })` step ships them to production.
+4. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.). `scripts/build.ts`'s `cp("public", "dist", { recursive: true })` step ships them to production.
 
 ## 8. CI/CD
 

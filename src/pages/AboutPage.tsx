@@ -27,9 +27,9 @@ function SocialItem({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
-        className="group flex text-sm font-medium text-zinc-800 transition hover:text-teal-500 dark:text-zinc-200 dark:hover:text-teal-400"
+        className="group flex text-sm font-medium text-zinc-800 transition hover:text-accent dark:text-zinc-200"
       >
-        <Icon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-teal-500" />
+        <Icon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-accent" />
         <span className="ml-4">{children}</span>
       </a>
     </li>
@@ -51,7 +51,7 @@ export function AboutPage() {
         </div>
         <div className="lg:order-first lg:row-span-2">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
-            I'm Jalo Moster. I build data systems in Cumming, Georgia.
+            I'm Jalo Moster. I build data systems.
           </h1>
           <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
             <p>

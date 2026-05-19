@@ -28,7 +28,7 @@ Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `
    - `favicon.ico` — small favicon, referenced from `index.html`. Use any reasonable 32x32 placeholder if Jalo hasn't supplied one.
    - `robots.txt` — resolve open question first: open (`User-agent: *` + `Allow: /`) for launch, or closed (`Disallow: /`) until launch. Default to **open** unless Jalo says otherwise.
    - `og-image.png` — 1200x630 OG card. Acceptable to defer; if deferred, omit the `<meta property="og:image">` tag in `index.html` until the asset exists.
-   - For v2, also ensure `public/images/avatar.jpg`, `public/images/portrait.jpg`, `public/images/photos/image-{1..5}.jpg`, `public/images/logos/<n>.svg`, and `public/cv.pdf` exist. `cp("public", "dist", { recursive: true })` ships them all unchanged.
+   - For v2, also ensure `public/images/avatar.jpg`, `public/images/portrait.jpg`, `public/images/logos/<n>.svg`, and `public/cv.pdf` exist. `cp("public", "dist", { recursive: true })` ships them all unchanged.
 4. **Confirm `.gitignore`** excludes `dist/` (it does as of Task 01).
 
 ## Outputs

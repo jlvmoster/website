@@ -1,7 +1,7 @@
 # Task 03 — Theming & global styles
 
 ## Goal
-Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark mode, `@plugin "@tailwindcss/typography";`, and the six existing CSS-variable tokens plus the two new `--panel` and `--ring` tokens.
+Rewrite `src/styles/globals.css` with the zinc + red palette, class-based dark mode, `@plugin "@tailwindcss/typography";`, and the six existing CSS-variable tokens plus the two new `--panel` and `--ring` tokens.
 
 ## Source spec
 - [`features/theming.md`](../specs/features/theming.md)
@@ -13,7 +13,7 @@ Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark 
 
 ## Steps
 
-1. **Confirm token values.** The defaults (zinc-50/950, zinc-900/200, zinc-600/400, teal-500/400, white/zinc-900 panel, zinc-100/zinc-300-20 ring) are resolved unless the user changes them. Only re-ask if Jalo specifies a different accent.
+1. **Confirm token values.** The defaults (zinc-50/950, zinc-900/200, zinc-600/400, Chick-fil-A red, white/zinc-900 panel, zinc-100/zinc-300-20 ring) are resolved unless the user changes them. Only re-ask if Jalo specifies a different accent.
 
 2. **Rewrite `src/styles/globals.css`:**
    ```css
@@ -25,7 +25,7 @@ Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark 
      --bg: #fafafa;
      --fg: #18181b;
      --muted: #52525b;
-     --accent: #14b8a6;
+     --accent: #e51636;
      --panel: #ffffff;
      --ring: rgb(244 244 245);
      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
@@ -37,7 +37,7 @@ Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark 
      --bg: #09090b;
      --fg: #e4e4e7;
      --muted: #a1a1aa;
-     --accent: #2dd4bf;
+     --accent: #ff4f5e;
      --panel: #18181b;
      --ring: rgb(212 212 216 / 0.2);
    }
@@ -77,4 +77,4 @@ Rewrite `src/styles/globals.css` with the zinc + teal palette, class-based dark 
 - Manual DevTools dark-mode emulation no longer flips colors (it's class-based now). The flip happens after Task 04 (anti-flicker script) and Task 06 (theme toggle).
 
 ## Open questions
-- Override teal-500/400 with a warmer accent? Default: keep teal.
+- Override the red accent? Default: keep Chick-fil-A red.

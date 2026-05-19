@@ -31,7 +31,6 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
   - `robots.txt` — `User-agent: *` + `Allow: /` (open by default; switch to `Disallow: /` only if you want to delay indexing).
   - `og-image.png` — 1200×630 OG card, referenced from `<meta property="og:image">`. Acceptable to omit in v1 and add post-scaffold.
   - `public/images/avatar.jpg`, `public/images/portrait.jpg` — Header and About page imagery.
-  - `public/images/photos/image-{1..5}.jpg` — Home page photos strip.
   - `public/images/logos/<n>.svg` — Resume and Projects logos.
   - `public/cv.pdf` — referenced by the "Download CV" button on Home.
 

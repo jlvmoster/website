@@ -34,7 +34,7 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 - Never reintroduce Pages-based hosting. Workers + Static Assets only.
 - Never add Next.js, Vite, MDX, or a third-party UI component library (shadcn, Radix, MUI). `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 - Worker types live in the gitignored `worker-configuration.d.ts`. Regenerate after `wrangler.toml` changes.
-- The avatar/portrait/photos/CV PDF live under `public/` and ride along via `scripts/build.ts`.
+- The avatar/portrait/logos/CV PDF live under `public/` and ride along via `scripts/build.ts`.
 - Pre-approved Bash: `bun *`, `bunx *`, `git *`. Other tools may prompt.
 
 ## Branch & PR convention
