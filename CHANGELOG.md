@@ -1,3 +1,13 @@
+# Updates — v2.2.0 (2026-05-19)
+
+Site reliability work — nothing visible on the page, but the deploy pipeline is now self-auditing and runs with the minimum permissions it needs.
+
+## Internal
+- Every production deploy now runs a Lighthouse audit against the live site and reports the scores back to the build, so regressions in performance, accessibility, or best practices surface automatically instead of waiting to be noticed by hand.
+- The deploy workflow runs with read-only token permissions by default, scoping write access only to the steps that need it.
+
+---
+
 # Updates — v2.1.0 (2026-05-19)
 
 A round of Lighthouse-driven polish: faster paints, accessible contrast, per-page browser metadata, and tighter security defaults.
