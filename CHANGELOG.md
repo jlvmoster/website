@@ -1,3 +1,15 @@
+# Updates — v2.1.0 (2026-05-19)
+
+A round of Lighthouse-driven polish: faster paints, accessible contrast, per-page browser metadata, and tighter security defaults.
+
+## Improvements
+- **Per-page browser metadata.** Each page now sets its own tab title and description, so browser tabs, bookmarks, and search results show the right page instead of a generic site title.
+- **Quicker first paint.** The avatar reserves its space up front so the layout doesn't shift while it loads, and the production build no longer ships development-only code.
+- **Readable text everywhere.** Work dates on the resume and the footer copyright now meet WCAG AA contrast in both light and dark themes.
+- **Tighter security defaults.** Every response ships with a baseline set of security headers that harden the site against common browser-side attacks.
+
+---
+
 # Updates — v2 Spotlight redesign (2026-05-18)
 
 The site has been redesigned around a multi-page structure inspired by the Tailwind Plus "Spotlight" template.
