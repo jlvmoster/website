@@ -39,6 +39,11 @@ export function ArticlesPage() {
       title="Notes on data systems, tooling, and the occasional latte."
       intro="A growing collection of write-ups on the work I do at Chick-fil-A, the tools I rely on, and the side projects that catch my attention."
     >
+      <title>Articles — Jalo Moster</title>
+      <meta
+        name="description"
+        content="Notes on data systems, tooling, and the occasional latte — write-ups on the work I do at Chick-fil-A and the side projects that catch my attention."
+      />
       <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
         <div className="flex max-w-3xl flex-col space-y-16">
           {articles.length === 0 ? (

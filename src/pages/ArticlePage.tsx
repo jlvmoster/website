@@ -10,6 +10,8 @@ export function ArticlePage() {
   if (!article) {
     return (
       <Container className="mt-16 sm:mt-32">
+        <title>Article not found — Jalo Moster</title>
+        <meta name="description" content="That article does not exist (yet)." />
         <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
           Article not found.
         </h1>
@@ -30,6 +32,8 @@ export function ArticlePage() {
   const Body = article.Component;
   return (
     <ArticleLayout article={article}>
+      <title>{`${article.title} — Jalo Moster`}</title>
+      <meta name="description" content={article.description} />
       <Body />
     </ArticleLayout>
   );

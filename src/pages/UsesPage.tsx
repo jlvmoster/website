@@ -26,6 +26,11 @@ export function UsesPage() {
       title="The hardware, software, and small luxuries I use to do my job."
       intro="A running inventory of the tools I actually reach for day to day. I'll keep this current as things change."
     >
+      <title>Uses — Jalo Moster</title>
+      <meta
+        name="description"
+        content="The hardware, software, and small luxuries I use to do my job — a running inventory of the tools I actually reach for day to day."
+      />
       <div className="space-y-20">
         {uses.map((section) => (
           <Section key={section.category} title={section.category}>

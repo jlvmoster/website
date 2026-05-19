@@ -368,6 +368,31 @@ export function clsx(...parts: Array<string | false | null | undefined>) {
 
 Single icon catalog at `src/components/icons.tsx` — no `@heroicons/react`, no `lucide-react`. Each icon is a named export taking `React.ComponentPropsWithoutRef<"svg">`. The catalog: `GitHubIcon`, `InstagramIcon`, `LinkedInIcon`, `XIcon`, `MailIcon`, `BriefcaseIcon`, `ArrowDownIcon`, `ArrowLeftIcon`, `SunIcon`, `MoonIcon`, `ChevronRightIcon`, `ChevronDownIcon`, `CloseIcon`, `LinkIcon`. SVG paths are copied verbatim from Spotlight `src/components/SocialIcons.tsx` and the inline `Icon` components in Spotlight's Header / Card / ArticleLayout / Projects pages.
 
+### 4.12 Per-route document metadata
+
+Per-route `<title>` and `<meta name="description">` are rendered directly inside the page components using React 19's native document-metadata support — *not* `react-helmet` / `react-helmet-async`. React 19 hoists `<title>`, `<meta>`, and `<link>` tags rendered in the tree into `<head>`. `<title>` is deduplicated by React 19 (only one is ever in `<head>`), so the static fallback in `src/index.html` is safely replaced on mount. `<meta>` tags are *appended* rather than deduplicated against pre-existing HTML — to avoid shipping two `<meta name="description">` per page, the static one was removed from `src/index.html`; the per-route React-rendered description is the only one.
+
+Why no Helmet: most security headers in `src/worker.ts` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options) cannot be set via `<meta>` at all — they're HTTP response headers. The CSP that *can* live in `<meta>` would not cover the inline anti-flicker `<script>` in `src/index.html` (which runs before any `<meta>` parses). Helmet only addresses per-route document tags, and React 19 already covers that natively.
+
+```tsx
+// src/pages/AboutPage.tsx (shape)
+export function AboutPage() {
+  return (
+    <Container className="mt-16 sm:mt-32">
+      <title>About — Jalo Moster</title>
+      <meta name="description" content="…" />
+      {/* page body */}
+    </Container>
+  );
+}
+```
+
+The fallback `<title>Jalo Moster</title>` in `src/index.html` remains as a pre-hydration value (visible during the loading flash). React 19 replaces it on mount. No fallback `<meta name="description">` is shipped in `src/index.html` — React 19 always renders the per-route one, and shipping a static one alongside would yield two description tags per page (React 19 does not dedupe `<meta>` against pre-existing HTML).
+
+Article detail (`/articles/:slug`) derives title and description from `article.title` / `article.description` (per §FR-1.2.8). Title pattern is `"<Page> — Jalo Moster"`; Home uses a longer one-line title.
+
+Detailed spec: `docs/specs/features/document-metadata.md`.
+
 ## 5. Project structure
 
 ```

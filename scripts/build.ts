@@ -9,6 +9,9 @@ const result = await Bun.build({
   publicPath: "/",
   minify: true,
   sourcemap: "linked",
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
   plugins: [tailwindPlugin],
 });
 

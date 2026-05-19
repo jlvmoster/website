@@ -39,6 +39,11 @@ function SocialItem({
 export function AboutPage() {
   return (
     <Container className="mt-16 sm:mt-32">
+      <title>About — Jalo Moster</title>
+      <meta
+        name="description"
+        content="Sr. Lead Software Engineer at Chick-fil-A. Seven years building data-intensive systems in Spark, Databricks, and Delta Lake."
+      />
       <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-y-12">
         <div className="lg:pl-20">
           <div className="max-w-xs px-2.5 lg:max-w-none">

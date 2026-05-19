@@ -37,6 +37,9 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - Client-side `<Link>` navigation doesn't trigger a full page load — verify by setting `window.__navMarker = "kept"` in the page, clicking a Link, and asserting the marker survives.
   - `/some-unknown-path` returns 200 and renders NotFoundPage.
 
+## Related
+- Per-route document metadata (titles + descriptions): `docs/specs/features/document-metadata.md` (covers §FR-1.2.9).
+
 ## Open questions
 - Wildcard 404: minimal NotFoundPage (default) vs. redirect to `/`.
 - Use BrowserRouter (default, History API) vs. HashRouter (no Workers SPA fallback needed). Default: BrowserRouter — Workers already handles SPA fallback.

@@ -41,6 +41,11 @@ export const Avatar = forwardRef<HTMLAnchorElement, AvatarProps>(
       >
         <img
           src="/images/avatar.jpg"
+          width={64}
+          height={64}
+          decoding="async"
+          loading="eager"
+          fetchPriority="high"
           alt=""
           className={clsx(
             "rounded-full bg-zinc-100 object-cover dark:bg-zinc-800",

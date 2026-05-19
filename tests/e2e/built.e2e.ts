@@ -83,3 +83,18 @@ test("built artifact returns the SPA shell for unknown paths", async ({
   expect(response?.status()).toBe(200);
   await expect(page.locator("#root")).toBeAttached();
 });
+
+test("built artifact sets per-route document titles", async ({ page }) => {
+  const routes: Array<{ path: string; title: RegExp }> = [
+    { path: "/", title: /^Jalo Moster — Software Engineer at Chick-fil-A$/ },
+    { path: "/about", title: /^About — Jalo Moster$/ },
+    { path: "/articles", title: /^Articles — Jalo Moster$/ },
+    { path: "/projects", title: /^Projects — Jalo Moster$/ },
+    { path: "/uses", title: /^Uses — Jalo Moster$/ },
+  ];
+
+  for (const route of routes) {
+    await page.goto(route.path);
+    await expect(page).toHaveTitle(route.title);
+  }
+});

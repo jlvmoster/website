@@ -211,3 +211,76 @@ test("dev server serves the SPA shell for unknown paths", async ({ page }) => {
   expect(response?.status()).toBe(200);
   await expect(page.locator("#root")).toBeAttached();
 });
+
+test("each route sets its own document title and description", async ({
+  page,
+}) => {
+  const routes: Array<{
+    path: string;
+    title: RegExp;
+    description: RegExp;
+  }> = [
+    {
+      path: "/",
+      title: /^Jalo Moster — Software Engineer at Chick-fil-A$/,
+      description: /Personal site of Jalo Moster/,
+    },
+    {
+      path: "/about",
+      title: /^About — Jalo Moster$/,
+      description: /Sr\. Lead Software Engineer at Chick-fil-A/,
+    },
+    {
+      path: "/articles",
+      title: /^Articles — Jalo Moster$/,
+      description: /Notes on data systems/,
+    },
+    {
+      path: "/articles/hello-world",
+      title: / — Jalo Moster$/,
+      description: /.+/,
+    },
+    {
+      path: "/projects",
+      title: /^Projects — Jalo Moster$/,
+      description: /Things I've built/,
+    },
+    {
+      path: "/uses",
+      title: /^Uses — Jalo Moster$/,
+      description: /hardware, software, and small luxuries/,
+    },
+    {
+      path: "/some-unknown-path",
+      title: /^Not found — Jalo Moster$/,
+      description: /doesn't exist/,
+    },
+  ];
+
+  for (const route of routes) {
+    await page.goto(route.path);
+    await expect(page).toHaveTitle(route.title);
+    const description = await page
+      .locator("head > meta[name='description']")
+      .getAttribute("content");
+    expect(description ?? "").toMatch(route.description);
+  }
+});
+
+test("client-side navigation swaps document.title without a full reload", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    (window as unknown as { __navMarker: string }).__navMarker = "kept";
+  });
+
+  await page.locator("footer a[href='/about']").click();
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page).toHaveTitle(/^About — Jalo Moster$/);
+
+  const marker = await page.evaluate(
+    () => (window as unknown as { __navMarker?: string }).__navMarker,
+  );
+  expect(marker).toBe("kept");
+});
