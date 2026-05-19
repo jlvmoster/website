@@ -26,7 +26,7 @@ export function Footer() {
                   </Link>
                 ))}
               </div>
-              <p className="text-sm text-zinc-400 dark:text-zinc-500">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 © {new Date().getFullYear()} Jalo Moster. All rights reserved.
               </p>
             </div>
