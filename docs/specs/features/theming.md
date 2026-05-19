@@ -1,10 +1,10 @@
 # Theming — Implementation Spec
 
 ## Goal
-Zinc + red palette via CSS variables, class-based dark mode, three-state theme toggle, system-stack typography, Tailwind v4 typography plugin for Prose.
+Zinc + red palette via CSS variables, class-based dark mode, Spotlight-style theme toggle, system-stack typography, Tailwind v4 typography plugin for Prose.
 
 ## Requirements covered
-- §FR-1.3.1 — Theme toggle (light/dark/system), `localStorage` persistence, anti-flicker.
+- §FR-1.3.1 — Theme toggle, `localStorage` persistence, anti-flicker.
 - §FR-1.3.2 — Six CSS variable tokens (`--bg`, `--fg`, `--muted`, `--accent`, `--font-sans`, `--font-serif`).
 - §FR-1.3.3 — System-stack fonts only.
 - §FR-1.3.4 — Prose max-width 65ch.

@@ -167,7 +167,7 @@ test("theme toggle applies dark mode immediately", async ({ page }) => {
   expect(toggled.stored).toBe("dark");
 });
 
-test("theme toggle cycles through system when system is dark", async ({
+test("theme toggle switches back to light when system is dark", async ({
   browser,
 }) => {
   const context = await browser.newContext({ colorScheme: "dark" });
@@ -188,19 +188,6 @@ test("theme toggle cycles through system when system is dark", async ({
         document.documentElement.classList.contains("dark"),
       ),
     ).toBe(true);
-
-    const system = await page
-      .getByRole("button", { name: "Switch to system theme" })
-      .evaluate((button) => {
-        (button as HTMLButtonElement).click();
-        return {
-          dark: document.documentElement.classList.contains("dark"),
-          stored: localStorage.getItem("theme"),
-        };
-      });
-
-    expect(system.dark).toBe(true);
-    expect(system.stored).toBe("system");
 
     const light = await page
       .getByRole("button", { name: "Switch to light theme" })

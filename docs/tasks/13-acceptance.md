@@ -23,7 +23,7 @@ Run each command from a clean state. Tick each box only after the corresponding 
 - [ ] All six routes load: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
 - [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Workers SPA fallback.
 - [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
-- [ ] Theme toggle cycles light → dark → system; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
+- [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
 - [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 64px and scales to 36px on scroll.
 - [ ] Articles list renders ≥ 1 article card; clicking it loads `/articles/<slug>`.
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.

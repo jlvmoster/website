@@ -2,7 +2,7 @@
 
 Jalo Moster's personal website — a multi-page React SPA deployed to Cloudflare Workers with Static Assets.
 
-**Status:** v2 redesign complete. Multi-page Spotlight architecture (Home / About / Articles / Projects / Uses), fixed header with scaling avatar, three-state theme toggle (light/dark/system), zinc + red palette, typed TS article content model, and Playwright E2E for dev, built, and production targets.
+**Status:** v2 redesign complete. Multi-page Spotlight architecture (Home / About / Articles / Projects / Uses), fixed header with scaling avatar, Spotlight-style dark mode toggle, zinc + red palette, typed TS article content model, and Playwright E2E for dev, built, and production targets.
 
 ## Stack
 
@@ -91,7 +91,7 @@ worker-configuration.d.ts # generated, gitignored
 
 ## Theming
 
-Light, dark, and system themes are selectable via a Header toggle and persisted in `localStorage["theme"]`. An inline anti-flicker script in `src/index.html` runs synchronously before React mounts, so the right theme class lands on `<html>` before first paint — no FOUC.
+The Header toggle switches between the resolved light and dark themes and persists the choice in `localStorage["theme"]`. First load defaults to `system`, so the OS preference is honored until the user chooses light or dark. An inline anti-flicker script in `src/index.html` runs synchronously before React mounts, so the right theme class lands on `<html>` before first paint — no FOUC.
 
 Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. Values map to a zinc base with a Chick-fil-A red accent (`#e51636` / `#ff4f5e`). The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.) so the toggle is a single `html.dark` class swap. Typography uses system font stacks only.
 

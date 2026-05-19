@@ -17,7 +17,7 @@ Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popo
 1. **Drop `public/images/avatar.jpg`** (user provides). Until then, a placeholder is fine.
 2. **Create `src/lib/useTheme.ts`** (canonical hook from `architecture.md` §4.8).
 3. **Create `src/components/Avatar.tsx`** — Avatar + AvatarContainer (forwardRef so the Header can read positions).
-4. **Create `src/components/ThemeToggle.tsx`** — single button cycling light → dark → system → light. Use SunIcon/MoonIcon. `aria-label` reflects next state.
+4. **Create `src/components/ThemeToggle.tsx`** — single button switching between the resolved light and dark themes. Use SunIcon/MoonIcon. `aria-label` reflects next state.
 5. **Create `src/components/MobileNavigation.tsx`** — handwritten popover (no `@headlessui/react`). Backdrop, panel, Esc key handler, click-to-close.
 6. **Create `src/components/Header.tsx`**:
    - Reads `useLocation()`; on `/`, attaches a passive scroll listener that writes CSS custom properties on `document.documentElement`. Cleanup on path change.

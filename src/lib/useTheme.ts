@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type ThemeChoice = "light" | "dark" | "system";
+export type ResolvedTheme = "light" | "dark";
 
 function readChoice(): ThemeChoice {
   try {
@@ -11,8 +12,24 @@ function readChoice(): ThemeChoice {
   }
 }
 
+function systemPrefersDark() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+}
+
+function resolveChoice(
+  choice: ThemeChoice,
+  prefersDark: boolean,
+): ResolvedTheme {
+  return choice === "dark" || (choice === "system" && prefersDark)
+    ? "dark"
+    : "light";
+}
+
 function applyChoice(choice: ThemeChoice) {
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = systemPrefersDark();
   const isDark = choice === "dark" || (choice === "system" && prefersDark);
   document.documentElement.classList.toggle("dark", isDark);
 }
@@ -25,7 +42,11 @@ function persistChoice(choice: ThemeChoice) {
 
 export function useTheme() {
   const [choice, setChoice] = useState<ThemeChoice>(readChoice);
-  const [, forceRender] = useState(0);
+  const [prefersDark, setPrefersDark] = useState(systemPrefersDark);
+  const resolvedTheme = useMemo(
+    () => resolveChoice(choice, prefersDark),
+    [choice, prefersDark],
+  );
 
   useEffect(() => {
     persistChoice(choice);
@@ -41,14 +62,20 @@ export function useTheme() {
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
+      const systemTheme = mq.matches ? "dark" : "light";
+      setPrefersDark(mq.matches);
       if (choice === "system") {
         applyChoice("system");
-        forceRender((n) => n + 1);
+      } else if (resolvedTheme === systemTheme) {
+        persistChoice("system");
+        applyChoice("system");
+        setChoice("system");
       }
     };
+    setPrefersDark(mq.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
-  }, [choice]);
+  }, [choice, resolvedTheme]);
 
-  return [choice, chooseTheme] as const;
+  return { choice, resolvedTheme, setTheme: chooseTheme } as const;
 }

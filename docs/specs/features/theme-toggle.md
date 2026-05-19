@@ -1,7 +1,7 @@
 # Theme Toggle — Implementation Spec
 
 ## Goal
-Three-state toggle (light / dark / system), persisted, that respects OS preference in system mode.
+Spotlight-style two-state toggle that switches between the resolved light and dark themes, persists the explicit choice, and respects OS preference by default.
 
 ## Requirements covered
 - §FR-1.3.1 — Toggle with `localStorage` persistence and anti-flicker.
@@ -14,7 +14,7 @@ Three-state toggle (light / dark / system), persisted, that respects OS preferen
 
 ## Behavior & edge cases
 - Default on first load (no `localStorage["theme"]`): `system`. The OS dark preference resolves on mount.
-- Toggle order: `light → dark → system → light`. `aria-label` reflects the **next** state ("Switch to dark", "Switch to system", "Switch to light").
+- Toggle behavior: click switches to the opposite resolved theme (`light ↔ dark`). `aria-label` reflects that next explicit state ("Switch to dark theme" or "Switch to light theme").
 - `localStorage["theme"]` stores the choice. Absence ⇒ `system`.
 - Anti-flicker `<script>` (in `src/index.html` `<head>`, before the React script):
 
@@ -33,13 +33,13 @@ Three-state toggle (light / dark / system), persisted, that respects OS preferen
 
 - The hook subscribes to `(prefers-color-scheme: dark)` `change` events so when the user is in `system` mode the page tracks OS changes.
 - `globals.css` declares `@custom-variant dark (&:where(.dark, .dark *));` — Tailwind's `dark:` utilities key off `html.dark`.
-- Button icon: SunIcon when resolved theme is light, MoonIcon when dark.
+- Button icon: both SunIcon and MoonIcon are always rendered, matching the Spotlight template; `dark:` CSS visibility controls which icon appears.
 
 ## Test plan
 - **E2E**:
   - With empty `localStorage` and browser `colorScheme: "dark"`, `html.dark` is set before any user interaction.
   - With baseline-light: click toggle → `html.dark` is set → reload → `html.dark` persists.
-  - Click two more times: `localStorage.theme === "system"`.
+  - With baseline-dark: click toggle → `html.dark` is removed and `localStorage.theme === "light"`.
 
 ## Open questions
-- Three icons (sun / moon / monitor) vs. two icons (sun in light, moon in dark) with `aria-label` disclosing system state. Default: two icons + aria-label.
+- Whether to add a separate "follow system" control later. Default: Spotlight-style two-state button.

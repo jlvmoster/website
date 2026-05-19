@@ -39,7 +39,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.2.8 Articles content model** — Articles are typed TS modules under `src/content/articles/<slug>.tsx`. Each module exports `meta: ArticleMeta` (`{ title, description, date, author? }`) and a default React component. A loader (`getAllArticles()`) in `src/content/articles/index.ts` returns the union sorted by `meta.date` descending. No MDX, no markdown parsing, no `fast-glob` runtime.
 
 ### 1.3 Styling and theming
-- **FR-1.3.1** Light and dark color schemes are user-controllable via a Header theme toggle with three settings: light, dark, and system. System mode honors `prefers-color-scheme`. Preference is persisted in `localStorage` under key `theme`. Default on first load (no stored value) is `system`. An inline anti-flicker script in `src/index.html` reads `localStorage` and the media query synchronously before React mounts to avoid an FOUC.
+- **FR-1.3.1** Light and dark color schemes are user-controllable via a Header theme toggle that switches between the resolved light and dark themes. System mode honors `prefers-color-scheme` by default on first load (no stored value). Preference is persisted in `localStorage` under key `theme`. An inline anti-flicker script in `src/index.html` reads `localStorage` and the media query synchronously before React mounts to avoid an FOUC.
 - **FR-1.3.2** Design tokens are exposed as CSS variables: `--bg`, `--fg`, `--muted`, `--accent`, `--font-sans`, `--font-serif`.
   - Token values map to a zinc base with Chick-fil-A red accents: `--bg` = zinc-50 / zinc-950, `--fg` = zinc-900 / zinc-200, `--muted` = zinc-600 / zinc-400, `--accent` = `#e51636` / `#ff4f5e`. Two additional tokens model the Spotlight panel chrome — see §FR-1.3.6.
 - **FR-1.3.3** Typography uses system stacks only — no hosted fonts.
@@ -134,7 +134,7 @@ Auth, database, comments, search, i18n, custom font hosting, MDX runtime, image 
 | Hero copy | "Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio." |
 | Typography | System stack only |
 | Hosting | Cloudflare Workers + Static Assets |
-| Theme toggle | light / dark / system; persisted in `localStorage["theme"]`; default `system` |
+| Theme toggle | Spotlight-style light/dark switch; persisted in `localStorage["theme"]`; default `system` |
 | CI / CD | GitHub Actions for both CI and CD; deploy via `cloudflare/wrangler-action@v3` |
 | Avatar image | `public/images/avatar.jpg` |
 | Portrait image | `public/images/portrait.jpg` |
@@ -153,7 +153,7 @@ The v2 release is complete when *all* of the following hold:
 - [ ] All six routes load: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
 - [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Workers SPA fallback.
 - [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
-- [ ] Theme toggle cycles light → dark → system; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
+- [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
 - [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 64px and scales to 36px on scroll.
 - [ ] Articles list renders ≥ 1 article card; clicking it loads `/articles/<slug>`.
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.

@@ -6,7 +6,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 ## Requirements covered
 - §NFR-2.4.1 — At least one smoke test exists under `tests/`.
 - §NFR-2.4.2 — Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
-- §NFR-2.4.3 — E2E minimum coverage: every route loads, hard-refresh deep links work, hero copy renders verbatim on `/`, social links resolve on `/` and `/about`, theme toggle cycles and persists, portrait image renders on `/about`, footer renders on every route, and SPA fallback handles unknown paths.
+- §NFR-2.4.3 — E2E minimum coverage: every route loads, hard-refresh deep links work, hero copy renders verbatim on `/`, social links resolve on `/` and `/about`, theme toggle switches and persists, portrait image renders on `/about`, footer renders on every route, and SPA fallback handles unknown paths.
 - §NFR-2.4.4 — Fresh machines and CI workers install Playwright's Chromium before E2E.
 - §FR-1.7.1 — `bunx playwright test` is part of the GitHub Actions CI gate (see [`features/ci-cd.md`](./ci-cd.md)).
 
@@ -33,7 +33,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
     - **Page loads** — `await page.goto("/")` returns 200 and the document has `<div id="root">`.
     - **Hero copy** — the hero substring `"It's my pleasure to invite you into my portfolio."` is visible.
     - **Social links** — three anchors with `href` matching `github.com/jlvmoster`, `instagram.com/jlvmoster`, `linkedin.com/in/jlvmoster`.
-    - **Theme toggle** — cycles light/dark/system and persists the selected value across reload via `localStorage["theme"]`.
+    - **Theme toggle** — switches light/dark and persists the selected value across reload via `localStorage["theme"]`.
   - Out of scope per the requirements: full-DOM snapshots, visual regression, multi-browser matrix.
   - Additional v2 assertions:
     - Navigate to each route (`/about`, `/articles`, `/projects`, `/uses`) via Header NavLinks; verify no full reload (scroll-position trick) and URL updates.
