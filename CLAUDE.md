@@ -112,6 +112,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - **Hero copy is canonical and must be preserved verbatim:** *"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."* Lives in `src/pages/HomePage.tsx`. Do not paraphrase "my pleasure" away — it's a deliberate Chick-fil-A tie-in.
 - Images live under `public/images/` and ride along via `scripts/build.ts`'s `cp public dist`. Referenced as string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, `/cv.pdf`). React does not import them.
 - When building or restyling UI, invoke the `frontend-design` skill before generating code. It produces distinctive, non-generic components that fit the minimal aesthetic.
+- **Per-route document metadata uses React 19's native support, not `react-helmet`.** Each page in `src/pages/` renders its own `<title>` and `<meta name="description">` directly in the returned tree. React 19 deduplicates `<title>` (so the static `<title>` in `src/index.html` is the pre-hydration fallback, replaced on mount) but **does not** dedupe `<meta>` — that's why `src/index.html` ships no static `<meta name="description">`. Article detail derives its tags from `article.title` / `article.description`. Spec: `docs/specs/features/document-metadata.md`. Adding a new route = add a `<title>` + `<meta name="description">` at the top of the returned tree.
 
 ## Testing
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`. The smoke spec wraps `<App />` in `<MemoryRouter initialEntries={["/"]}>` (since `BrowserRouter` is mounted in `src/main.tsx`, outside `App`) and asserts the verbatim hero substring + three social URLs.
@@ -145,6 +146,7 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - Use the `--accent` token (and the `text-accent` / `fill-accent` / `from-accent/0` utilities) for the brand color. Don't hand-write palette-specific accent pairs.
 - Worker types (`Env`, `ExportedHandler`, `Fetcher`) come from generated `worker-configuration.d.ts` — run `bunx wrangler types` after changes to `wrangler.toml`. The file is gitignored.
 - Articles are typed TSX modules under `src/content/articles/<slug>.tsx`. No MDX, no markdown parsing, no runtime globbing. Adding an article = drop the TSX + register in `src/content/articles/index.ts`'s `modules` record.
+- Never add `react-helmet` or `react-helmet-async`. Per-route `<title>` / `<meta>` go directly in the page component via React 19 native head support (see Frontend conventions).
 
 ## Git conventions
 - Branch naming: `<github-username>/<feature-slug>` (e.g., `jlvmoster/website-spec`).

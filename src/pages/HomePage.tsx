@@ -9,6 +9,11 @@ export function HomePage() {
   const articles = getAllArticles().slice(0, 4);
   return (
     <>
+      <title>Jalo Moster — Software Engineer at Chick-fil-A</title>
+      <meta
+        name="description"
+        content="Personal site of Jalo Moster — Software Engineer at Chick-fil-A. Notes on data systems, projects, and the tools I use day to day."
+      />
       <Container className="mt-9">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">

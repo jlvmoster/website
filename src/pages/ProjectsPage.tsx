@@ -9,6 +9,11 @@ export function ProjectsPage() {
       title="Things I've built — and a few that are still in flight."
       intro="A short list of side projects, write-ups, and infrastructure I've worked on outside of my day job. Expect this list to grow as I ship more."
     >
+      <title>Projects — Jalo Moster</title>
+      <meta
+        name="description"
+        content="Things I've built — and a few that are still in flight. Side projects, write-ups, and infrastructure I've worked on outside of my day job."
+      />
       <ul className="grid grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <Card as="li" key={project.name}>
