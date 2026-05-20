@@ -110,7 +110,7 @@ Production deploys run automatically on push to `master`:
 
 1. `check` job: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`.
 2. `deploy` job (depends on `check`): builds and ships `dist/` via `cloudflare/wrangler-action@v3`.
-3. `lighthouse` job (depends on `deploy`, also runs on a nightly `schedule` cron): asserts Core Web Vitals budgets against `https://moster.dev` via `treosh/lighthouse-ci-action@v12` using thresholds in `lighthouserc.json`. Not a PR merge gate; failures alert rather than block.
+3. `lighthouse` job (depends on `deploy`, also runs on a nightly `schedule` cron): asserts Core Web Vitals budgets against `https://moster.dev` via `treosh/lighthouse-ci-action@v12` using thresholds in `lighthouserc.json`, then uploads results to the self-hosted LHCI Server at `https://lhci.moster.dev`. Not a PR merge gate; failures alert rather than block.
 
 Cloudflare credentials live as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed. `bun run deploy` from a developer machine is supported as a break-glass path but is not the source of truth.
 

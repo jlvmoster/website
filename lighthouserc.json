@@ -32,7 +32,8 @@
       }
     },
     "upload": {
-      "target": "temporary-public-storage"
+      "target": "lhci",
+      "serverBaseUrl": "https://lhci.moster.dev"
     }
   }
 }

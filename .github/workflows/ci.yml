@@ -73,4 +73,7 @@ jobs:
         with:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
-          temporaryPublicStorage: true
+          serverBaseUrl: https://lhci.moster.dev
+          serverToken: ${{ secrets.LHCI_BUILD_TOKEN }}
+          basicAuthUsername: ${{ secrets.LHCI_BASIC_AUTH_USERNAME }}
+          basicAuthPassword: ${{ secrets.LHCI_BASIC_AUTH_PASSWORD }}

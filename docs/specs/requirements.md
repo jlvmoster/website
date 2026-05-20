@@ -90,7 +90,8 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.8.2** Lighthouse thresholds live in a committed `lighthouserc.json` at the repo root and are asserted via `@lhci/cli` invoked through `treosh/lighthouse-ci-action`.
 - **FR-1.8.3** The Lighthouse job runs after the `deploy` job on push to `master`, and also on a daily `schedule` trigger so regressions surface even when no code changes have shipped. It is not a PR merge gate.
 - **FR-1.8.4** Each Lighthouse run executes ≥ 3 audits per URL and asserts against the median, to absorb runner variance.
-- **FR-1.8.5** Each run uploads its HTML report to Google's temporary public storage (link in workflow logs) and as a GitHub Actions artifact; no self-hosted LHCI Server is introduced for v1.
+- **FR-1.8.5** Each run uploads its results to the self-hosted LHCI Server at `https://lhci.moster.dev` for historical reporting and also saves the raw reports as GitHub Actions artifacts.
+- **FR-1.8.6** LHCI Server upload credentials are stored only as GitHub Actions secrets (`LHCI_BUILD_TOKEN`, `LHCI_BASIC_AUTH_USERNAME`, `LHCI_BASIC_AUTH_PASSWORD`) and are never committed to the repository.
 
 ## 2. Non-functional requirements
 
