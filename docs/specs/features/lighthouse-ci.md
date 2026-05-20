@@ -8,7 +8,8 @@ Post-deploy performance monitoring against `https://moster.dev` that asserts Cor
 - §FR-1.8.2 — Budgets live in committed `lighthouserc.json`; assertions run via `@lhci/cli` invoked through `treosh/lighthouse-ci-action`.
 - §FR-1.8.3 — Triggered on push to `master` (after `deploy`) and on a daily `schedule:` cron. Not a PR merge gate.
 - §FR-1.8.4 — `numberOfRuns: 3` with `aggregationMethod: "median"` on every assertion.
-- §FR-1.8.5 — Reports uploaded to Google's temporary public storage and saved as a GitHub Actions artifact.
+- §FR-1.8.5 — Reports uploaded to the self-hosted LHCI Server at `https://lhci.moster.dev` and saved as GitHub Actions artifacts.
+- §FR-1.8.6 — LHCI Server upload credentials live only in GitHub Actions secrets.
 - §NFR-2.5.1 — LCP median ≤ 2500 ms (`error`).
 - §NFR-2.5.2 — CLS median ≤ 0.1 (`error`).
 - §NFR-2.5.3 — TBT median ≤ 200 ms (`warn`).
@@ -33,17 +34,17 @@ Post-deploy performance monitoring against `https://moster.dev` that asserts Cor
   - `warn` on TBT — TBT is a lab-only proxy for the production INP signal; a failed budget is informational.
 - **Assertion scope:** `lighthouserc.json` intentionally omits LHCI assertion presets such as `lighthouse:no-pwa`; only the explicit Core Web Vitals and performance-score budgets above are enforced. Broader accessibility, SEO, best-practices, or image-optimization audits should be added as separate requirements when they become intentional gates.
 - **Deploy → measurement gap:** the `lighthouse` job sleeps 30 s on the `push` path (`if: github.event_name == 'push'`) so Cloudflare's global propagation completes before the audit. The schedule path skips the sleep because production is already live.
-- **Report surfacing:** `temporaryPublicStorage: true` posts a shareable link in the workflow log (Google-hosted, no auth, no history). `uploadArtifacts: true` also stashes the raw HTML report as a workflow artifact. No LHCI Server is provisioned for v1 (§FR-1.8.5).
+- **Report surfacing:** `serverBaseUrl: https://lhci.moster.dev` uploads each run to the self-hosted LHCI Server for historical comparison, using `LHCI_BUILD_TOKEN` plus optional basic-auth credentials from GitHub Actions secrets (§FR-1.8.5, §FR-1.8.6). `uploadArtifacts: true` also stashes the raw HTML reports as workflow artifacts.
 - **Failure semantics:** a Lighthouse assertion failure marks the workflow run red and emails the repo owner via GitHub's default notifications. The site stays on the just-deployed revision; rolling back is a manual decision based on the report link.
 - **Cost:** one ubuntu-latest runner × ~5 min × (push-frequency + nightly) stays well under the free-tier 2,000 min/month even with daily runs.
 
 ## Test plan
-- **First-run smoke:** merge this feature to `master`, watch CI; confirm `lighthouse` job runs after `deploy`, posts a `temporary-public-storage` URL in the log, and uploads an artifact.
+- **First-run smoke:** merge this feature to `master`, watch CI; confirm `lighthouse` job runs after `deploy`, uploads the run to `https://lhci.moster.dev`, and uploads an artifact.
 - **Scheduled-run smoke:** on the next nightly cron firing, confirm a workflow run appears with only `lighthouse` executed (no `check`, no `deploy`).
 - **Failing-budget rehearsal:** temporarily lower `largest-contentful-paint.maxNumericValue` to `100` in `lighthouserc.json` on a throwaway branch, push to `master`, confirm the `lighthouse` job fails red and the linked report shows the assertion. Revert.
 - **PR isolation:** open a PR; confirm `lighthouse` does not run and is not listed as a required check in branch protection.
 
 ## Open questions
 - Add a separate **mobile** preset matrix entry? Deferred — desktop-first audience, and a second preset doubles audit time.
-- Move to a self-hosted LHCI Server (`serverBaseUrl` + `serverToken`) for historical diffing? Deferred per §FR-1.8.5 — not worth the Postgres + Heroku/Docker footprint for a personal site.
+- Add LHCI GitHub status checks or PR comments from the self-hosted server? Deferred — the job remains post-deploy and non-PR-gating per §FR-1.8.3.
 - Add a `budget.json` for byte-size budgets (JS/CSS/images)? Deferred until a regression actually demands it; the assertion budgets above already catch LCP regressions caused by oversized assets.

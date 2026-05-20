@@ -531,7 +531,10 @@ jobs:
         with:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
-          temporaryPublicStorage: true
+          serverBaseUrl: https://lhci.moster.dev
+          serverToken: ${{ secrets.LHCI_BUILD_TOKEN }}
+          basicAuthUsername: ${{ secrets.LHCI_BASIC_AUTH_USERNAME }}
+          basicAuthPassword: ${{ secrets.LHCI_BASIC_AUTH_PASSWORD }}
 ```
 
 The workflow scopes `GITHUB_TOKEN` to `contents: read`, which is enough for checkout while leaving deploy authentication to Cloudflare secrets. The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
@@ -569,8 +572,8 @@ Requirements §1.8 adds a third job, `lighthouse`, to the same `ci.yml`. It runs
 
 - **Post-deploy, not PR-gating.** Lighthouse runs on a shared GitHub runner are noisy; per-PR enforcement would block merges on jitter rather than real regressions. Running against the *deployed* site, against absolute Core Web Vitals cutoffs, with N=3 runs and `aggregationMethod: "median"`, gives a trustworthy signal at the cost of detecting regressions slightly after they ship. Recovery is a roll-back, not a merge block.
 - **One workflow, three jobs.** `check` and `deploy` are unchanged; `lighthouse` chains off `deploy` via `needs:`. The `if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')` guard makes the job fire on both `push` (after a successful deploy) and `schedule` (where `deploy` is skipped). The `check` job adds `if: github.event_name != 'schedule'` so the cron run does not re-run the full test suite.
-- **`treosh/lighthouse-ci-action` over rolling our own.** The official `GoogleChrome/lighthouse-ci` repo points readers at this community action; it's a thin wrapper around `@lhci/cli` with GH-native artifact and public-storage upload paths.
-- **No LHCI Server.** Historical diffs and a status-check integration require self-hosting Postgres + a server. For a personal site, the `temporary-public-storage` link in the workflow log plus the uploaded HTML artifact are enough; this stays consistent with §NFR-2.2.2 (no paid third-party services for v1).
+- **`treosh/lighthouse-ci-action` over rolling our own.** The official `GoogleChrome/lighthouse-ci` repo points readers at this community action; it's a thin wrapper around `@lhci/cli` with GH-native artifact and LHCI Server upload paths.
+- **Self-hosted LHCI Server.** Uploading to `https://lhci.moster.dev` gives historical trend data for the live site while keeping raw HTML reports attached to each workflow run. The build token and basic-auth credentials stay in GitHub Actions secrets (§FR-1.8.6), so no LHCI credentials are committed.
 
 **Cost.** One ubuntu-latest runner × ~5 min × (push frequency + nightly) is well under the GitHub Actions free tier ceiling per §NFR-2.2.3.
 
