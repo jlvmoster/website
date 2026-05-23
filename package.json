@@ -21,13 +21,13 @@
     "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5",
     "@types/bun": "latest",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "bun-plugin-tailwind": "^0.1.2",
     "husky": "^9.1.7",
     "tailwindcss": "^4.3.0",
     "typescript": "^6",
-    "wrangler": "^4.92.0"
+    "wrangler": "^4.94.0"
   },
   "dependencies": {
     "react": "^19",
