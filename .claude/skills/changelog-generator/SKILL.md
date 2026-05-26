@@ -1,18 +1,18 @@
 ---
 name: changelog-generator
-description: Use when the user asks for a changelog, release notes, "what's new", "what shipped", site updates, a weekly or monthly digest, or any curated reader-facing list of recent moster.dev changes — even if they don't say "changelog". Skip only when the user explicitly wants raw `git log` output.
+description: Use when the user asks for a changelog, release notes, "what's new", "what shipped", a weekly or monthly digest, or any curated reader-facing list of recent project changes — even if they don't say "changelog". Skip only when the user explicitly wants raw `git log` output.
 ---
 
 # Changelog Generator
 
-Turn git commit history on moster.dev into a clean, reader-friendly changelog. The audience is humans visiting the site or reading an update post — not other developers.
+Turn git commit history into a clean, reader-friendly changelog. The audience is humans reading release notes or an update post — not other developers.
 
 ## Workflow
 
-1. **Pick a range.** Default to most recent semver tag (`git describe --tags --abbrev=0`) → `HEAD`. Fall back to past 7 days (`git log --since=7.days`) when no tag exists. Ask the user if the range is ambiguous — one question is cheaper than rewriting.
+1. **Pick a range.** Default to most recent semver-shaped tag (`git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' --match '[0-9]*.[0-9]*.[0-9]*'`) → `HEAD`. Fall back to past 7 days (`git log --since=7.days`) when no semver tag exists. Ask the user if the range is ambiguous — one question is cheaper than rewriting.
 2. **Read commits.** `git log <range> --pretty=format:"%H%x09%s%x09%b%x1e" --no-merges`. Skip merge commits.
 3. **Categorize.** Map each commit to **New**, **Improvements**, **Fixes**, **Breaking**, or **Internal** (filtered out). See the table below. **If every commit lands in Internal, stop here** and return `No user-facing changes in this range.` as your entire output — don't promote a refactor or chore to fill the gap.
-4. **Rewrite for readers.** Convert `feat(blog): add MDX support` → `Posts now support rich formatting via MDX.` Short, declarative, present-tense, benefit-oriented.
+4. **Rewrite for readers.** Convert `feat(blog): add MDX support` → `Posts now support rich formatting.` Short, declarative, present-tense, benefit-oriented.
 5. **Render Markdown** using the template below.
 6. **Show before saving.** Ask before writing to disk. When saving, prepend to existing `CHANGELOG.md` rather than overwriting.
 
@@ -22,7 +22,7 @@ Inspect both the commit prefix and the body. Multiple signals can apply — pick
 
 | Bucket | Triggers | Examples |
 |---|---|---|
-| **Breaking** | `BREAKING CHANGE:` in body, `feat!:` / `fix!:` prefix, removed/renamed user-visible behavior | "Drop legacy `/blog` redirect", "Rename `/about` → `/me`" |
+| **Breaking** | `BREAKING CHANGE:` in body, Conventional Commit `!` marker before the colon (`feat!:`, `feat(scope)!:`, `fix!:`, `fix(scope)!:`), removed/renamed user-visible behavior | "Drop legacy `/blog` redirect", "Rename `/about` → `/me`" |
 | **New** | `feat:`, `feat(scope):` | New page, new section, new visible feature |
 | **Improvements** | `perf:`, visual `style:`, `a11y:`, copy/typography tweaks, design polish | Faster image loading, better dark mode contrast, refreshed hero |
 | **Fixes** | `fix:`, `fix(scope):` | Bug fixes the reader could have hit |
@@ -33,10 +33,11 @@ Inspect both the commit prefix and the body. Multiple signals can apply — pick
 - **Only upgrade when there's an observable change.** A refactor that moves code around (e.g., "refactor: pull theme variables into globals.css", "refactor: extract Nav component") stays **Internal**, even if the topic *sounds* user-facing. If you can't describe what a non-developer would see or feel differently, it's Internal.
 - Ambiguous commits go in the bucket the reader cares about more (a fix that adds a new affordance → **New**).
 - Drop entries too small to matter to readers (a typo fix in a deleted draft).
+- If the project doesn't use conventional commit prefixes, fall back to judging each commit's user-facing impact from its subject and body.
 
 ## Output template
 
-moster.dev is a minimal-aesthetic site. **Default to no emojis** — plain headings only. Add emoji only if the user requests it. Each entry is one or two sentences; lead with the benefit, follow with the detail.
+**Default to no emojis** — plain headings only. Add emoji only if the user requests it or the project's existing changelog already uses them. Each entry is one or two sentences; lead with the benefit, follow with the detail.
 
 ```markdown
 # Updates — <date or version>
@@ -59,11 +60,11 @@ Drop empty sections. If the entire range produces no user-facing changes, return
 ## Style rules
 
 - **Present tense, active voice.** "Posts load 2x faster." not "We've improved post loading speed."
-- **Reader's perspective.** What the site does, not what you did. "Dark mode now follows your OS setting." beats "Implemented prefers-color-scheme."
-- **No technical jargon.** Avoid framework names (MDX, React) and implementation terms (frontmatter, SSR, hydration, prefers-color-scheme). Describe what the reader experiences, not the tech behind it. "Posts now support code blocks and callouts." beats "Posts now support MDX with frontmatter."
+- **Reader's perspective.** What the product does, not what you did. "Dark mode now follows your OS setting." beats "Implemented prefers-color-scheme."
+- **No technical jargon.** Avoid framework names and implementation terms (MDX, React, frontmatter, SSR, hydration, prefers-color-scheme). Describe what the reader experiences, not the tech behind it. "Posts now support code blocks and callouts." beats "Posts now support MDX with frontmatter."
 - **No code or file references** in entry text. `src/components/Hero.tsx` doesn't belong in a changelog.
 - **No commit hashes** unless explicitly requested.
-- **Preserve "my pleasure".** Never paraphrase the canonical hero line (see CLAUDE.md).
+- **Respect canonical copy.** If the project's `CLAUDE.md`, style guide, or existing changelog preserves specific phrasing (taglines, hero copy, brand voice), don't paraphrase it.
 - **One thought per bullet.** Split a commit that did two things.
 
 ## Examples
@@ -73,7 +74,7 @@ Drop empty sections. If the entire range produces no user-facing changes, return
 | `feat(blog): add MDX support with frontmatter parsing and code block syntax highlighting` | New | **Rich post formatting.** Posts now support code blocks, callouts, and inline formatting. |
 | `perf: lazy-load hero image and inline critical CSS` | Improvements | The home page paints noticeably faster on the first visit. |
 | `fix: prevent dark-mode flash on initial paint` | Fixes | Dark mode no longer flashes white when the page first loads. |
-| `chore(deps): bun update typescript to 5.9.4` | Internal *(excluded)* | — |
+| `chore(deps): bump typescript to 5.9.4` | Internal *(excluded)* | — |
 
 ## Common mistakes
 
@@ -82,7 +83,7 @@ Drop empty sections. If the entire range produces no user-facing changes, return
 - **Including hashes or file paths.** Belong in `git log`, not a changelog.
 - **Padding empty changelogs by promoting a refactor.** If every commit is internal (chore/refactor/build/ci/docs/test), don't reach for the closest user-adjacent one and dress it up. Return `No user-facing changes in this range.` and move on. A refactor with no observable behavior change is Internal, even if the words sound user-facing.
 - **Overwriting `CHANGELOG.md`.** Always prepend; older sections stay intact.
-- **Running from the wrong worktree.** Confirm with `git rev-parse --show-toplevel`. In Conductor, this is a city-named worktree under the shared `website` project; the city differs across sessions.
+- **Running from the wrong worktree.** Confirm with `git rev-parse --show-toplevel` before generating. If you're in a parallel or sandbox workspace, your commit range may not match the canonical branch.
 
 ## Tips
 
