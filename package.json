@@ -17,7 +17,7 @@
     "prepare": "husky && wrangler types"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
+    "@biomejs/biome": "^2.4.16",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5",
     "@types/bun": "latest",
@@ -27,7 +27,7 @@
     "husky": "^9.1.7",
     "tailwindcss": "^4.3.0",
     "typescript": "^6",
-    "wrangler": "^4.94.0"
+    "wrangler": "^4.95.0"
   },
   "dependencies": {
     "react": "^19",
