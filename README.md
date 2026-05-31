@@ -11,7 +11,7 @@ Jalo Moster's personal website — a multi-page React SPA deployed to Cloudflare
 - **Hosting:** Cloudflare Workers + Static Assets (not Pages) on `moster.dev`. SPA fallback handles deep-link refreshes.
 - **Lint / format:** Biome. **Types:** TypeScript strict mode + generated Worker types.
 - **Testing:** `bun test` for units, `@playwright/test` for browser E2E.
-- **CI/CD:** GitHub Actions — `check` on every PR/push, `deploy` on push to `master` via `cloudflare/wrangler-action@v3`, and `lighthouse` post-deploy + nightly via `treosh/lighthouse-ci-action@v12`.
+- **CI/CD:** GitHub Actions — `check` on every PR/push, `deploy` on push to `master` via `cloudflare/wrangler-action@v3`, and `lighthouse` post-deploy + weekly via `treosh/lighthouse-ci-action@v12`.
 
 No Vite, webpack, esbuild, Next.js, MDX, or third-party UI component libraries — the Bun HTML bundler is the entire build pipeline. `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 
@@ -110,7 +110,7 @@ Production deploys run automatically on push to `master`:
 
 1. `check` job: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`.
 2. `deploy` job (depends on `check`): builds and ships `dist/` via `cloudflare/wrangler-action@v3`.
-3. `lighthouse` job (depends on `deploy`, also runs on a nightly `schedule` cron): asserts Core Web Vitals budgets against `https://moster.dev` via `treosh/lighthouse-ci-action@v12` using thresholds in `lighthouserc.json`, then uploads results to the self-hosted LHCI Server at `https://lhci.moster.dev`. Not a PR merge gate; failures alert rather than block.
+3. `lighthouse` job (depends on `deploy`, also runs on a weekly `schedule` cron — Sundays at 06:00 EST / 11:00 UTC): asserts Core Web Vitals budgets against `https://moster.dev` via `treosh/lighthouse-ci-action@v12` using thresholds in `lighthouserc.json`, then uploads results to the self-hosted LHCI Server at `https://lhci.moster.dev`. Not a PR merge gate; failures alert rather than block.
 
 Cloudflare credentials live as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed. `bun run deploy` from a developer machine is supported as a break-glass path but is not the source of truth.
 
