@@ -19,12 +19,12 @@ Automated CI on every PR and push to `master`, and automated production deploys 
 
 ## Behavior & edge cases
 - **Workflow (`.github/workflows/ci.yml`):**
-  - Triggers: `pull_request` against `master`, `push` to `master`, and a `schedule: '0 7 * * *'` cron that fires only the `lighthouse` job (see `features/lighthouse-ci.md`).
+  - Triggers: `pull_request` against `master`, `push` to `master`, and a `schedule: '0 11 * * 0'` cron (Sundays at 06:00 EST / 11:00 UTC) that fires only the `lighthouse` job (see `features/lighthouse-ci.md`).
   - `check` job runs on `ubuntu-latest` and is gated with `if: github.event_name != 'schedule'` so cron runs do not re-execute the suite.
   - `check` steps in order: `actions/checkout@v6` → `actions/setup-node@v6` (node 22) → `oven-sh/setup-bun@v2` → restore Bun package cache → restore Playwright browser cache → `bun install --frozen-lockfile` → `bun run setup:browsers` → `bun run check` → `bun run build` → `bun test` → `bunx playwright test` → `bunx playwright test -c playwright.built.config.ts`.
   - `deploy` job has `needs: check` and only runs when `github.event_name == 'push' && github.ref == 'refs/heads/master'`.
   - `deploy` steps: `actions/checkout@v6` → `actions/setup-node@v6` (node 22) → `oven-sh/setup-bun@v2` → restore Bun package cache → `bun install --frozen-lockfile` → `bun run build` → `cloudflare/wrangler-action@v3`.
-  - `lighthouse` job (`needs: deploy`, `if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')`) runs post-deploy and on the daily cron; see `features/lighthouse-ci.md` for behavior.
+  - `lighthouse` job (`needs: deploy`, `if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')`) runs post-deploy and on the weekly cron; see `features/lighthouse-ci.md` for behavior.
   - The Wrangler action receives `apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}` and `accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}`.
   - `--frozen-lockfile` enforces that PRs touching dependencies update `bun.lock`.
   - Cache Bun packages with `actions/cache@v5`, path `~/.bun/install/cache`, key `bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}`.

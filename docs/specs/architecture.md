@@ -463,7 +463,7 @@ on:
   push:
     branches: [master]
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '0 11 * * 0'
 permissions:
   contents: read
 jobs:
@@ -566,7 +566,7 @@ Branch protection should require `check` before merge. The deploy job is not a p
 
 ### 8.5 Post-deploy Lighthouse CI
 
-Requirements §1.8 adds a third job, `lighthouse`, to the same `ci.yml`. It runs `@lhci/cli` via [`treosh/lighthouse-ci-action@v12`](https://github.com/treosh/lighthouse-ci-action) against `https://moster.dev` after every production deploy and on a daily `schedule:` cron, asserting Core Web Vitals budgets defined in `lighthouserc.json` at the repo root. The per-feature implementation spec is at [features/lighthouse-ci.md](features/lighthouse-ci.md).
+Requirements §1.8 adds a third job, `lighthouse`, to the same `ci.yml`. It runs `@lhci/cli` via [`treosh/lighthouse-ci-action@v12`](https://github.com/treosh/lighthouse-ci-action) against `https://moster.dev` after every production deploy and on a weekly `schedule:` cron, asserting Core Web Vitals budgets defined in `lighthouserc.json` at the repo root. The per-feature implementation spec is at [features/lighthouse-ci.md](features/lighthouse-ci.md).
 
 **Why this shape:**
 
@@ -575,7 +575,7 @@ Requirements §1.8 adds a third job, `lighthouse`, to the same `ci.yml`. It runs
 - **`treosh/lighthouse-ci-action` over rolling our own.** The official `GoogleChrome/lighthouse-ci` repo points readers at this community action; it's a thin wrapper around `@lhci/cli` with GH-native artifact and LHCI Server upload paths.
 - **Self-hosted LHCI Server.** Uploading to `https://lhci.moster.dev` gives historical trend data for the live site while keeping raw HTML reports attached to each workflow run. The build token and basic-auth credentials stay in GitHub Actions secrets (§FR-1.8.6), so no LHCI credentials are committed.
 
-**Cost.** One ubuntu-latest runner × ~5 min × (push frequency + nightly) is well under the GitHub Actions free tier ceiling per §NFR-2.2.3.
+**Cost.** One ubuntu-latest runner × ~5 min × (push frequency + weekly) is well under the GitHub Actions free tier ceiling per §NFR-2.2.3.
 
 ## 9. Sources
 

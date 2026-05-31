@@ -79,7 +79,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
 - `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
-- `.github/workflows/ci.yml` — single workflow with `check` (PRs + pushes), `deploy` (push to `master`, needs `check`), and `lighthouse` (post-deploy + nightly `schedule`, needs `deploy`); canonical YAML in architecture §8.1.
+- `.github/workflows/ci.yml` — single workflow with `check` (PRs + pushes), `deploy` (push to `master`, needs `check`), and `lighthouse` (post-deploy + weekly `schedule`, needs `deploy`); canonical YAML in architecture §8.1.
 - `lighthouserc.json` — Lighthouse CI config at repo root; URL list (`/`, `/about`, `/articles`), `numberOfRuns: 3`, Core Web Vitals assertions with `aggregationMethod: "median"`, self-hosted LHCI Server upload target. See `docs/specs/features/lighthouse-ci.md`.
 - `wrangler.toml`, `src/worker.ts` — Cloudflare Workers + Static Assets config and pass-through fetch handler.
 - `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.

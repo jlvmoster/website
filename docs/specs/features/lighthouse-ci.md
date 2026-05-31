@@ -1,12 +1,12 @@
 # Lighthouse CI — Implementation Spec
 
 ## Goal
-Post-deploy performance monitoring against `https://moster.dev` that asserts Core Web Vitals budgets on every push to `master` and on a nightly schedule. Failures alert; they do not gate PR merges.
+Post-deploy performance monitoring against `https://moster.dev` that asserts Core Web Vitals budgets on every push to `master` and on a weekly schedule. Failures alert; they do not gate PR merges.
 
 ## Requirements covered
 - §FR-1.8.1 — Lighthouse runs against the live site on a representative set of routes after every production deploy.
 - §FR-1.8.2 — Budgets live in committed `lighthouserc.json`; assertions run via `@lhci/cli` invoked through `treosh/lighthouse-ci-action`.
-- §FR-1.8.3 — Triggered on push to `master` (after `deploy`) and on a daily `schedule:` cron. Not a PR merge gate.
+- §FR-1.8.3 — Triggered on push to `master` (after `deploy`) and on a weekly `schedule:` cron. Not a PR merge gate.
 - §FR-1.8.4 — `numberOfRuns: 3` with `aggregationMethod: "median"` on every assertion.
 - §FR-1.8.5 — Reports uploaded to the self-hosted LHCI Server at `https://lhci.moster.dev` and saved as GitHub Actions artifacts.
 - §FR-1.8.6 — LHCI Server upload credentials live only in GitHub Actions secrets.
@@ -14,7 +14,7 @@ Post-deploy performance monitoring against `https://moster.dev` that asserts Cor
 - §NFR-2.5.2 — CLS median ≤ 0.1 (`error`).
 - §NFR-2.5.3 — TBT median ≤ 200 ms (`warn`).
 - §NFR-2.5.4 — Performance category median ≥ 0.9 (`error`).
-- §NFR-2.2.3 — Stays on GitHub Actions' free tier (one runner, ~5 minutes, runs only on master + nightly).
+- §NFR-2.2.3 — Stays on GitHub Actions' free tier (one runner, ~5 minutes, runs only on master + weekly).
 
 ## File layout
 - `lighthouserc.json` — repo root, consumed by the action via `configPath`. Holds the URL list, run count, assertion thresholds, and upload target.
@@ -24,7 +24,7 @@ Post-deploy performance monitoring against `https://moster.dev` that asserts Cor
 ## Behavior & edge cases
 - **Trigger surface:**
   - `push` to `master` → `check` → `deploy` → `lighthouse` (in that order, via `needs:` chain).
-  - `schedule` (`0 7 * * *` UTC) → only `lighthouse` runs; `check` is skipped via `if: github.event_name != 'schedule'`, `deploy` is skipped by its existing event-name guard, and `lighthouse` evaluates because of `always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')`.
+  - `schedule` (`0 11 * * 0` — Sundays at 06:00 EST / 11:00 UTC) → only `lighthouse` runs; `check` is skipped via `if: github.event_name != 'schedule'`, `deploy` is skipped by its existing event-name guard, and `lighthouse` evaluates because of `always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')`.
   - `pull_request` → `check` runs; `deploy` and `lighthouse` are skipped. Lighthouse never gates a PR.
 - **Audited routes (in `lighthouserc.json`):** `/`, `/about`, `/articles`. Keeps audit time bounded (~5 min for 3 URLs × 3 runs) and covers the three structurally distinct pages (Home hero + avatar scaling, image-heavy About, list page). Adding `/projects` and `/uses` is a one-line edit when their performance becomes a concern.
 - **Run count and aggregation:** `numberOfRuns: 3` with `aggregationMethod: "median"` on each assertion. Single-run Lighthouse on shared GH runners commonly swings ±500 ms on LCP; the median across three runs absorbs that.
@@ -36,11 +36,11 @@ Post-deploy performance monitoring against `https://moster.dev` that asserts Cor
 - **Deploy → measurement gap:** the `lighthouse` job sleeps 30 s on the `push` path (`if: github.event_name == 'push'`) so Cloudflare's global propagation completes before the audit. The schedule path skips the sleep because production is already live.
 - **Report surfacing:** `serverBaseUrl: https://lhci.moster.dev` uploads each run to the self-hosted LHCI Server for historical comparison, using `LHCI_BUILD_TOKEN` plus optional basic-auth credentials from GitHub Actions secrets (§FR-1.8.5, §FR-1.8.6). `uploadArtifacts: true` also stashes the raw HTML reports as workflow artifacts.
 - **Failure semantics:** a Lighthouse assertion failure marks the workflow run red and emails the repo owner via GitHub's default notifications. The site stays on the just-deployed revision; rolling back is a manual decision based on the report link.
-- **Cost:** one ubuntu-latest runner × ~5 min × (push-frequency + nightly) stays well under the free-tier 2,000 min/month even with daily runs.
+- **Cost:** one ubuntu-latest runner × ~5 min × (push-frequency + weekly) stays well under the free-tier 2,000 min/month.
 
 ## Test plan
 - **First-run smoke:** merge this feature to `master`, watch CI; confirm `lighthouse` job runs after `deploy`, uploads the run to `https://lhci.moster.dev`, and uploads an artifact.
-- **Scheduled-run smoke:** on the next nightly cron firing, confirm a workflow run appears with only `lighthouse` executed (no `check`, no `deploy`).
+- **Scheduled-run smoke:** on the next weekly cron firing, confirm a workflow run appears with only `lighthouse` executed (no `check`, no `deploy`).
 - **Failing-budget rehearsal:** temporarily lower `largest-contentful-paint.maxNumericValue` to `100` in `lighthouserc.json` on a throwaway branch, push to `master`, confirm the `lighthouse` job fails red and the linked report shows the assertion. Revert.
 - **PR isolation:** open a PR; confirm `lighthouse` does not run and is not listed as a required check in branch protection.
 
