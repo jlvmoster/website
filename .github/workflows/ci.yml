@@ -6,6 +6,7 @@ on:
     branches: [master]
   schedule:
     - cron: '0 11 * * 0'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -61,10 +62,20 @@ jobs:
 
   lighthouse:
     needs: deploy
-    if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule')
+    if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Tag non-deploy runs as a distinct LHCI build
+        if: github.event_name != 'push'
+        run: |
+          lhci_hash="$(git rev-parse --short=24 HEAD)-${{ github.run_id }}"
+          {
+            echo "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=${{ github.event_name }}"
+            echo "LHCI_BUILD_CONTEXT__CURRENT_HASH=${lhci_hash:0:40}"
+            echo "LHCI_BUILD_CONTEXT__COMMIT_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE=${{ github.event_name }} production audit"
+          } >> "$GITHUB_ENV"
       - name: Wait for deploy to propagate
         if: github.event_name == 'push'
         run: sleep 30
