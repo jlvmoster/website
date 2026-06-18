@@ -4,7 +4,6 @@
 Wire `react-router-dom` BrowserRouter, set up `src/App.tsx` with the Routes table, add the anti-flicker theme script to `src/index.html`, and create page-component stubs so the router compiles.
 
 ## Source spec
-- [`features/app-shell.md`](../specs/features/app-shell.md)
 - [`features/routing.md`](../specs/features/routing.md)
 - [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
 - Requirements: §FR-1.1.1, §FR-1.1.4, §FR-1.1.5, §FR-1.1.6, §FR-1.3.1

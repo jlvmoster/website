@@ -1,17 +1,11 @@
 import { useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { navItems } from "../content/nav";
 import { clsx } from "../lib/clsx";
 import { Avatar, AvatarContainer } from "./Avatar";
 import { ContainerInner, ContainerOuter } from "./Container";
 import { MobileNavigation } from "./MobileNavigation";
 import { ThemeToggle } from "./ThemeToggle";
-
-const navItems = [
-  { label: "About", href: "/about" },
-  { label: "Articles", href: "/articles" },
-  { label: "Projects", href: "/projects" },
-  { label: "Uses", href: "/uses" },
-];
 
 const avatarDockDistance = 136;
 const navHideDistance = 64;

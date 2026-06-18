@@ -17,12 +17,12 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 | 01 | [Tooling & TS config](./01-tooling.md) | `features/tooling.md` |
 | 02 | [Worker config & types](./02-worker-config.md) | `features/worker.md` |
 | 03 | [Theming & global styles](./03-theming.md) | `features/theming.md`, `features/theme-toggle.md` |
-| 04 | [App shell & router](./04-app-shell.md) | `features/app-shell.md`, `features/routing.md` |
+| 04 | [App shell & router](./04-app-shell.md) | `features/routing.md` |
 | 05 | [Layout primitives](./05-layout-primitives.md) | `features/layout-shell.md`, `features/iconography.md` |
-| 06 | [Header & Footer](./06-header-footer.md) | `features/header.md`, `features/footer.md` |
+| 06 | [Header & Footer](./06-header-footer.md) | `features/header.md` |
 | 07 | [Home page](./07-home-page.md) | `features/home-page.md`, `features/hero.md` |
-| 08 | [About & Articles](./08-about-articles.md) | `features/about-page.md`, `features/articles-page.md`, `features/content-model.md` |
-| 09 | [Projects & Uses](./09-projects-uses.md) | `features/projects-page.md`, `features/uses-page.md` |
+| 08 | [About & Articles](./08-about-articles.md) | `features/articles-page.md`, `features/content-model.md` |
+| 09 | [Projects & Uses](./09-projects-uses.md) | `requirements.md` §FR-1.2.6, §FR-1.2.7 |
 | 10 | [Build pipeline & `public/`](./10-build-pipeline.md) | `features/build-pipeline.md` |
 | 11 | [Unit smoke + Playwright E2E](./11-testing.md) | `features/testing.md` |
 | 12 | [CI/CD bootstrap](./12-ci-cd.md) | `features/ci-cd.md` |
