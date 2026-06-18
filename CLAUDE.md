@@ -65,7 +65,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 ## Key files
 - `docs/specs/requirements.md` — authoritative requirements doc (read first).
 - `docs/specs/architecture.md` — rationale, code shapes, and operational notes (router config, LayoutShell, Header scroll math, theme toggle hook, article content model, primitives, iconography).
-- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Theming, ThemeToggle, App Shell, Routing, LayoutShell, Header, Footer, HomePage, AboutPage, ArticlesPage, ProjectsPage, UsesPage, ContentModel, Iconography, Worker, BuildPipeline, Tooling, Testing, CI/CD). Read the relevant one before touching a feature.
+- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Theming, ThemeToggle, Routing, LayoutShell, Header, HomePage, ArticlesPage, ContentModel, Iconography, Worker, BuildPipeline, Tooling, Testing, CI/CD). Read the relevant one before touching a feature.
 - `docs/tasks/README.md` — ordered, 13-step implementation playbook. Each task lists prereqs, steps, and a verification block.
 - `src/pages/` — one routed component per URL (HomePage, AboutPage, ArticlesPage, ArticlePage, ProjectsPage, UsesPage, NotFoundPage). Page bodies live here, not in `src/components/`.
 - `src/components/` — handwritten primitives (LayoutShell, Header, Footer, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons) plus `home/` subfolder for Resume/ArticleCard.

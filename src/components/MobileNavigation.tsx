@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { navItems } from "../content/nav";
 import { clsx } from "../lib/clsx";
 import { ChevronDownIcon, CloseIcon } from "./icons";
-
-const navItems = [
-  { label: "About", href: "/about" },
-  { label: "Articles", href: "/articles" },
-  { label: "Projects", href: "/projects" },
-  { label: "Uses", href: "/uses" },
-];
 
 export function MobileNavigation({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);

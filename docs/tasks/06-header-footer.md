@@ -5,7 +5,6 @@ Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popo
 
 ## Source spec
 - [`features/header.md`](../specs/features/header.md)
-- [`features/footer.md`](../specs/features/footer.md)
 - [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
 - Architecture: §4.7, §4.8
 

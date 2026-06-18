@@ -4,7 +4,6 @@
 Build the About page (portrait + prose + social column) and the Articles surface (list + detail) including the article content loader and a placeholder first article.
 
 ## Source spec
-- [`features/about-page.md`](../specs/features/about-page.md)
 - [`features/articles-page.md`](../specs/features/articles-page.md)
 - [`features/content-model.md`](../specs/features/content-model.md)
 
@@ -53,5 +52,4 @@ Build the About page (portrait + prose + social column) and the Articles surface
   - `/articles/does-not-exist`: "Article not found." state.
 
 ## Open questions
-- See `features/about-page.md` (bio copy, headline, location).
 - See `features/articles-page.md` (list-page title + intro).

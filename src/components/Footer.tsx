@@ -1,12 +1,6 @@
 import { Link } from "react-router-dom";
+import { navItems } from "../content/nav";
 import { ContainerInner, ContainerOuter } from "./Container";
-
-const navItems = [
-  { label: "About", href: "/about" },
-  { label: "Articles", href: "/articles" },
-  { label: "Projects", href: "/projects" },
-  { label: "Uses", href: "/uses" },
-];
 
 export function Footer() {
   return (

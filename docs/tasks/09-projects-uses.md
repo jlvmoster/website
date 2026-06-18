@@ -4,8 +4,7 @@
 Build the Projects page (three-column card grid) and the Uses page (Section-based tool list).
 
 ## Source spec
-- [`features/projects-page.md`](../specs/features/projects-page.md)
-- [`features/uses-page.md`](../specs/features/uses-page.md)
+- `requirements.md` §FR-1.2.6, §FR-1.2.7
 
 ## Prereqs
 - Task 08.
