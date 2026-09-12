@@ -4,14 +4,10 @@ on:
     branches: [master]
   push:
     branches: [master]
-  schedule:
-    - cron: '0 11 * * 0'
-  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   check:
-    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -59,32 +55,3 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  lighthouse:
-    needs: deploy
-    if: always() && (needs.deploy.result == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Tag non-deploy runs as a distinct LHCI build
-        if: github.event_name != 'push'
-        run: |
-          lhci_hash="$(git rev-parse --short=24 HEAD)-${{ github.run_id }}"
-          {
-            echo "LHCI_BUILD_CONTEXT__CURRENT_BRANCH=${{ github.event_name }}"
-            echo "LHCI_BUILD_CONTEXT__CURRENT_HASH=${lhci_hash:0:40}"
-            echo "LHCI_BUILD_CONTEXT__COMMIT_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "LHCI_BUILD_CONTEXT__COMMIT_MESSAGE=${{ github.event_name }} production audit"
-          } >> "$GITHUB_ENV"
-      - name: Wait for deploy to propagate
-        if: github.event_name == 'push'
-        run: sleep 30
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v12
-        with:
-          configPath: ./lighthouserc.json
-          uploadArtifacts: true
-          serverBaseUrl: https://lhci.moster.dev
-          serverToken: ${{ secrets.LHCI_BUILD_TOKEN }}
-          basicAuthUsername: ${{ secrets.LHCI_BASIC_AUTH_USERNAME }}
-          basicAuthPassword: ${{ secrets.LHCI_BASIC_AUTH_PASSWORD }}
