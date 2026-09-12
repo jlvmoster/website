@@ -86,12 +86,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.7.6** `bun run deploy` remains supported as a break-glass path (§FR-1.5.4) but is not the production source of truth.
 
 ### 1.8 Performance monitoring
-- **FR-1.8.1** Production deploys are followed by an automated Lighthouse CI run against the live site that measures Core Web Vitals (LCP, CLS) and total blocking time on a representative set of routes.
-- **FR-1.8.2** Lighthouse thresholds live in a committed `lighthouserc.json` at the repo root and are asserted via `@lhci/cli` invoked through `treosh/lighthouse-ci-action`.
-- **FR-1.8.3** The Lighthouse job runs after the `deploy` job on push to `master`, and also on a weekly `schedule` trigger so regressions surface even when no code changes have shipped. It is not a PR merge gate.
-- **FR-1.8.4** Each Lighthouse run executes ≥ 3 audits per URL and asserts against the median, to absorb runner variance.
-- **FR-1.8.5** Each run uploads its results to the self-hosted LHCI Server at `https://lhci.moster.dev` for historical reporting and also saves the raw reports as GitHub Actions artifacts.
-- **FR-1.8.6** LHCI Server upload credentials are stored only as GitHub Actions secrets (`LHCI_BUILD_TOKEN`, `LHCI_BASIC_AUTH_USERNAME`, `LHCI_BASIC_AUTH_PASSWORD`) and are never committed to the repository.
+- **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. Production deploys end at the `deploy` job; there is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
 
 ## 2. Non-functional requirements
 
@@ -119,10 +114,11 @@ This document is the authoritative source of truth for what the implementation m
 - **NFR-2.4.4** A fresh machine or CI worker can fully recreate the test environment with `bun install && bun run setup:browsers`; E2E must not depend on a pre-existing Playwright browser cache.
 
 ### 2.5 Performance budgets
-- **NFR-2.5.1** Largest Contentful Paint (LCP) median ≤ 2500 ms on every audited route — Core Web Vitals "good" threshold; asserted at `error` level.
-- **NFR-2.5.2** Cumulative Layout Shift (CLS) median ≤ 0.1 on every audited route — Core Web Vitals "good" threshold; asserted at `error` level.
-- **NFR-2.5.3** Total Blocking Time (TBT) median ≤ 200 ms — asserted at `warn` level (lab-only signal; the production constraint is INP, which Lighthouse cannot measure synthetically).
-- **NFR-2.5.4** Lighthouse `categories:performance` median score ≥ 0.9 on every audited route; asserted at `error` level.
+These are design targets, not CI-asserted gates (automated Lighthouse CI was retired with the LHCI server).
+- **NFR-2.5.1** Largest Contentful Paint (LCP) ≤ 2500 ms on representative routes — Core Web Vitals "good" threshold.
+- **NFR-2.5.2** Cumulative Layout Shift (CLS) ≤ 0.1 on representative routes — Core Web Vitals "good" threshold.
+- **NFR-2.5.3** Total Blocking Time (TBT) ≤ 200 ms (lab-only signal; the production constraint is INP).
+- **NFR-2.5.4** Lighthouse `categories:performance` score ≥ 0.9 on representative routes.
 
 ## 3. Growth path (designed-in, not built)
 
