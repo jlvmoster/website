@@ -1,0 +1,17 @@
+{
+  "name": "moster.dev",
+  "install": "curl -fsSL https://bun.com/install | bash && export PATH=\"$HOME/.bun/bin:$PATH\" && bun install && bun run setup:browsers",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "export PATH=\"$HOME/.bun/bin:$PATH\" && bun run dev",
+      "description": "Bun dev server with HMR on http://localhost:3000 (scripts/dev.ts)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "dev server",
+      "port": 3000
+    }
+  ]
+}
