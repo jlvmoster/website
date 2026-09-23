@@ -5,11 +5,11 @@ export default defineConfig({
   testMatch: "**/built.e2e.ts",
   fullyParallel: true,
   use: {
-    baseURL: "http://localhost:8787",
+    baseURL: "http://localhost:4173",
   },
   webServer: {
     command: "bun run build && bun run preview",
-    url: "http://localhost:8787",
+    url: "http://localhost:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

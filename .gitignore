@@ -39,6 +39,5 @@ playwright-report
 playwright/.cache
 .playwright-mcp/
 
-# Wrangler / Cloudflare Workers
-.wrangler/
-worker-configuration.d.ts
+# Vercel
+.vercel/

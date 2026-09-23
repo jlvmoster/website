@@ -1,3 +1,5 @@
+> Historical playbook note: hosting is now **Vercel** (`vercel.json` + GitHub Actions → Vercel CLI). Prefer `docs/specs/features/ci-cd.md` / `hosting.md` over Cloudflare/Wrangler wording still present in this task file.
+
 # Task 13 — Acceptance verification
 
 ## Goal

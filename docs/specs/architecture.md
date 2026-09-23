@@ -2,81 +2,71 @@
 
 Companion to `docs/specs/requirements.md`. Requirements answer *what must be true*; this doc answers *how* and *why* — the rationale behind the chosen stack, the concrete code shapes that satisfy the requirements, and the implementation notes that don't belong in a constraints list.
 
-## 1. Why Cloudflare Workers + Static Assets
+## 1. Why Vercel
 
-Two paths could host the v1 site cheaply: Cloudflare Workers (with Static Assets) or Cloudflare Pages. We picked Workers.
+The site previously shipped on Cloudflare Workers + Static Assets. The intentional platform change is to host the same Bun-built static SPA on **Vercel**.
 
-**Cloudflare's own guidance.** As of 2026, the Cloudflare docs explicitly steer new projects to Workers + Static Assets and treat Pages as the legacy path. Pages isn't deprecated, but it isn't where new features land.
+**Fit for a static SPA.** `scripts/build.ts` already emits a complete `dist/` (HTML + hashed assets + `public/` copy). Vercel serves that directory as a static deployment with SPA rewrites — no Worker stub, no Wrangler types, no dual runtimes between Bun-local and Workers V8.
 
-**Cleaner growth story.** Requirements §1.2.4 (contact form) and the growth-path items (`/api/contact`, `/api/og`, edge KV/D1/R2) all imply we'll add dynamic code eventually. On Workers that means adding a branch to `src/worker.ts` — same project, same `wrangler.toml`, same `wrangler deploy`. On Pages it would mean introducing a separate "Functions" concept with its own conventions. Workers collapses static + dynamic + cron + KV + bindings into one config file.
+**Growth path stays open.** Requirements §1.2.4 (contact form) and growth-path items (`/api/contact`, `/api/og`, edge storage) map cleanly to Vercel serverless or Edge Functions under `/api/*` when needed. Day-1 remains static-only.
 
-**Tradeoff vs Vercel.** The thing we give up by choosing Workers over Vercel is the Node-compatible serverless runtime. Dynamic code on Workers runs in the V8 Workers runtime, not Node — so a `Bun.serve` server cannot be deployed as-is. Bun remains the local toolchain (per CLAUDE.md), but server code that ships to prod has to be written against the Workers `fetch` handler API. In exchange we get a single deployment surface, no static-vs-functions split, and a free tier that comfortably covers a personal site.
+**Tradeoff vs Cloudflare Workers.** We give up Workers-specific bindings (KV/D1/R2 wired through `wrangler.toml`) and the Workers free-tier shape. In exchange we get a simpler deploy surface for a static portfolio, first-class custom-domain + HTTPS on Vercel, and a Node-compatible serverless runtime if/when dynamic routes arrive. Bun remains the local toolchain (per CLAUDE.md); production is static files from `dist/`, not a Bun server.
+
+**Not Next.js / not Pages.** The Bun HTML bundler stays the only build pipeline (§NFR-2.1.2). Vercel is the host only — framework is `null` in `vercel.json`. Cloudflare Pages is not reintroduced.
 
 ## 2. Free tier budget
 
-The whole v1 has to fit inside Cloudflare's free tier (requirements §2.2). The relevant ceilings:
+The whole personal site should fit Vercel Hobby + GitHub Actions free tier (requirements §2.2):
 
-- **Unlimited bandwidth and unlimited static-asset requests** — no credit card required.
-- **100,000 dynamic Worker requests per day.** Only counts when server-side code runs; static asset responses are free.
-- **GitHub Actions free tier:** unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free accounts. The v1 workflow is intentionally small enough to fit.
-- **20,000-file limit per deployment.**
-- **Custom domain + automatic HTTPS** included.
+- **Vercel Hobby** — static bandwidth and build minutes as published for Hobby; custom domain + automatic HTTPS included.
+- **GitHub Actions free tier:** unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free accounts. The workflow is intentionally small enough to fit.
+- **No Cloudflare Workers free-tier ceilings** apply after cutover (those were the previous budget).
 
-These shape a few decisions: we don't worry about asset cache headers for v1 (bandwidth is free), and we don't need to optimize file count (we're nowhere near 20K).
+These shape a few decisions: keep the site static until a real `/api/*` need appears, and keep CI/CD lean (check + deploy only).
 
 ## 3. Deployment surfaces
 
-The same project supports four runtime contexts, in this order of "production-likeness":
+The same project supports these runtime contexts, in this order of "production-likeness":
 
 | Surface | Command | Runtime | Purpose |
 |---|---|---|---|
 | Local dev | `bun run dev` | Bun.serve + HMR | Tight feedback loop. Fastest. |
-| Pre-deploy check | `bun run preview` | `wrangler dev` (Workers V8 runtime locally) | Sanity-check anything Worker-shaped before pushing. |
-| CI | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner | Runs `bun run check`, `bun test`, `bunx playwright test`. Merge gate. See §8.1. |
-| CD | GitHub Actions deploy job on push to `master` | `ubuntu-latest` runner + `cloudflare/wrangler-action@v3` | Runs after CI passes, builds `dist/`, then deploys with Wrangler. See §8.2. |
-| Break-glass deploy | `bun run deploy` | Local Bun bundler → `wrangler deploy` | Manual fallback when GitHub Actions is unavailable; not the default path. |
-| Production | (auto, after CD) | Cloudflare Workers + Static Assets edge | What users see. |
+| Pre-deploy check | `bun run preview` | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing. |
+| CI | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1. |
+| CD | GitHub Actions deploy job on push to `master` | `ubuntu-latest` + Vercel CLI | Builds `dist/`, then `vercel deploy dist --prod`. See §8.2. |
+| Break-glass deploy | `bun run deploy` | Local Bun bundler → `vercel deploy --prod` | Manual fallback when GitHub Actions is unavailable; not the default path. |
+| Production | (auto, after CD) | Vercel edge CDN | What users see. |
 
-`wrangler dev` matters because Bun.serve and Workers are *not* the same runtime. If a future `/api/og` branch uses a Workers-only API, only `wrangler dev` will catch it locally.
+Local `preview` does not need to emulate a remote serverless runtime while the site is static-only. When `/api/*` functions land, add a Vercel-local preview path for those handlers.
 
 ## 4. Concrete code shapes
 
 These are the canonical implementations of the requirements that involve config or non-trivial code. Treat them as starting points — if the actual files diverge, update this doc.
 
-### 4.1 `wrangler.toml` (static-only, day 1)
+### 4.1 `vercel.json` (static SPA)
 
-```toml
-name = "personal-site"
-main = "src/worker.ts"
-compatibility_date = "2026-05-17"
-
-[assets]
-directory = "./dist"
-binding = "ASSETS"
-not_found_handling = "single-page-application"  # serves index.html for unknown paths → SPA routes work
-
-[vars]
-# env vars here later
-
-# When you add a Worker fetch handler (forms, API, OG images), uncomment:
-# [[routes]]
-# pattern = "moster.dev/api/*"
-# zone_name = "moster.dev"
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "bun run build",
+  "outputDirectory": "dist",
+  "installCommand": "bun install",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "headers": [/* security headers — see committed vercel.json */]
+}
 ```
 
-The `not_found_handling = "single-page-application"` setting is what makes requirements §FR-1.4.3 work — it's a single line in config, no Worker code needed.
+Existing files under `dist/` are served first; the rewrite supplies `index.html` for client routes and unknown paths (§FR-1.4.3). Security headers that used to live in `src/worker.ts` are declared here as HTTP response headers.
 
-### 4.2 `src/worker.ts` (pass-through stub)
+### 4.2 `scripts/preview.ts` (local built-artifact server)
 
 ```ts
-export default {
-  async fetch(req: Request, env: Env): Promise<Response> {
-    return env.ASSETS.fetch(req);
-  },
-} satisfies ExportedHandler<Env>;
+// Serves dist/ on port 4173 with SPA fallback for extensionless paths.
+// Used by `bun run preview` and playwright.built.config.ts.
 ```
 
-This costs nothing — asset requests are free, and the Worker only runs when the request would otherwise miss the asset binding. The point of having the stub from day 1 (rather than adding it when we need dynamic routes) is that *the deployment shape never has to change*. Adding `/api/contact` later is one new `if` branch, not a deploy reconfiguration.
+Canonical implementation is the committed `scripts/preview.ts`. It mirrors Vercel's rewrite semantics closely enough for built-artifact E2E.
 
 ### 4.3 `scripts/build.ts` (programmatic build + public/ copy)
 
@@ -104,7 +94,7 @@ The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic 
 
 ### 4.4 Routing & app shell
 
-`react-router-dom` was picked because it is the conventional, well-known SPA router (vs. tiny alternatives like `wouter`), declarative, no SSR overhead, and plays cleanly with the Workers `not_found_handling = "single-page-application"` setting — Workers returns `index.html` for any non-asset path, and the client router resolves the URL after mount.
+`react-router-dom` was picked because it is the conventional, well-known SPA router (vs. tiny alternatives like `wouter`), declarative, no SSR overhead, and plays cleanly with Vercel's SPA rewrite to `index.html` — the host returns the SPA shell for any non-asset path, and the client router resolves the URL after mount.
 
 ```tsx
 // src/main.tsx
@@ -235,7 +225,7 @@ The scroll math is transliterated verbatim from Spotlight `src/components/Header
 
 - `usePathname()` → `useLocation()` from `react-router-dom`
 - `next/link`'s `Link` → `react-router-dom`'s `Link`
-- `next/image` → plain `<img src="/images/avatar.jpg">` (`public/` is copied to `dist/` by `scripts/build.ts` and Workers serves `/images/avatar.jpg` from there)
+- `next/image` → plain `<img src="/images/avatar.jpg">` (`public/` is copied to `dist/` by `scripts/build.ts` and Vercel serves `/images/avatar.jpg` from there)
 
 Mobile popover (handwritten, not HeadlessUI) outline:
 - A button toggles an `open: boolean` state.
@@ -372,7 +362,7 @@ Single icon catalog at `src/components/icons.tsx` — no `@heroicons/react`, no 
 
 Per-route `<title>` and `<meta name="description">` are rendered directly inside the page components using React 19's native document-metadata support — *not* `react-helmet` / `react-helmet-async`. React 19 hoists `<title>`, `<meta>`, and `<link>` tags rendered in the tree into `<head>`. `<title>` is deduplicated by React 19 (only one is ever in `<head>`), so the static fallback in `src/index.html` is safely replaced on mount. `<meta>` tags are *appended* rather than deduplicated against pre-existing HTML — to avoid shipping two `<meta name="description">` per page, the static one was removed from `src/index.html`; the per-route React-rendered description is the only one.
 
-Why no Helmet: most security headers in `src/worker.ts` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options) cannot be set via `<meta>` at all — they're HTTP response headers. The CSP that *can* live in `<meta>` would not cover the inline anti-flicker `<script>` in `src/index.html` (which runs before any `<meta>` parses). Helmet only addresses per-route document tags, and React 19 already covers that natively.
+Why no Helmet: most security headers declared in `vercel.json` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options) cannot be set via `<meta>` at all — they're HTTP response headers. The CSP that *can* live in `<meta>` would not cover the inline anti-flicker `<script>` in `src/index.html` (which runs before any `<meta>` parses). Helmet only addresses per-route document tags, and React 19 already covers that natively.
 
 ```tsx
 // src/pages/AboutPage.tsx (shape)
@@ -401,7 +391,6 @@ Detailed spec: `docs/specs/features/document-metadata.md`.
 │   ├── index.html          # Bun HTML entry; anti-flicker theme script in <head>
 │   ├── main.tsx            # createRoot + BrowserRouter wrap
 │   ├── App.tsx             # LayoutShell + Routes table
-│   ├── worker.ts           # Workers fetch handler (pass-through today)
 │   ├── pages/              # one .tsx per route (Home/About/Articles/Article/Projects/Uses/NotFound)
 │   ├── components/         # Header, Footer, LayoutShell, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, icons, home/{Resume,ArticleCard}
 │   ├── content/            # articles/{index.ts, <slug>.tsx}, projects.ts, uses.ts, resume.ts
@@ -410,46 +399,41 @@ Detailed spec: `docs/specs/features/document-metadata.md`.
 ├── public/                 # favicon, og-image, robots.txt, images/{avatar,portrait}.jpg, images/logos/, cv.pdf — copied into dist/
 ├── scripts/
 │   ├── dev.ts              # Bun.serve with HMR
-│   └── build.ts            # bun build → dist/
+│   ├── build.ts            # bun build → dist/
+│   └── preview.ts          # Bun.serve of dist/ with SPA fallback
 ├── tests/
 ├── docs/
 │   └── specs/
 │       ├── requirements.md
 │       ├── architecture.md # this file
 │       └── features/       # per-feature implementation specs
+├── vercel.json             # Vercel static SPA config (rewrites + headers)
 ├── tsconfig.json
 ├── biome.json
 ├── bunfig.toml
-├── wrangler.toml
 ├── package.json
 └── README.md
 ```
 
 This layout is what satisfies requirements §NFR-2.3.1–§NFR-2.3.4. The split between `src/` (import graph) and `public/` (copied as-is) is load-bearing — see §4.3.
 
-## 6. Worker type generation
+## 6. Typechecking (no platform stubs)
 
-Requirements §1.6 says `wrangler types` runs as part of `bun run check`. Some context for why:
+Requirements §1.6 no longer require Cloudflare Worker type generation. `bun run check` is `biome check && tsc --noEmit`. `tsconfig.json` uses `"types": ["bun"]` plus DOM libs — nothing generated from hosting config.
 
-- The `Env`, `ExportedHandler`, and `Fetcher` types referenced in `src/worker.ts` are **not** in `@cloudflare/workers-types` or any package — they are generated from `wrangler.toml` by `wrangler types`. The output goes to `worker-configuration.d.ts`.
-- The generated file reflects the current bindings (`ASSETS`, `[vars]`, any future KV/D1/R2). If `wrangler.toml` changes and `wrangler types` doesn't re-run, the TypeScript types lie.
-- Because the file is binding-shape-dependent, it's gitignored. Anyone cloning the repo runs `bunx wrangler types` before their first `tsc`.
-- `tsconfig.json` references it via `"types": ["bun", "./worker-configuration.d.ts"]` so the generated declarations are picked up.
-
-The check command order (`wrangler types && biome check && tsc --noEmit`) matters — regenerate first, then lint, then typecheck.
-
-## 7. Post-scaffold operational steps
+## 7. Post-scaffold / cutover operational steps
 
 These aren't in the requirements doc because they're one-time setup performed in dashboards, not code:
 
-1. **Create Cloudflare deploy credentials for GitHub Actions.** Required by §FR-1.7.2. In Cloudflare, create a scoped API token with Workers deploy permissions for this account/project. In GitHub repo settings, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as Actions secrets. Do not commit either value.
-2. **Add custom domain `moster.dev`** in the Cloudflare dashboard. SSL/HTTPS is automatic once the zone is attached.
-3. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
-4. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.). `scripts/build.ts`'s `cp("public", "dist", { recursive: true })` step ships them to production.
+1. **Create a Vercel project** (Hobby) with framework `Other` / `null`, build `bun run build`, output `dist/`, install `bun install`. Connect the GitHub repo `jlvmoster/website` if using Git Integration for previews.
+2. **Create a Vercel token** for GitHub Actions and store secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID` (team id), `VERCEL_PROJECT_ID`. Do not commit either value. Required by §FR-1.7.2 / §FR-1.7.5.
+3. **Add custom domain `moster.dev`** in the Vercel project. Point DNS (typically apex + `www`) at Vercel per the dashboard instructions; remove the old Cloudflare Workers custom-domain binding when ready.
+4. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
+5. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.).
 
 ## 8. CI/CD
 
-Requirements §1.7 uses GitHub Actions for both CI and CD. Pull requests get the same quality gate as before; pushes to `master` run the gate first and only then deploy through Cloudflare's official Wrangler action.
+Requirements §1.7 uses GitHub Actions for both CI and CD. Pull requests get the same quality gate as before; pushes to `master` run the gate first and only then deploy through the Vercel CLI.
 
 ### 8.1 CI on GitHub Actions
 
@@ -469,9 +453,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
       - uses: oven-sh/setup-bun@v2
       - name: Cache Bun packages
         uses: actions/cache@v5
@@ -497,9 +478,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
       - uses: oven-sh/setup-bun@v2
       - name: Cache Bun packages
         uses: actions/cache@v5
@@ -508,55 +486,54 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy to Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel deploy dist --prod --yes --token="$VERCEL_TOKEN"
 ```
 
-The workflow scopes `GITHUB_TOKEN` to `contents: read`, which is enough for checkout while leaving deploy authentication to Cloudflare secrets. The `check` job order matches the fresh-machine bootstrap in `features/tooling.md`. The cache keys include `hashFiles('bun.lock')`, so dependency or Playwright-version changes naturally create fresh caches. `setup:browsers` still runs after cache restore for the same reason §NFR-2.4.4 calls it out: do not depend on a pre-existing Playwright cache being complete or warm. `--frozen-lockfile` ensures PRs that touch dependencies also commit `bun.lock`.
-
-`actions/setup-node@v6` is provisioned before `oven-sh/setup-bun@v2` because `bun run check` invokes `wrangler types` (Node-based) and `cloudflare/wrangler-action@v3` in the `deploy` job also expects Node available on PATH. `bun run build` runs in `check` to catch bundler breakage before merge; the second `bunx playwright test -c playwright.built.config.ts` exercises the built artifact through `wrangler dev`, so PR gating covers both the dev-server and the built-artifact code paths described in `features/testing.md`.
+The workflow scopes `GITHUB_TOKEN` to `contents: read`. Node/`actions/setup-node` is no longer required — Wrangler is gone. `bun run build` runs in `check` to catch bundler breakage; `playwright.built.config.ts` exercises `dist/` via `bun run preview`.
 
 ### 8.2 CD Through GitHub Actions
 
 The `deploy` job runs only on pushes to `master`, after `check` succeeds:
 
-- Installs dependencies with `bun install --frozen-lockfile`.
-- Builds the static assets with `bun run build`.
-- Deploys with `cloudflare/wrangler-action@v3`, which runs Wrangler against the committed `wrangler.toml`.
-- Authenticates using GitHub Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+- Installs with `bun install --frozen-lockfile`.
+- Builds with `bun run build`.
+- Deploys `dist/` with `bunx vercel deploy dist --prod --yes`.
+- Authenticates using GitHub Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
 
 Branch protection should require `check` before merge. The deploy job is not a pull-request gate because it only runs on `master`.
+
+Optional: Vercel Git Integration can also deploy from GitHub. Prefer a single production path (Actions `deploy` job) so production cannot race ahead of CI (§FR-1.7.7). Preview deployments from Vercel Git on PR branches are fine.
 
 ### 8.3 Why this shape
 
 - **One pipeline surface.** CI and CD both live in GitHub Actions, so deployment cannot race ahead of the quality gate.
-- **Official deploy action.** Cloudflare documents `cloudflare/wrangler-action@v3` as the GitHub Actions path for Workers deploys.
-- **Secrets stay out of source.** The Cloudflare API token and account ID live in GitHub Actions secrets, never in committed files (§FR-1.7.5).
-- **`bun run deploy` is unchanged** (§FR-1.5.4 / §FR-1.7.6). It still works as a break-glass path when GitHub Actions is degraded, but it is not the production source of truth.
+- **Official CLI path.** Vercel documents CLI + token deploy for CI environments.
+- **Secrets stay out of source.** Token and project ids live in GitHub Actions secrets (§FR-1.7.5).
+- **`bun run deploy` is break-glass** (§FR-1.5.4 / §FR-1.7.6).
 
-### 8.4 Tradeoffs accepted for v1
+### 8.4 Tradeoffs accepted
 
-- **GitHub now holds deploy credentials.** This is the direct tradeoff for keeping CI/CD in one GitHub Actions workflow. The token must be scoped narrowly in Cloudflare and stored only as a GitHub Actions secret.
-- **Cache package artifacts, not `node_modules`.** CI caches Bun's package cache and Playwright's browser archive using exact `bun.lock` keys. Playwright notes that browser-cache restore can be comparable to download time, so this is a measured tradeoff rather than a correctness dependency. The workflow still runs `bun install --frozen-lockfile` and `bun run setup:browsers`, which keeps it reproducible on cache misses and avoids relying on a committed or restored `node_modules` tree.
+- **GitHub holds deploy credentials.** Scope the Vercel token narrowly; store only as Actions secrets.
+- **Cache package artifacts, not `node_modules`.** Same Bun + Playwright cache shape as before.
 
 ### 8.5 Lighthouse CI (retired)
 
-Automated post-deploy Lighthouse CI is not part of the pipeline (§FR-1.8.1). The workflow is `check` + `deploy` only: no `lighthouse` job, no weekly `schedule` trigger, and no `lighthouserc.json`. Core Web Vitals numbers in §NFR-2.5 remain design targets, not CI-asserted gates.
+Automated post-deploy Lighthouse CI is not part of the pipeline (§FR-1.8.1). Core Web Vitals numbers in §NFR-2.5 remain design targets, not CI-asserted gates.
 
 ## 9. Sources
 
-- [Static Assets · Cloudflare Workers docs](https://developers.cloudflare.com/workers/static-assets/)
-- [Migrate from Pages to Workers · Cloudflare Workers docs](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)
-- [GitHub Actions · Cloudflare Workers docs](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
-- [cloudflare/wrangler-action](https://github.com/cloudflare/wrangler-action)
+- [Rewrites · Vercel docs](https://vercel.com/docs/rewrites) — SPA fallback via `vercel.json`
+- [vercel.json project configuration](https://vercel.com/docs/project-configuration/vercel-json)
+- [Deploying from CLI · Vercel docs](https://vercel.com/docs/cli/deploying-from-cli)
+- [Vercel for GitHub](https://vercel.com/docs/git/vercel-for-github)
 - [Cache dependencies and build outputs in GitHub Actions](https://github.com/actions/cache)
 - [Playwright CI docs — caching browsers](https://playwright.dev/docs/ci#caching-browsers)
-- [TypeScript on Workers · Cloudflare Workers docs](https://developers.cloudflare.com/workers/languages/typescript/) — `wrangler types` and `worker-configuration.d.ts`
 - [HTML bundler · Bun docs](https://bun.com/docs/bundler/html) — clarifies that `public/` is not auto-copied
-- [Workers & Pages Pricing · Cloudflare](https://www.cloudflare.com/plans/developer-platform/)
 - [GitHub Actions billing & free-tier minutes · GitHub Docs](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
 - [oven-sh/setup-bun action](https://github.com/oven-sh/setup-bun)
 - [Core Web Vitals thresholds · web.dev](https://web.dev/articles/vitals) — LCP/CLS/INP "good" cutoffs anchoring §NFR-2.5
