@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { LayoutShell } from "./components/LayoutShell";
@@ -21,10 +22,20 @@ function ScrollToTop() {
   return null;
 }
 
+function SpeedInsightsReporter() {
+  const { pathname } = useLocation();
+  const route = /^\/articles\/[^/]+$/.test(pathname)
+    ? "/articles/[slug]"
+    : pathname;
+
+  return <SpeedInsights route={route} />;
+}
+
 export function App() {
   return (
     <LayoutShell>
       <ScrollToTop />
+      <SpeedInsightsReporter />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
