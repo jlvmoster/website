@@ -1,5 +1,6 @@
+import { computeRoute, SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useMatches } from "react-router-dom";
 import { LayoutShell } from "./components/LayoutShell";
 import { AboutPage } from "./pages/AboutPage";
 import { ArticlePage } from "./pages/ArticlePage";
@@ -21,10 +22,25 @@ function ScrollToTop() {
   return null;
 }
 
+function SpeedInsightsReporter() {
+  const { pathname } = useLocation();
+  const matches = useMatches();
+  const params: Record<string, string> = {};
+
+  for (const match of matches) {
+    for (const [key, value] of Object.entries(match.params)) {
+      if (value) params[key] = value;
+    }
+  }
+
+  return <SpeedInsights route={computeRoute(pathname, params)} />;
+}
+
 export function App() {
   return (
     <LayoutShell>
       <ScrollToTop />
+      <SpeedInsightsReporter />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
