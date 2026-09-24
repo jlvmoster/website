@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
@@ -22,13 +23,20 @@ function ScrollToTop() {
   return null;
 }
 
+function reportingRoute(pathname: string) {
+  return /^\/articles\/[^/]+$/.test(pathname) ? "/articles/[slug]" : pathname;
+}
+
 function SpeedInsightsReporter() {
   const { pathname } = useLocation();
-  const route = /^\/articles\/[^/]+$/.test(pathname)
-    ? "/articles/[slug]"
-    : pathname;
 
-  return <SpeedInsights route={route} />;
+  return <SpeedInsights route={reportingRoute(pathname)} />;
+}
+
+function WebAnalyticsReporter() {
+  const { pathname } = useLocation();
+
+  return <Analytics path={pathname} route={reportingRoute(pathname)} />;
 }
 
 export function App() {
@@ -36,6 +44,7 @@ export function App() {
     <LayoutShell>
       <ScrollToTop />
       <SpeedInsightsReporter />
+      <WebAnalyticsReporter />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />

@@ -126,7 +126,7 @@ These are not v1 requirements; the architecture must leave room for them without
 - **GP-3.2** Contact form / newsletter: `/api/contact` as a Vercel serverless or Edge Function using Resend or Loops.
 - **GP-3.3** OG image generation: `/api/og` as a Vercel Edge Function.
 - **GP-3.4** CMS: Tina or markdown-via-PR. Deferred.
-- **GP-3.5** Analytics: Vercel Analytics (or equivalent) snippet.
+- **GP-3.5** Analytics — *implemented via `@vercel/analytics` (`Analytics` from `@vercel/analytics/react`, mounted in `src/App.tsx`).*
 - **GP-3.6** Edge data: Vercel KV / Blob (or similar) when dynamic features need persistence.
 - **GP-3.7** RSS feed: `/feed.xml` generated at build time or via a small `/api/feed` function reading the same article loader.
 - **GP-3.8** Per-route metadata — *implemented in v2 via React 19 native `<title>` / `<meta>` (see §FR-1.2.9). No external library was added.*
