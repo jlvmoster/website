@@ -34,7 +34,8 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
   - This is the same gate that enforces §FR-1.7.1's "PR cannot merge until CI is green"; the migration to host-owned CD just makes it the *only* gate.
 - **Vercel Git Integration:**
   - Install the [Vercel GitHub App](https://github.com/apps/vercel) and link the repo to the Vercel project. No tokens, org ids, or project ids are stored anywhere in GitHub.
-  - Push to `master` → production deploy. Push to any PR branch → preview deploy, which is a useful extra acceptance surface (see `features/testing.md`).
+  - Push to `master` → production deploy. Push to any PR branch → preview deploy.
+  - Preview URLs are **not** an automated acceptance surface as configured: the project has Deployment Protection set to `all_except_custom_domains`, so `*.vercel.app` URLs redirect to Vercel's login page and `bun run test:e2e:production` fails on every assertion. Pointing it at a preview would require a Protection Bypass for Automation secret; not worth adding until something needs it.
   - Vercel builds from the repo root, so the committed `vercel.json` (rewrites + security headers) applies. A build that uploads only `dist/` would *not* pick up `vercel.json` — that is why nothing in this repo runs `vercel deploy dist`.
 - **Failure semantics:**
   - CI failure on a PR → branch protection blocks the merge, so the commit never reaches `master` and never deploys.

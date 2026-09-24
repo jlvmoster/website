@@ -98,7 +98,7 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 - **Unit:** `bun test` — specs colocated with source or under `tests/`. The smoke spec renders `<App />` inside `<MemoryRouter initialEntries={["/"]}>` and asserts the verbatim hero substring + three social URLs.
 - **Dev E2E:** `bun run test:e2e` against `bun run dev`. Coverage: every route loads, hero copy renders verbatim on `/`, theme toggle cycles + persists, footer renders on every route, SPA fallback handles unknown paths.
 - **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `bun run preview`, and verifies SPA fallback for hard-refreshes on each deep link.
-- **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`, plus the `vercel.json` security headers — `scripts/preview.ts` does not serve those, so this is the only place they're verified. Point it at a Vercel preview URL to check a deployment before promoting it.
+- **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`, plus the `vercel.json` security headers — `scripts/preview.ts` does not serve those, so this is the only place they're verified. It needs a URL Vercel serves unauthenticated: Deployment Protection is on for everything except custom domains, so `*.vercel.app` preview URLs redirect to a login page and every assertion fails.
 - A fresh machine can recreate the full test environment with `bun install && bun run setup:browsers`.
 
 ## Deployment

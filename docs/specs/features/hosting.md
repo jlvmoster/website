@@ -30,7 +30,7 @@ Static SPA hosting on Vercel: `vercel.json` build/output settings, SPA rewrites 
 ## Test plan
 - **Pre-deploy smoke:** `bun run build && bun run preview` serves the built site without errors.
 - **E2E:** request `/some-unknown-path` returns the SPA shell (status 200, body contains `<div id="root">`).
-- **Headers:** `bun run test:e2e:production` asserts each `vercel.json` header on the deployed origin. Nothing local can substitute.
+- **Headers:** `bun run test:e2e:production` asserts each `vercel.json` header on the deployed origin. Nothing local can substitute. Run it against the custom domain — Deployment Protection blocks `*.vercel.app`.
 - **Type check:** `bun run check` passes without `wrangler types`.
 
 ## Open questions
