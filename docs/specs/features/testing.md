@@ -13,9 +13,9 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 ## File layout
 - `tests/smoke.test.ts` — unit-level smoke test for the App shell.
 - `tests/e2e/site.e2e.ts` — Playwright spec covering local dev-server behavior.
-- `tests/e2e/built.e2e.ts` — Playwright spec covering built output via `bun run preview`.
+- `tests/e2e/built.e2e.ts` — Playwright spec covering built output via `bun run preview` (`scripts/preview.ts` on port 4173).
 - `tests/e2e/production.e2e.ts` — optional production smoke spec for `moster.dev` after deploy.
-- `playwright.config.ts` — Playwright config at repo root.
+- `playwright.config.ts` / `playwright.built.config.ts` — Playwright configs at repo root.
 
 ## Behavior & edge cases
 - **`bun test`:**
@@ -37,7 +37,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
   - Out of scope per the requirements: full-DOM snapshots, visual regression, multi-browser matrix.
   - Additional v2 assertions:
     - Navigate to each route (`/about`, `/articles`, `/projects`, `/uses`) via Header NavLinks; verify no full reload (scroll-position trick) and URL updates.
-    - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses`: each returns 200 and the page renders (Workers SPA fallback).
+    - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses`: each returns 200 and the page renders (Vercel / preview SPA fallback).
     - Theme toggle: click cycles `html.dark`; reload persists the choice via `localStorage["theme"]`.
     - `/about` renders an `<img src="/images/portrait.jpg">`.
     - `/articles` renders ≥ 1 article card; clicking it navigates to `/articles/:slug`.

@@ -7,6 +7,21 @@ test("production serves the SPA shell over HTTPS", async ({ page }) => {
   await expect(page.locator("#root")).toBeAttached();
 });
 
+// The only check that the vercel.json `headers` block is actually live —
+// scripts/preview.ts does not serve them, so built.e2e.ts cannot cover this.
+test("production sends the vercel.json security headers", async ({
+  request,
+}) => {
+  const headers = (await request.get("/")).headers();
+  expect(headers["strict-transport-security"]).toContain("max-age=");
+  expect(headers["content-security-policy"]).toContain("default-src 'self'");
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-frame-options"]).toBe("DENY");
+  expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(headers["cross-origin-opener-policy"]).toBe("same-origin");
+  expect(headers["permissions-policy"]).toContain("camera=()");
+});
+
 test("production renders the canonical hero copy verbatim", async ({
   page,
 }) => {

@@ -23,7 +23,7 @@ Per-route `<title>` and `<meta name="description">` for every route on moster.de
 
 ## Why no `react-helmet` / `react-helmet-async`
 - React 19 already does what Helmet does for `<title>` / `<meta>` / `<link>`. Adding Helmet would be a dependency for behavior the framework now provides.
-- The HTTP security headers in `src/worker.ts` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options, CSP) cannot be set via `<meta>` at all (most) or would not cover pre-`<meta>` script execution (CSP). Helmet does not help with these.
+- The HTTP security headers in `vercel.json` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options, CSP) cannot be set via `<meta>` at all (most) or would not cover pre-`<meta>` script execution (CSP). Helmet does not help with these.
 - Per CLAUDE.md "Hard rules": no third-party UI/component libraries beyond `react-router-dom`, `clsx`, and `@tailwindcss/typography`.
 
 ## Test plan

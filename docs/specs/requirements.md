@@ -8,7 +8,7 @@ This document is the authoritative source of truth for what the implementation m
 > - §FR-1.2.1.a Hero copy (the "my pleasure" Chick-fil-A tie-in) stays verbatim.
 > - §FR-1.3.3 System-stack fonts only — no hosted fonts.
 > - §NFR-2.1.2 No Next.js, no Vite, no MDX runtime.
-> - §FR-1.4.x Workers + Static Assets deployment shape.
+> - §FR-1.4.x Vercel static hosting for the Bun-built SPA (`dist/`).
 > - §FR-1.5.x Bun HTML bundler + scripts/build.ts copy step.
 > - The Husky `.husky/pre-commit` hook stays.
 
@@ -18,7 +18,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.1.3** Each page is a routed component under `src/pages/`; sections are subcomponents that can be lifted to their own route later without rewriting.
 - **FR-1.1.4** Client-side routing uses `react-router-dom`. The router lives in `src/main.tsx`/`src/App.tsx` and routes are statically declared. (Note: the v1 wording of this ID has been flipped — routing is now in.)
 - **FR-1.1.5** Routes registered with `react-router-dom`: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`. A wildcard route renders a minimal NotFoundPage.
-- **FR-1.1.6** Deep links to any route serve the SPA shell via Workers `not_found_handling = "single-page-application"` (§FR-1.4.3) and react-router resolves the route client-side.
+- **FR-1.1.6** Deep links to any route serve the SPA shell via Vercel rewrites to `index.html` (§FR-1.4.3) and react-router resolves the route client-side.
 - **FR-1.1.7** Navigation between routes does not trigger a full document load. In-app links use `Link` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`.
 - **FR-1.1.8** The Header is fixed across all routes. Home (`/`) shows a large avatar that scales from 64px to 36px on scroll; other routes show the avatar at 36px from page load.
 - **FR-1.1.9** The Footer is present across all routes and contains NavLinks for About / Articles / Projects / Uses plus a copyright line.
@@ -57,36 +57,35 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.3.8** The Header's avatar scroll effect is implemented in vanilla JS via a `useEffect` on the Home route that sets CSS custom properties (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`) on `document.documentElement` in response to scroll/resize events. React does not re-render on scroll.
 
 ### 1.4 Deployment
-- **FR-1.4.1** The site deploys to Cloudflare Workers with Static Assets (not Pages).
-- **FR-1.4.2** The Worker exposes a pass-through `fetch` handler in `src/worker.ts` that defers to `env.ASSETS.fetch(req)`.
-- **FR-1.4.3** SPA fallback is enabled: unknown paths serve `index.html` (`not_found_handling = "single-page-application"`).
-- **FR-1.4.4** The site is served from the custom domain `moster.dev` with automatic HTTPS.
-- **FR-1.4.5** A single `wrangler.toml` configures both static assets and any future dynamic routes — no Pages-style "Functions" split.
+- **FR-1.4.1** The site deploys to Vercel as a static SPA built from `dist/` (not Cloudflare Workers, not Cloudflare Pages, not Next.js).
+- **FR-1.4.2** Hosting configuration lives in `vercel.json` (build command, output directory, SPA rewrites, security headers). There is no Worker entrypoint.
+- **FR-1.4.3** SPA fallback is enabled: unknown paths rewrite to `index.html` so client routes resolve after mount.
+- **FR-1.4.4** The site is served from the custom domain `moster.dev` with automatic HTTPS (configured in the Vercel project after DNS cutover).
+- **FR-1.4.5** Future dynamic routes (contact form, OG images, RSS) use Vercel serverless or Edge Functions under `/api/*`, not a Cloudflare Worker.
 
 ### 1.5 Build and dev loop
 - **FR-1.5.1** `bun run dev` starts a local server via `Bun.serve` with HMR (`scripts/dev.ts`).
 - **FR-1.5.2** `bun run build` invokes `scripts/build.ts`, which calls `Bun.build()` on `src/index.html`, writes to `dist/`, and then copies `public/` → `dist/` (the HTML bundler does not auto-copy `public/`).
-- **FR-1.5.3** `bun run preview` runs the production-equivalent Workers runtime via `wrangler dev`.
-- **FR-1.5.4** `bun run deploy` ships `dist/` via `wrangler deploy`.
-- **FR-1.5.5** `bun run check` runs `wrangler types && biome check && tsc --noEmit`.
+- **FR-1.5.3** `bun run preview` serves the built `dist/` locally via `scripts/preview.ts` (`Bun.serve` + SPA fallback), matching production rewrite semantics for deep links.
+- **FR-1.5.4** There is no committed deploy script. Vercel owns the production build, so break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
+- **FR-1.5.5** `bun run check` runs `biome check && tsc --noEmit`.
 - **FR-1.5.6** `bun test` runs unit tests.
 - **FR-1.5.7** `scripts/build.ts` and `scripts/dev.ts` continue to copy `public/` → `dist/` so `public/images/{avatar,portrait}.jpg`, `public/images/logos/`, and `public/cv.pdf` ride along to production.
 
-### 1.6 Type generation
-- **FR-1.6.1** Worker runtime types (`Env`, `ExportedHandler`, `Fetcher`) are generated by `bunx wrangler types` into `worker-configuration.d.ts`.
-- **FR-1.6.2** `tsconfig.json` lists `"./worker-configuration.d.ts"` alongside `"bun"` in `types` so generated types resolve.
-- **FR-1.6.3** `worker-configuration.d.ts` is gitignored; type generation is part of `bun run check` and CI.
+### 1.6 Platform types
+- **FR-1.6.1** No platform-generated Worker/runtime type stubs are required. TypeScript uses Bun + DOM lib types only (`tsconfig.json` `"types": ["bun"]`).
 
 ### 1.7 CI/CD
 - **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. A PR cannot merge until CI is green.
-- **FR-1.7.2** Pushes to `master` trigger an automated production deploy through GitHub Actions after CI passes. Production releases must not require an interactive `bun run deploy` from a developer's machine.
-- **FR-1.7.3** CI and CD both run on GitHub Actions. Deploys use Cloudflare's official `cloudflare/wrangler-action@v3`.
+- **FR-1.7.2** Pushes to `master` deploy to production automatically. Production releases must not require an interactive deploy from a developer's machine.
+- **FR-1.7.3** There is exactly one production deploy path: Vercel Git Integration (the Vercel GitHub App), which builds from the repo root so `vercel.json` applies. GitHub Actions runs CI only — the workflow has no deploy job.
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
-- **FR-1.7.5** Cloudflare API credentials needed for deploys are stored only as GitHub Actions secrets (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) and are never committed to the repository.
-- **FR-1.7.6** `bun run deploy` remains supported as a break-glass path (§FR-1.5.4) but is not the production source of truth.
+- **FR-1.7.5** No deploy credentials exist in the repository or in GitHub Actions secrets. Git Integration authenticates through the Vercel GitHub App.
+- **FR-1.7.6** Manual `bunx vercel --prod` (§FR-1.5.4) remains available as break-glass but is not the production source of truth.
+- **FR-1.7.7** Two dashboard settings gate production. GitHub branch protection requires the `check` job before a pull request merges to `master`. Vercel Deployment Checks include that same `check` workflow so a push to the production branch is not promoted while `check` is pending or red. Branch protection alone does not hold the Vercel promotion.
 
 ### 1.8 Performance monitoring
-- **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. Production deploys end at the `deploy` job; there is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
+- **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. There is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
 
 ## 2. Non-functional requirements
 
@@ -97,15 +96,15 @@ This document is the authoritative source of truth for what the implementation m
 - **NFR-2.1.4** TypeScript is in strict mode with `react-jsx` and bundler resolution.
 
 ### 2.2 Hosting and cost
-- **NFR-2.2.1** Hosting must stay within Cloudflare's free tier for v1 (unlimited static bandwidth, ≤100K dynamic Worker req/day, ≤20,000 files per deployment). Cloudflare Workers Builds minutes are not applicable because production deploys run through GitHub Actions.
-- **NFR-2.2.2** No paid third-party services are introduced for v1.
-- **NFR-2.2.3** CI/CD stays within GitHub Actions' free tier where possible (unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free). Cloudflare hosting remains on the Workers free tier.
+- **NFR-2.2.1** Hosting must stay within Vercel's Hobby (free) tier for a personal static site where possible (bandwidth and build minutes as published by Vercel). No Cloudflare Workers free-tier ceilings apply after cutover.
+- **NFR-2.2.2** No paid third-party services are introduced for v1 beyond what Hobby covers.
+- **NFR-2.2.3** CI/CD stays within GitHub Actions' free tier where possible (unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free). Production hosting is on Vercel Hobby.
 
 ### 2.3 Project layout
-- **NFR-2.3.1** Source lives under `src/` with subdirectories `components/`, `content/`, `lib/`, `styles/`, plus the entry files `index.html`, `main.tsx`, `App.tsx`, and `worker.ts`.
+- **NFR-2.3.1** Source lives under `src/` with subdirectories `components/`, `content/`, `lib/`, `styles/`, plus the entry files `index.html`, `main.tsx`, and `App.tsx`.
 - **NFR-2.3.2** Static assets that are not part of the bundler import graph live under `public/`.
-- **NFR-2.3.3** Build/dev entry scripts live under `scripts/`.
-- **NFR-2.3.4** `dist/` and `.wrangler/` are gitignored.
+- **NFR-2.3.3** Build/dev entry scripts live under `scripts/` (`dev.ts`, `build.ts`, `preview.ts`).
+- **NFR-2.3.4** `dist/` and `.vercel/` are gitignored.
 
 ### 2.4 Quality gates
 - **NFR-2.4.1** At least one smoke test exists under `tests/` (per the build checklist).
@@ -124,12 +123,12 @@ These are design targets, not CI-asserted gates (automated Lighthouse CI was ret
 
 These are not v1 requirements; the architecture must leave room for them without restructuring.
 - **GP-3.1** Blog with MDX — deferred (currently using typed TSX modules per §FR-1.2.8 instead of MDX).
-- **GP-3.2** Contact form / newsletter: `/api/contact` branch in `src/worker.ts` using Resend or Loops.
-- **GP-3.3** OG image generation: `/api/og` branch using `workers-og`.
+- **GP-3.2** Contact form / newsletter: `/api/contact` as a Vercel serverless or Edge Function using Resend or Loops.
+- **GP-3.3** OG image generation: `/api/og` as a Vercel Edge Function.
 - **GP-3.4** CMS: Tina or markdown-via-PR. Deferred.
-- **GP-3.5** Analytics: Cloudflare Web Analytics snippet.
-- **GP-3.6** Edge data: Workers KV / D1 / R2 wired through `wrangler.toml`.
-- **GP-3.7** RSS feed: `/feed.xml` generated by a Worker fetch handler that reads the same article loader.
+- **GP-3.5** Analytics: Vercel Analytics (or equivalent) snippet.
+- **GP-3.6** Edge data: Vercel KV / Blob (or similar) when dynamic features need persistence.
+- **GP-3.7** RSS feed: `/feed.xml` generated at build time or via a small `/api/feed` function reading the same article loader.
 - **GP-3.8** Per-route metadata — *implemented in v2 via React 19 native `<title>` / `<meta>` (see §FR-1.2.9). No external library was added.*
 
 ## 4. Out of scope (v1)
@@ -147,9 +146,9 @@ Auth, database, comments, search, i18n, custom font hosting, MDX runtime, image 
 | Contact email | `jalo@moster.dev` |
 | Hero copy | "Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio." |
 | Typography | System stack only |
-| Hosting | Cloudflare Workers + Static Assets |
+| Hosting | Vercel (static SPA from Bun `dist/`) |
 | Theme toggle | Spotlight-style light/dark switch; persisted in `localStorage["theme"]`; default `system` |
-| CI / CD | GitHub Actions for both CI and CD; deploy via `cloudflare/wrangler-action@v3` |
+| CI / CD | GitHub Actions for CI; Vercel Git Integration for CD |
 | Avatar image | `public/images/avatar.jpg` |
 | Portrait image | `public/images/portrait.jpg` |
 | Color palette | Zinc + Chick-fil-A red accent |
@@ -159,13 +158,14 @@ Auth, database, comments, search, i18n, custom font hosting, MDX runtime, image 
 The v2 release is complete when *all* of the following hold:
 - [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS assets, and the contents of `public/` (including `public/images/` and `public/cv.pdf`).
 - [ ] `bun run dev` serves the site locally with HMR.
-- [ ] `bun run preview` serves the built site through `wrangler dev`.
-- [ ] `bun run deploy` publishes the site; `moster.dev` resolves over HTTPS and returns the SPA.
-- [ ] `bun run check` passes (wrangler types regen + biome + `tsc --noEmit`).
+- [ ] `bun run preview` serves the built site from `dist/` with SPA fallback.
+- [ ] Vercel builds and promotes `master` automatically; `moster.dev` resolves over HTTPS and returns the SPA (after DNS cutover).
+- [ ] `bun run test:e2e:production` passes, including the `vercel.json` security headers — the only proof that the hosting config is live.
+- [ ] `bun run check` passes (biome + `tsc --noEmit`).
 - [ ] `bun test` passes; smoke test asserts the verbatim hero substring.
 - [ ] Playwright E2E suite passes the minimum coverage (§NFR-2.4.3).
 - [ ] All six routes load: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
-- [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Workers SPA fallback.
+- [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Vercel SPA rewrite.
 - [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
 - [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
 - [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 64px and scales to 36px on scroll.
@@ -173,4 +173,4 @@ The v2 release is complete when *all* of the following hold:
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
 - [ ] Footer renders on every route.
 - [ ] Each route swaps `document.title` to its own value per §FR-1.2.9 (e.g., visiting `/about` updates the tab title to "About — Jalo Moster").
-- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. On push to `master`, CD deploys via `cloudflare/wrangler-action@v3`.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is required by GitHub branch protection on `master` and by a Vercel Deployment Check, and a push to `master` produces a Vercel production deploy.

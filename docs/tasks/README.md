@@ -2,6 +2,8 @@
 
 Ordered task list for implementing `docs/specs/` into a working v1 site. Each task is a self-contained step with prereqs, actionable steps, expected outputs, and verification commands.
 
+> **This playbook is a historical record of how the site was built.** All 13 tasks are done, and tasks written before the Cloudflare → Vercel cutover still describe Wrangler steps. Where a task and a spec disagree, `docs/specs/` wins — start there instead.
+
 ## How to use
 
 1. Read `docs/specs/requirements.md` and `docs/specs/architecture.md` first — they are the source of truth. The tasks here orchestrate *order* and *gates*; they do not restate spec content.
@@ -15,7 +17,7 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 | # | Task | Source spec(s) |
 |---|---|---|
 | 01 | [Tooling & TS config](./01-tooling.md) | `features/tooling.md` |
-| 02 | [Worker config & types](./02-worker-config.md) | `features/worker.md` |
+| 02 | [Hosting config (Vercel)](./02-hosting-config.md) | `features/hosting.md` |
 | 03 | [Theming & global styles](./03-theming.md) | `features/theming.md`, `features/theme-toggle.md` |
 | 04 | [App shell & router](./04-app-shell.md) | `features/routing.md` |
 | 05 | [Layout primitives](./05-layout-primitives.md) | `features/layout-shell.md`, `features/iconography.md` |
@@ -31,9 +33,9 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 ## Hard rules (v2)
 
 - Never paraphrase the hero copy. "my pleasure" stays verbatim.
-- Never reintroduce Pages-based hosting. Workers + Static Assets only.
+- Never reintroduce Cloudflare Workers / Pages hosting. Vercel is the chosen host.
 - Never add Next.js, Vite, MDX, or a third-party UI component library (shadcn, Radix, MUI). `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
-- Worker types live in the gitignored `worker-configuration.d.ts`. Regenerate after `wrangler.toml` changes.
+- Hosting config lives in `vercel.json` (SPA rewrites + headers). Local preview is `scripts/preview.ts`.
 - The avatar/portrait/logos/CV PDF live under `public/` and ride along via `scripts/build.ts`.
 - Pre-approved Bash: `bun *`, `bunx *`, `git *`. Other tools may prompt.
 

@@ -35,10 +35,10 @@ export const uses: UsesCategory[] = [
           "Replaces Node, npm, ts-node, jest, esbuild, and a handful of other tools with one fast runtime.",
       },
       {
-        title: "Cloudflare Workers + Static Assets",
-        href: "https://developers.cloudflare.com/workers/static-assets/",
+        title: "Vercel",
+        href: "https://vercel.com",
         description:
-          "How this site is hosted. Free tier covers a personal site comfortably and the dynamic surface is already wired up for when I need it.",
+          "How this site is hosted. Static SPA from the Bun build, SPA rewrites for client routes, and room to grow into serverless functions when I need them.",
       },
       {
         title: "Claude Code",

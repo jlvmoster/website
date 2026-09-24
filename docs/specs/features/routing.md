@@ -1,20 +1,21 @@
 # Routing — Implementation Spec
 
 ## Goal
-Single source of truth for the router config and the SPA-fallback handshake with Workers.
+Single source of truth for the router config and the SPA-fallback handshake with Vercel.
 
 ## Requirements covered
 - §FR-1.1.4 — `react-router-dom` is the routing library.
 - §FR-1.1.5 — Six declared routes + wildcard NotFound.
-- §FR-1.1.6 — Workers `not_found_handling = "single-page-application"` returns `index.html` for any non-asset deep link; the client router resolves the URL after mount.
+- §FR-1.1.6 — Vercel rewrites unknown paths to `index.html`; the client router resolves the URL after mount.
 - §FR-1.1.7 — In-app navigation uses `<Link>`; external uses plain `<a>`.
 
 ## File layout
 - `src/main.tsx` — `BrowserRouter` wrap.
 - `src/App.tsx` — `<Routes>` + LayoutShell.
 - `src/pages/*.tsx` — one file per route.
-- `wrangler.toml` — `not_found_handling = "single-page-application"` (existing).
+- `vercel.json` — `rewrites` to `/index.html` (existing).
 - `scripts/dev.ts` — already serves `index.html` for unknown paths (existing).
+- `scripts/preview.ts` — SPA fallback for built `dist/`.
 
 ## Behavior & edge cases
 - Use `BrowserRouter` from `react-router-dom@^7`.
@@ -26,7 +27,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - `/projects` → `<ProjectsPage />`
   - `/uses` → `<UsesPage />`
   - `*` → `<NotFoundPage />`
-- Hard refresh on any of the six static routes returns 200 from Workers via SPA fallback; the client router then renders the right page.
+- Hard refresh on any of the six static routes returns 200 from Vercel via SPA rewrite; the client router then renders the right page.
 - `<NotFoundPage>` is a minimal component (heading + link back to `/`).
 - `<Link>` for in-app navigation. External links (`href` starts with `http`) use plain `<a target="_blank" rel="noopener noreferrer">`.
 
@@ -42,4 +43,4 @@ Single source of truth for the router config and the SPA-fallback handshake with
 
 ## Open questions
 - Wildcard 404: minimal NotFoundPage (default) vs. redirect to `/`.
-- Use BrowserRouter (default, History API) vs. HashRouter (no Workers SPA fallback needed). Default: BrowserRouter — Workers already handles SPA fallback.
+- Use BrowserRouter (default, History API) vs. HashRouter (no SPA rewrite needed). Default: BrowserRouter — Vercel already handles SPA rewrite.

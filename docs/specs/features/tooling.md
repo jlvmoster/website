@@ -4,8 +4,8 @@
 The non-runtime config that makes the project install, build, lint, type-check, and run scripts uniformly.
 
 ## Requirements covered
-- §FR-1.5.4 — `bun run deploy` ships `dist/` via `wrangler deploy`.
-- §FR-1.5.5 — `bun run check` runs `wrangler types && biome check && tsc --noEmit`.
+- §FR-1.5.4 — No committed deploy script; Vercel owns the production build.
+- §FR-1.5.5 — `bun run check` runs `biome check && tsc --noEmit`.
 - §FR-1.5.6 — `bun test` runs unit tests.
 - §NFR-2.1.1 — Bun is the package manager, dev server, bundler, test runner.
 - §NFR-2.1.3 — Biome is the single lint + format tool.
@@ -15,10 +15,10 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 ## File layout
 - `package.json` — `scripts` block + deps + `"prepare": "husky"`.
 - `.husky/pre-commit` — shell script that runs `bun run check`.
-- `tsconfig.json` — already strict; ensure `types: ["bun", "./worker-configuration.d.ts"]`.
+- `tsconfig.json` — already strict; `"types": ["bun"]`.
 - `biome.json` — formatter + linter config.
 - `bunfig.toml` — Bun-specific config; registers `bun-plugin-tailwind` under `[serve.static]`.
-- `package.json` — adds `react-router-dom@^7` (runtime) and `@tailwindcss/typography@^0.5` (dev). Optionally `clsx@^2` (runtime) — see open questions.
+- No hosting CLI is a dependency. Vercel deploys through Git Integration, so the CLI is not needed to ship; ad-hoc use is `bunx vercel …`.
 
 ## Behavior & edge cases
 - `package.json` scripts (canonical):
@@ -27,11 +27,10 @@ The non-runtime config that makes the project install, build, lint, type-check, 
     "scripts": {
       "dev": "bun --hot ./scripts/dev.ts",
       "build": "bun ./scripts/build.ts",
-      "preview": "wrangler dev",
-      "deploy": "wrangler deploy",
+      "preview": "bun ./scripts/preview.ts",
       "test": "bun test",
       "setup:browsers": "playwright install chromium",
-      "check": "wrangler types && biome check && tsc --noEmit",
+      "check": "biome check && tsc --noEmit",
       "prepare": "husky"
     }
   }
@@ -41,15 +40,14 @@ The non-runtime config that makes the project install, build, lint, type-check, 
   - `strict: true`, `noUncheckedIndexedAccess: true` (recommended), `noImplicitOverride: true`.
   - `jsx: "react-jsx"`, `moduleResolution: "bundler"`, `module: "Preserve"`, `target: "ESNext"`.
   - `verbatimModuleSyntax: true` — pairs with `module: "Preserve"`, Bun's modern idiomatic combination.
-  - `types: ["bun", "./worker-configuration.d.ts"]` — both entries required.
+  - `types: ["bun"]`.
   - `lib: ["ESNext", "DOM", "DOM.Iterable"]`.
 - `biome.json`:
   - Enable formatter + linter with Biome's recommended ruleset (no rule overrides).
-  - `files.includes`: include `**`, then negate `dist`, `.wrangler`, `worker-configuration.d.ts`, `node_modules` (Biome 2.x folder-ignore form; no trailing `/**`).
+  - `files.includes`: include `**`, then negate `dist`, `.vercel`, `node_modules` (Biome 2.x folder-ignore form; no trailing `/**`).
   - Formatter: 2-space indent, double quotes, trailing commas `"all"`.
 - `bunfig.toml`:
   - `[serve.static] plugins = ["bun-plugin-tailwind"]` — registers Tailwind v4 with Bun's HTML bundler.
-- Wrangler is installed as a dev dependency so `bunx wrangler …` works offline against the lockfile version.
 - Fresh development environment bootstrap on any new machine or CI worker:
   1. `bun install`
   2. `bun run setup:browsers`

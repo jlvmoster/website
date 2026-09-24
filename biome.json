@@ -7,13 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "**",
-      "!dist",
-      "!.wrangler",
-      "!worker-configuration.d.ts",
-      "!node_modules"
-    ]
+    "includes": ["**", "!dist", "!.vercel", "!node_modules"]
   },
   "formatter": {
     "enabled": true,
