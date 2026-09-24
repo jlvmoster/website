@@ -22,7 +22,7 @@ The whole personal site should fit Vercel Hobby + GitHub Actions free tier (requ
 - **GitHub Actions free tier:** unlimited minutes on public repos; 2,000 Ubuntu minutes/month on private free accounts. The workflow is intentionally small enough to fit.
 - **No Cloudflare Workers free-tier ceilings** apply after cutover (those were the previous budget).
 
-These shape a few decisions: keep the site static until a real `/api/*` need appears, and keep CI/CD lean (check + deploy only).
+These shape a few decisions: keep the site static until a real `/api/*` need appears, and keep CI to a single `check` job. Vercel owns the deploy.
 
 ## 3. Deployment surfaces
 
@@ -410,10 +410,10 @@ Requirements §1.6 no longer require Cloudflare Worker type generation. `bun run
 These aren't in the requirements doc because they're one-time setup performed in dashboards, not code:
 
 1. **Create a Vercel project** (Hobby) with framework `Other` / `null` and install the [Vercel GitHub App](https://github.com/apps/vercel) on `jlvmoster/website`. Git Integration is the production deploy path (§FR-1.7.3), so the link is required, not optional. Build settings come from the committed `vercel.json`, which overrides the dashboard — leave the dashboard fields empty rather than keeping a second copy that silently does nothing.
-2. **Make `check` a required status check on `master`** in GitHub branch protection. Vercel builds the moment a commit lands, so this is the only thing standing between an un-tested push and production (§FR-1.7.7). No deploy tokens or secrets are needed anywhere.
+2. **Require `check` in two dashboards** (§FR-1.7.7). GitHub branch protection on `master` blocks a red pull request. Vercel → Project Settings → Deployment Checks → GitHub → the `check` workflow holds the production alias, because Vercel builds as soon as the production branch updates and does not read the GitHub ruleset. No deploy tokens.
 3. **Confirm the project's Production Branch is `master`.** Now that Git Integration owns production, that setting is what decides which branch reaches users; every other branch must resolve to a preview. Check it explicitly on a freshly linked project: Vercel promotes the *first* deployment it ever builds to production regardless of branch, which makes the dashboard briefly look as though any branch deploys to production.
 4. **Add custom domain `moster.dev`** in the Vercel project. Point DNS (typically apex + `www`) at Vercel per the dashboard instructions; remove the old Cloudflare Workers custom-domain binding when ready. The custom domain also matters for testing: Deployment Protection is set to `all_except_custom_domains`, so `bun run test:e2e:production` only works against `moster.dev`.
-5. **Delete any local `worker-configuration.d.ts`** — one-time, on machines that ran the project on Cloudflare. It was gitignored before the cutover and is not regenerated now, but nothing ignores it any more, so a stale copy makes `bun run check` fail on Biome's `noExplicitAny`.
+5. **`worker-configuration.d.ts` stays gitignored.** Nothing generates it. A leftover copy from the Workers era fails Biome's `noExplicitAny` if the ignore is removed.
 6. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
 7. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.).
 
@@ -470,7 +470,7 @@ Production deploys are not in this repo. The Vercel GitHub App watches `jlvmoste
 - Vercel builds from the **repo root**, which is the point: `vercel.json` is at the root, so rewrites and security headers are part of every deployment (§4.1).
 - Authentication is the GitHub App. No tokens, org ids, or project ids exist in the repo or in Actions secrets (§FR-1.7.5).
 
-The gate is GitHub branch protection: `check` is a required status check on `master` (§FR-1.7.7), so every commit that lands there has already passed CI before Vercel sees it.
+GitHub branch protection stops a red pull request from merging. Vercel does not read that ruleset: it builds the production branch immediately. A Deployment Check on the `check` workflow holds the production alias until CI is green (§FR-1.7.7).
 
 ### 8.3 Why this shape
 
@@ -481,7 +481,7 @@ The gate is GitHub branch protection: `check` is a required status check on `mas
 
 ### 8.4 Tradeoffs accepted
 
-- **The gate moves from job ordering to branch protection.** With `needs: check`, an un-tested `master` push simply skipped the deploy; now Vercel starts building immediately, so the required status check is doing real work. It is a repo setting rather than a committed file, which is the one thing this shape gives up. `features/ci-cd.md`'s test plan checks it explicitly.
+- **The gate is two dashboard settings, not job ordering.** With `needs: check`, an un-tested `master` push skipped the deploy. Vercel starts building immediately, and GitHub branch protection does not pause it. The Vercel Deployment Check is what holds promotion. Both settings live outside the repo. `features/ci-cd.md`'s test plan checks them.
 - **Build logs live in two places.** CI output in Actions, build/deploy output in the Vercel dashboard.
 - **Cache package artifacts, not `node_modules`.** Same Bun + Playwright cache shape as before.
 

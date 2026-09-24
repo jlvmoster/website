@@ -41,3 +41,6 @@ playwright/.cache
 
 # Vercel
 .vercel/
+
+# Stale Wrangler output from before the Vercel cutover. Biome lints it if it is not ignored.
+worker-configuration.d.ts

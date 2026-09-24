@@ -108,7 +108,7 @@ Two systems, one job each:
 - **GitHub Actions** runs the `check` job on every PR and push: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`. It never deploys.
 - **Vercel Git Integration** deploys. Push to `master` → production; push to a PR branch → preview. Vercel builds from the repo root so the committed `vercel.json` (SPA rewrites + security headers) applies.
 
-The gate is branch protection: `check` is a required status check on `master`, so nothing reaches production without green CI. No deploy credentials exist in the repo or in Actions secrets — the Vercel GitHub App authenticates. Break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
+GitHub branch protection should require `check` before a pull request merges. Vercel does not read that ruleset: add the `check` workflow under the project's Deployment Checks or a push to the production branch promotes while CI is still running. Confirm the Production Branch is `master`. No deploy credentials exist in the repo or in Actions secrets — the Vercel GitHub App authenticates. Break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
 
 ## Docs
 

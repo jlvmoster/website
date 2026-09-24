@@ -10,7 +10,7 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
 - §FR-1.7.4 — Workflow files committed under `.github/workflows/`.
 - §FR-1.7.5 — No deploy credentials in the repo or in Actions secrets; the Vercel GitHub App authenticates.
 - §FR-1.7.6 — Manual `bunx vercel --prod` remains available as break-glass only.
-- §FR-1.7.7 — `check` is a required status check on `master`; that gate is what keeps un-tested commits out of production.
+- §FR-1.7.7 — `check` is a required GitHub status check on `master`, and a Vercel Deployment Check on that workflow holds production promotion.
 - §NFR-2.2.3 — CI/CD stays within GitHub Actions' free tier where possible.
 - §NFR-2.4.4 — CI workers run Playwright's Chromium installer on every run, after restoring the browser cache if available, so E2E does not depend on a pre-existing cache.
 
@@ -29,9 +29,10 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
   - Do not cache `node_modules`; keep `bun install --frozen-lockfile` as the source of truth.
   - Keep `bun run setup:browsers` after the Playwright cache restore so CI works on cold caches.
   - `permissions: contents: read` — checkout is all `GITHUB_TOKEN` needs now that nothing deploys.
-- **Required status check (load-bearing):**
-  - `check` must be a required status check on `master` in GitHub branch protection (§FR-1.7.7). Vercel starts building the moment a commit lands on `master`, so branch protection — not job ordering — is what stops an un-tested commit from reaching production.
-  - This is the same gate that enforces §FR-1.7.1's "PR cannot merge until CI is green"; the migration to host-owned CD just makes it the *only* gate.
+- **Production gate (load-bearing, §FR-1.7.7):**
+  - GitHub branch protection requires `check` on `master`. That blocks a red pull request. It does not pause Vercel.
+  - Vercel Deployment Checks include the `check` workflow (Project Settings → Deployment Checks → GitHub). Vercel still builds when the production branch updates; the check holds the production alias until `check` is green.
+  - Branch protection is also what enforces §FR-1.7.1's "PR cannot merge until CI is green."
 - **Vercel Git Integration:**
   - Install the [Vercel GitHub App](https://github.com/apps/vercel) and link the repo to the Vercel project. No tokens, org ids, or project ids are stored anywhere in GitHub.
   - Push to `master` → production deploy. Push to any PR branch → preview deploy.
@@ -45,10 +46,10 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
 ## Test plan
 - **CI green path:** open a no-op PR; confirm `check` runs all commands and reports green.
 - **CI red path:** push a deliberate Biome violation on a branch; confirm the PR cannot merge because `check` is red.
-- **Gate check:** confirm `check` is listed as a required status check on `master` in branch protection. Without it, §FR-1.7.7 is unenforced and an un-tested push deploys.
+- **Gate check:** confirm `check` is a required status check on `master`, and that the Vercel project lists `check` under Deployment Checks. Without the Vercel half, a push to the production branch promotes while CI is still running.
 - **CD path:** merge a trivial visible content change to `master`; confirm Vercel reports a successful production deploy, `curl -sI https://moster.dev` returns 200 (after DNS cutover), and the live page reflects the change.
 - **Config-applied check:** after the first production deploy, `bun run test:e2e:production` — it asserts both deep-link rewrites and the `vercel.json` security headers, which is the only automated proof that `vercel.json` took effect.
 - **Lockfile drift:** push a branch that adds a dep without updating `bun.lock`; confirm `bun install --frozen-lockfile` fails CI.
 
 ## Open questions
-- Gate Vercel production builds further with an Ignored Build Step (`vercel.json` `ignoreCommand`)? Not needed while `check` is a required status check — every commit on `master` has already passed CI.
+- Skip Vercel builds with `ignoreCommand` until `check` passes? No. That skips the build entirely and races the Actions run. Deployment Checks hold promotion after the build, which is the gate §FR-1.7.7 names.

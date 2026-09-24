@@ -82,7 +82,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
 - **FR-1.7.5** No deploy credentials exist in the repository or in GitHub Actions secrets. Git Integration authenticates through the Vercel GitHub App.
 - **FR-1.7.6** Manual `bunx vercel --prod` (§FR-1.5.4) remains available as break-glass but is not the production source of truth.
-- **FR-1.7.7** The `check` job is a required status check on `master` (GitHub branch protection). Because CD is owned by the host, that gate — not workflow job ordering — is what keeps un-tested commits out of production.
+- **FR-1.7.7** Two dashboard settings gate production. GitHub branch protection requires the `check` job before a pull request merges to `master`. Vercel Deployment Checks include that same `check` workflow so a push to the production branch is not promoted while `check` is pending or red. Branch protection alone does not hold the Vercel promotion.
 
 ### 1.8 Performance monitoring
 - **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. There is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
@@ -173,4 +173,4 @@ The v2 release is complete when *all* of the following hold:
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
 - [ ] Footer renders on every route.
 - [ ] Each route swaps `document.title` to its own value per §FR-1.2.9 (e.g., visiting `/about` updates the tab title to "About — Jalo Moster").
-- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is a required status check on `master`, and a push to `master` produces a Vercel production deploy.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is required by GitHub branch protection on `master` and by a Vercel Deployment Check, and a push to `master` produces a Vercel production deploy.

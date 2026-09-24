@@ -34,4 +34,4 @@ Static SPA hosting on Vercel: `vercel.json` build/output settings, SPA rewrites 
 - **Type check:** `bun run check` passes without `wrangler types`.
 
 ## Open questions
-- Prefer Vercel Git Integration alone for production vs a GitHub Actions `vercel deploy` job? **Resolved:** Git Integration alone. Actions runs CI only. A second deploy path would race the platform's own build on every push to `master`, needs three long-lived secrets, and pulls the Vercel CLI into the lockfile (+170 packages) to do what the installed GitHub App already does. The `check` required status check is what gates production (§FR-1.7.7).
+- Prefer Vercel Git Integration alone for production vs a GitHub Actions `vercel deploy` job? **Resolved:** Git Integration alone. Actions runs CI only. A second deploy path would race the platform's own build on every push to `master`, needs three long-lived secrets, and pulls the Vercel CLI into the lockfile (+170 packages) to do what the installed GitHub App already does. Production is gated by a GitHub required check plus a Vercel Deployment Check on that workflow (§FR-1.7.7).
