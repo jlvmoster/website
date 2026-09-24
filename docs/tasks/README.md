@@ -2,6 +2,8 @@
 
 Ordered task list for implementing `docs/specs/` into a working v1 site. Each task is a self-contained step with prereqs, actionable steps, expected outputs, and verification commands.
 
+> **This playbook is a historical record of how the site was built.** All 13 tasks are done, and tasks written before the Cloudflare → Vercel cutover still describe Wrangler steps. Where a task and a spec disagree, `docs/specs/` wins — start there instead.
+
 ## How to use
 
 1. Read `docs/specs/requirements.md` and `docs/specs/architecture.md` first — they are the source of truth. The tasks here orchestrate *order* and *gates*; they do not restate spec content.
@@ -15,7 +17,7 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 | # | Task | Source spec(s) |
 |---|---|---|
 | 01 | [Tooling & TS config](./01-tooling.md) | `features/tooling.md` |
-| 02 | [Hosting config (Vercel)](./02-worker-config.md) | `features/hosting.md` |
+| 02 | [Hosting config (Vercel)](./02-hosting-config.md) | `features/hosting.md` |
 | 03 | [Theming & global styles](./03-theming.md) | `features/theming.md`, `features/theme-toggle.md` |
 | 04 | [App shell & router](./04-app-shell.md) | `features/routing.md` |
 | 05 | [Layout primitives](./05-layout-primitives.md) | `features/layout-shell.md`, `features/iconography.md` |
