@@ -33,8 +33,9 @@ The same project supports these runtime contexts, in this order of "production-l
 | Local dev | `bun run dev` | Bun.serve + HMR | Tight feedback loop. Fastest. |
 | Pre-deploy check | `bun run preview` | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing. |
 | CI | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1. |
-| CD | GitHub Actions deploy job on push to `master` | `ubuntu-latest` + Vercel CLI | Builds `dist/`, then `vercel deploy dist --prod`. See §8.2. |
-| Break-glass deploy | `bun run deploy` | Local Bun bundler → `vercel deploy --prod` | Manual fallback when GitHub Actions is unavailable; not the default path. |
+| Preview deploy | (auto, on every PR branch push) | Vercel build + edge CDN | Real platform, real `vercel.json`. Where `bun run test:e2e:production` can point before a release. |
+| CD | (auto, on push to `master`) | Vercel build + edge CDN | Vercel Git Integration builds from the repo root and promotes to production. See §8.2. |
+| Break-glass deploy | `bunx vercel --prod` | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path. |
 | Production | (auto, after CD) | Vercel edge CDN | What users see. |
 
 Local `preview` does not need to emulate a remote serverless runtime while the site is static-only. When `/api/*` functions land, add a Vercel-local preview path for those handlers.
@@ -43,30 +44,13 @@ Local `preview` does not need to emulate a remote serverless runtime while the s
 
 These are the canonical implementations of the requirements that involve config or non-trivial code. Treat them as starting points — if the actual files diverge, update this doc.
 
-### 4.1 `vercel.json` (static SPA)
+### 4.1 `vercel.json` and `scripts/preview.ts`
 
-```json
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "buildCommand": "bun run build",
-  "outputDirectory": "dist",
-  "installCommand": "bun install",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "headers": [/* security headers — see committed vercel.json */]
-}
-```
+Both are short committed files and are their own canonical form — read them rather than a copy here, which only drifts. What matters about each:
 
-Existing files under `dist/` are served first; the rewrite supplies `index.html` for client routes and unknown paths (§FR-1.4.3). Security headers that used to live in `src/worker.ts` are declared here as HTTP response headers.
-
-### 4.2 `scripts/preview.ts` (local built-artifact server)
-
-```ts
-// Serves dist/ on port 4173 with SPA fallback for extensionless paths.
-// Used by `bun run preview` and playwright.built.config.ts.
-```
-
-Canonical implementation is the committed `scripts/preview.ts`. It mirrors Vercel's rewrite semantics closely enough for built-artifact E2E.
+- **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), a catch-all `rewrites` entry to `/index.html`, and the security headers that used to live in `src/worker.ts`. Files present under the output directory are matched before rewrites apply, so hashed assets and `public/` files still win and only client routes fall through to the shell (§FR-1.4.3).
+- **The file's location is load-bearing.** Vercel reads `vercel.json` from the root of whatever is deployed. Git Integration deploys the repo root, so it applies. Uploading a built directory instead (`vercel deploy dist`) produces a deployment with no `vercel.json` at its root: every rewrite and header disappears, deep links 404, and nothing in CI notices. See `features/hosting.md`.
+- **`scripts/preview.ts`** is a 13-line `Bun.serve` that returns the requested file from `dist/` if it exists and `dist/index.html` otherwise. That single fallback is the entire feature; it mirrors the rewrite but *not* the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
 
 ### 4.3 `scripts/build.ts` (programmatic build + public/ copy)
 
@@ -425,15 +409,16 @@ Requirements §1.6 no longer require Cloudflare Worker type generation. `bun run
 
 These aren't in the requirements doc because they're one-time setup performed in dashboards, not code:
 
-1. **Create a Vercel project** (Hobby) with framework `Other` / `null`, build `bun run build`, output `dist/`, install `bun install`. Connect the GitHub repo `jlvmoster/website` if using Git Integration for previews.
-2. **Create a Vercel token** for GitHub Actions and store secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID` (team id), `VERCEL_PROJECT_ID`. Do not commit either value. Required by §FR-1.7.2 / §FR-1.7.5.
+1. **Create a Vercel project** (Hobby) with framework `Other` / `null` and install the [Vercel GitHub App](https://github.com/apps/vercel) on `jlvmoster/website`. Git Integration is the production deploy path (§FR-1.7.3), so the link is required, not optional. Build settings come from the committed `vercel.json`, which overrides the dashboard — leave the dashboard fields empty rather than keeping a second copy that silently does nothing.
+2. **Make `check` a required status check on `master`** in GitHub branch protection. Vercel builds the moment a commit lands, so this is the only thing standing between an un-tested push and production (§FR-1.7.7). No deploy tokens or secrets are needed anywhere.
 3. **Add custom domain `moster.dev`** in the Vercel project. Point DNS (typically apex + `www`) at Vercel per the dashboard instructions; remove the old Cloudflare Workers custom-domain binding when ready.
-4. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
-5. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.).
+4. **Delete any local `worker-configuration.d.ts`** — one-time, on machines that ran the project on Cloudflare. It was gitignored before the cutover and is not regenerated now, but nothing ignores it any more, so a stale copy makes `bun run check` fail on Biome's `noExplicitAny`.
+5. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.
+6. **Drop avatar + portrait + logos + CV PDF into `public/`.** The Header / Home / About pages reference these via string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, etc.).
 
 ## 8. CI/CD
 
-Requirements §1.7 uses GitHub Actions for both CI and CD. Pull requests get the same quality gate as before; pushes to `master` run the gate first and only then deploy through the Vercel CLI.
+Requirements §1.7 splits the two: GitHub Actions owns CI, Vercel Git Integration owns CD. Each system does the one thing it is already good at, and neither duplicates the other.
 
 ### 8.1 CI on GitHub Actions
 
@@ -471,54 +456,32 @@ jobs:
       - run: bun test
       - run: bunx playwright test
       - run: bunx playwright test -c playwright.built.config.ts
-
-  deploy:
-    needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: oven-sh/setup-bun@v2
-      - name: Cache Bun packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-      - run: bun install --frozen-lockfile
-      - run: bun run build
-      - name: Deploy to Vercel
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: bunx vercel deploy dist --prod --yes --token="$VERCEL_TOKEN"
 ```
 
-The workflow scopes `GITHUB_TOKEN` to `contents: read`. Node/`actions/setup-node` is no longer required — Wrangler is gone. `bun run build` runs in `check` to catch bundler breakage; `playwright.built.config.ts` exercises `dist/` via `bun run preview`.
+That is the whole workflow — one job, no deploy step. `GITHUB_TOKEN` is scoped to `contents: read`, which is all a checkout needs now that nothing ships from here. `actions/setup-node` is gone with Wrangler. `bun run build` runs inside `check` to catch bundler breakage before merge, and `playwright.built.config.ts` exercises the built `dist/` through `bun run preview`.
 
-### 8.2 CD Through GitHub Actions
+### 8.2 CD Through Vercel Git Integration
 
-The `deploy` job runs only on pushes to `master`, after `check` succeeds:
+Production deploys are not in this repo. The Vercel GitHub App watches `jlvmoster/website`:
 
-- Installs with `bun install --frozen-lockfile`.
-- Builds with `bun run build`.
-- Deploys `dist/` with `bunx vercel deploy dist --prod --yes`.
-- Authenticates using GitHub Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+- Push to `master` → Vercel installs, runs `bun run build`, and promotes the result to production.
+- Push to any other branch with an open PR → preview deployment, with the same `vercel.json` applied.
+- Vercel builds from the **repo root**, which is the point: `vercel.json` is at the root, so rewrites and security headers are part of every deployment (§4.1).
+- Authentication is the GitHub App. No tokens, org ids, or project ids exist in the repo or in Actions secrets (§FR-1.7.5).
 
-Branch protection should require `check` before merge. The deploy job is not a pull-request gate because it only runs on `master`.
-
-Optional: Vercel Git Integration can also deploy from GitHub. Prefer a single production path (Actions `deploy` job) so production cannot race ahead of CI (§FR-1.7.7). Preview deployments from Vercel Git on PR branches are fine.
+The gate is GitHub branch protection: `check` is a required status check on `master` (§FR-1.7.7), so every commit that lands there has already passed CI before Vercel sees it.
 
 ### 8.3 Why this shape
 
-- **One pipeline surface.** CI and CD both live in GitHub Actions, so deployment cannot race ahead of the quality gate.
-- **Official CLI path.** Vercel documents CLI + token deploy for CI environments.
-- **Secrets stay out of source.** Token and project ids live in GitHub Actions secrets (§FR-1.7.5).
-- **`bun run deploy` is break-glass** (§FR-1.5.4 / §FR-1.7.6).
+- **One production deploy path.** Two paths cannot race if there is only one. An Actions deploy job alongside Git Integration means every push to `master` kicks off two production builds whose completion order decides what users get.
+- **The host builds what it serves.** Vercel reads `vercel.json` from the deployment root, so letting Vercel build from the repo root is what makes the config apply at all. Uploading a prebuilt `dist/` instead drops rewrites and headers silently (§4.1).
+- **Nothing to leak and nothing to rotate.** The GitHub App replaces three long-lived Actions secrets.
+- **Smaller tree.** Not depending on the Vercel CLI keeps ~170 packages out of the lockfile; `bunx vercel` still covers break-glass (§FR-1.5.4 / §FR-1.7.6).
 
 ### 8.4 Tradeoffs accepted
 
-- **GitHub holds deploy credentials.** Scope the Vercel token narrowly; store only as Actions secrets.
+- **The gate moves from job ordering to branch protection.** With `needs: check`, an un-tested `master` push simply skipped the deploy; now Vercel starts building immediately, so the required status check is doing real work. It is a repo setting rather than a committed file, which is the one thing this shape gives up. `features/ci-cd.md`'s test plan checks it explicitly.
+- **Build logs live in two places.** CI output in Actions, build/deploy output in the Vercel dashboard.
 - **Cache package artifacts, not `node_modules`.** Same Bun + Playwright cache shape as before.
 
 ### 8.5 Lighthouse CI (retired)
@@ -529,8 +492,8 @@ Automated post-deploy Lighthouse CI is not part of the pipeline (§FR-1.8.1). Co
 
 - [Rewrites · Vercel docs](https://vercel.com/docs/rewrites) — SPA fallback via `vercel.json`
 - [vercel.json project configuration](https://vercel.com/docs/project-configuration/vercel-json)
-- [Deploying from CLI · Vercel docs](https://vercel.com/docs/cli/deploying-from-cli)
-- [Vercel for GitHub](https://vercel.com/docs/git/vercel-for-github)
+- [Vercel for GitHub](https://vercel.com/docs/git/vercel-for-github) — the production deploy path
+- [Deploying from CLI · Vercel docs](https://vercel.com/docs/cli/deploying-from-cli) — break-glass only; note `vercel deploy [path]` treats the path as the project root
 - [Cache dependencies and build outputs in GitHub Actions](https://github.com/actions/cache)
 - [Playwright CI docs — caching browsers](https://playwright.dev/docs/ci#caching-browsers)
 - [HTML bundler · Bun docs](https://bun.com/docs/bundler/html) — clarifies that `public/` is not auto-copied

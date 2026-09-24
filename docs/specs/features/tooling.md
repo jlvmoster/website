@@ -4,7 +4,7 @@
 The non-runtime config that makes the project install, build, lint, type-check, and run scripts uniformly.
 
 ## Requirements covered
-- §FR-1.5.4 — `bun run deploy` ships `dist/` via the Vercel CLI (`vercel deploy --prod`).
+- §FR-1.5.4 — No committed deploy script; Vercel owns the production build.
 - §FR-1.5.5 — `bun run check` runs `biome check && tsc --noEmit`.
 - §FR-1.5.6 — `bun test` runs unit tests.
 - §NFR-2.1.1 — Bun is the package manager, dev server, bundler, test runner.
@@ -18,7 +18,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - `tsconfig.json` — already strict; `"types": ["bun"]`.
 - `biome.json` — formatter + linter config.
 - `bunfig.toml` — Bun-specific config; registers `bun-plugin-tailwind` under `[serve.static]`.
-- `vercel` is a devDependency so `bunx vercel …` / `bun run deploy` resolve against the lockfile.
+- No hosting CLI is a dependency. Vercel deploys through Git Integration, so the CLI is not needed to ship; ad-hoc use is `bunx vercel …`.
 
 ## Behavior & edge cases
 - `package.json` scripts (canonical):
@@ -28,7 +28,6 @@ The non-runtime config that makes the project install, build, lint, type-check, 
       "dev": "bun --hot ./scripts/dev.ts",
       "build": "bun ./scripts/build.ts",
       "preview": "bun ./scripts/preview.ts",
-      "deploy": "vercel deploy --prod",
       "test": "bun test",
       "setup:browsers": "playwright install chromium",
       "check": "biome check && tsc --noEmit",

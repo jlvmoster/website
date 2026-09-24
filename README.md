@@ -11,7 +11,7 @@ Jalo Moster's personal website — a multi-page React SPA deployed to Vercel.
 - **Hosting:** [Vercel](https://vercel.com) static SPA on `moster.dev`. `vercel.json` rewrites deep links to `index.html`.
 - **Lint / format:** Biome. **Types:** TypeScript strict mode.
 - **Testing:** `bun test` for units, `@playwright/test` for browser E2E.
-- **CI/CD:** GitHub Actions — `check` on every PR/push, `deploy` on push to `master` via the Vercel CLI.
+- **CI/CD:** GitHub Actions runs `check` on every PR/push; Vercel Git Integration deploys `master`.
 
 No Vite, webpack, esbuild, Next.js, MDX, or third-party UI component libraries — the Bun HTML bundler is the entire build pipeline. `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 
@@ -30,7 +30,6 @@ bun run dev              # http://localhost:3000 with HMR
 | `bun run dev` | Local dev server with HMR (`scripts/dev.ts` → `Bun.serve`). |
 | `bun run build` | Bundles `src/index.html` to `dist/` and copies `public/` over (`scripts/build.ts`). |
 | `bun run preview` | Serves built `dist/` locally with SPA fallback (`scripts/preview.ts`). |
-| `bun run deploy` | `vercel deploy --prod` — break-glass only; prod deploys run from GitHub Actions. |
 | `bun run check` | `biome check && tsc --noEmit`. |
 | `bun test` | Unit / integration tests. |
 | `bun run test:e2e` | Browser E2E against the Bun dev server. |
@@ -99,24 +98,17 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 - **Unit:** `bun test` — specs colocated with source or under `tests/`. The smoke spec renders `<App />` inside `<MemoryRouter initialEntries={["/"]}>` and asserts the verbatim hero substring + three social URLs.
 - **Dev E2E:** `bun run test:e2e` against `bun run dev`. Coverage: every route loads, hero copy renders verbatim on `/`, theme toggle cycles + persists, footer renders on every route, SPA fallback handles unknown paths.
 - **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `bun run preview`, and verifies SPA fallback for hard-refreshes on each deep link.
-- **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`.
+- **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`, plus the `vercel.json` security headers — `scripts/preview.ts` does not serve those, so this is the only place they're verified. Point it at a Vercel preview URL to check a deployment before promoting it.
 - A fresh machine can recreate the full test environment with `bun install && bun run setup:browsers`.
 
 ## Deployment
 
-Production deploys run automatically on push to `master`:
+Two systems, one job each:
 
-1. `check` job: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`.
-2. `deploy` job (depends on `check`): builds and ships `dist/` via `bunx vercel deploy dist --prod`.
+- **GitHub Actions** runs the `check` job on every PR and push: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`. It never deploys.
+- **Vercel Git Integration** deploys. Push to `master` → production; push to a PR branch → preview. Vercel builds from the repo root so the committed `vercel.json` (SPA rewrites + security headers) applies.
 
-Vercel credentials live as GitHub Actions secrets (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) and are never committed. `bun run deploy` from a developer machine is supported as a break-glass path but is not the source of truth.
-
-### Manual cutover (Cloudflare → Vercel)
-
-1. Install the [Vercel GitHub App](https://github.com/apps/vercel) and link `jlvmoster/website` to the `moster-dev` Vercel project (optional for previews; required if you want Git Integration).
-2. Add GitHub Actions secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
-3. In the Vercel project, add custom domain `moster.dev` (and `www` if desired); follow DNS instructions (usually apex A/ALIAS + CNAME).
-4. When ready, remove the old Cloudflare Workers custom domain binding so DNS points only at Vercel.
+The gate is branch protection: `check` is a required status check on `master`, so nothing reaches production without green CI. No deploy credentials exist in the repo or in Actions secrets — the Vercel GitHub App authenticates. Break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
 
 ## Docs
 

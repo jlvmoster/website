@@ -43,7 +43,7 @@ test("hello world", () => {
 
 This repo is Jalo's personal website. **The authoritative requirements doc is `docs/specs/requirements.md` — read it before any non-trivial change.** It covers the deployment model, file layout, page composition, growth path, and the resolved decisions (domain, socials, hero copy, typography, theme toggle, palette).
 
-Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-dom` with six routes (`/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`). `src/pages/` holds the routed components; `src/components/` ships the LayoutShell + Header (with scaling avatar on Home) + Footer + theme toggle + the Card/Button/SimpleLayout/Section/Prose/Container primitives. `src/content/articles/` hosts typed TSX article modules (no MDX). `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler; `vercel.json` + `scripts/preview.ts` handle Vercel static hosting and local built-artifact preview (SPA rewrites feed deep-link refreshes to the client router). `.github/workflows/ci.yml` runs check + dev/built E2E on PR and deploys to Vercel on push to `master`. See `README.md` for the user-facing summary.
+Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-dom` with six routes (`/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`). `src/pages/` holds the routed components; `src/components/` ships the LayoutShell + Header (with scaling avatar on Home) + Footer + theme toggle + the Card/Button/SimpleLayout/Section/Prose/Container primitives. `src/content/articles/` hosts typed TSX article modules (no MDX). `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler; `vercel.json` + `scripts/preview.ts` handle Vercel static hosting and local built-artifact preview (SPA rewrites feed deep-link refreshes to the client router). `.github/workflows/ci.yml` runs check + dev/built E2E on PR and push — it does not deploy; Vercel Git Integration builds and promotes `master`. See `README.md` for the user-facing summary.
 
 ## Commands
 
@@ -54,7 +54,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 | Dev server (HMR) | `bun run dev` (`scripts/dev.ts` + `Bun.serve`) |
 | Production build | `bun run build` (`scripts/build.ts` → `dist/`) |
 | Local built preview | `bun run preview` (`scripts/preview.ts` serves `dist/`) |
-| Deploy (break-glass only) | `bun run deploy` — prod deploys run from GitHub Actions on push to `master`, see `docs/specs/features/ci-cd.md` |
+| Deploy | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md` |
 | Type + lint check | `bun run check` (`biome check && tsc --noEmit`) |
 | Unit tests | `bun test` |
 | E2E (dev server) | `bun run test:e2e` against `bun run dev` |
@@ -78,7 +78,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
 - `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
-- `.github/workflows/ci.yml` — single workflow with `check` (PRs + pushes) and `deploy` (push to `master`, needs `check`); canonical YAML in architecture §8.1.
+- `.github/workflows/ci.yml` — single `check` job on PRs + pushes, no deploy job; canonical YAML in architecture §8.1.
 - `vercel.json` — Vercel static SPA config (build, output `dist/`, SPA rewrites, security headers).
 - `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.
 - `.vercel/` — _(gitignored)_ local Vercel link metadata; do not commit.
@@ -98,7 +98,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - When documenting workflows, writing repo-local skills, or giving run instructions, prefer relative paths from the active worktree root. Avoid hard-coded absolute paths like `/Users/jalo/Dev/Conductor/workspaces/website/<city>`; if an absolute example is unavoidable, describe it as a Conductor worktree example, not a stable path.
 
 ## Frontend conventions
-- Stack: Bun + React 19 + `react-router-dom` v7 + Tailwind v4 SPA, multi-page client routing, deployed to Cloudflare Workers Static Assets via Wrangler.
+- Stack: Bun + React 19 + `react-router-dom` v7 + Tailwind v4 SPA, multi-page client routing, deployed to Vercel as static files from `dist/`.
 - Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.).
 - **Use the `--accent` token utility class (`text-accent`, `hover:text-accent`, `from-accent/0`)** for the brand color across hover states, active links, and links; do not hard-code palette-specific accent pairs. The accent value swaps automatically via the class-based dark mode.
 - Class-based dark mode: `@custom-variant dark (&:where(.dark, .dark *));` is declared in `globals.css`, so `dark:` utilities key off `html.dark` (not `prefers-color-scheme`). The theme toggle owns that class.
@@ -117,24 +117,24 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`. The smoke spec wraps `<App />` in `<MemoryRouter initialEntries={["/"]}>` (since `BrowserRouter` is mounted in `src/main.tsx`, outside `App`) and asserts the verbatim hero substring + three social URLs.
 - **Browser smoke (dev E2E):** `bun run test:e2e` runs `tests/e2e/site.e2e.ts` against `bun run dev` (wired via `playwright.config.ts`).
 - **Built artifact acceptance:** `bun run test:e2e:built` runs `tests/e2e/built.e2e.ts` after `bun run build`, served through `bun run preview` (wired via `playwright.built.config.ts`).
-- **Production acceptance:** `bun run test:e2e:production` runs `tests/e2e/production.e2e.ts` against `PRODUCTION_URL` or `https://moster.dev` (wired via `playwright.production.config.ts`).
+- **Production acceptance:** `bun run test:e2e:production` runs `tests/e2e/production.e2e.ts` against `PRODUCTION_URL` or `https://moster.dev` (wired via `playwright.production.config.ts`). It owns the `vercel.json` security-header assertions — `scripts/preview.ts` mirrors the SPA rewrite but not the headers, so built E2E cannot cover them. Set `PRODUCTION_URL` to a Vercel preview URL to check a deployment before it's promoted.
   - Each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) once before the first run.
   - Keep specs thin: every route loads, hero copy verbatim on `/`, three social links resolve, theme toggle cycles + persists, `/about` portrait + mailto render, `/articles` list + detail navigation, hard-refresh on each deep link returns 200, footer on every route. Don't snapshot the whole DOM.
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
 
 ## Agents and skills
-Plugins enabled in `.claude/settings.json`: official marketplace plugins `claude-md-management`, `frontend-design`, `playwright`, `skill-creator`, `superpowers`, `typescript-lsp` (and any hosting-related plugins as configured).
+Plugins enabled in `.claude/settings.json`: official marketplace plugins `claude-md-management`, `frontend-design`, `playwright`, `skill-creator`, `superpowers`, `typescript-lsp`. The `cloudflare@cloudflare` plugin and its marketplace were removed with the hosting cutover.
 
 Built-in subagents to lean on:
 - **`Explore`** — locating code under `src/` or facts in `docs/specs/requirements.md`.
-- **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Worker fetch handler).
+- **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Vercel Function).
 
 Repo-local skills in `.claude/skills/`:
 - **`changelog-generator`** — turns git commits in a chosen range into a reader-facing changelog (categories: New, Improvements, Fixes, Breaking; filters internal/tooling commits; defaults to no emojis to match the site's minimal aesthetic). Triggers on "changelog", "release notes", "what's new", "site updates", weekly/monthly digest asks, etc.
 
 Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - `new-post` — scaffold an MDX file under `src/content/` with frontmatter, once the blog ships.
-- `deploy-check` — chain `bun run check && bun run build && bunx vercel deploy --prebuilt --yes` (or dry-run equivalent) as a one-shot pre-push gate.
+- `deploy-check` — chain `bun run check && bun run build && bun run test:e2e:built` as a one-shot pre-push gate. Nothing deploys locally, so there's no CLI step.
 - `requirements-sync` — flag a diff between `docs/specs/requirements.md` and the implemented state if requirements start drifting.
 
 ## Hard rules specific to this repo
@@ -144,6 +144,7 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - Never reintroduce media-query dark mode. Dark mode is class-based (`html.dark`); the theme toggle owns that class. The `prefers-color-scheme` media query is only consulted when the user choice is `"system"`.
 - Use the `--accent` token (and the `text-accent` / `fill-accent` / `from-accent/0` utilities) for the brand color. Don't hand-write palette-specific accent pairs.
 - Hosting config is `vercel.json`. Local built-artifact preview is `scripts/preview.ts` (no Wrangler).
+- Never add a deploy job to `.github/workflows/ci.yml` or a `deploy` script to `package.json`. Vercel Git Integration is the single production path; a second one races it, and `vercel deploy dist` ships a deployment with no `vercel.json` (no rewrites, no security headers).
 - Articles are typed TSX modules under `src/content/articles/<slug>.tsx`. No MDX, no markdown parsing, no runtime globbing. Adding an article = drop the TSX + register in `src/content/articles/index.ts`'s `modules` record.
 - Never add `react-helmet` or `react-helmet-async`. Per-route `<title>` / `<meta>` go directly in the page component via React 19 native head support (see Frontend conventions).
 

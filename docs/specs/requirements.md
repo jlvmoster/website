@@ -67,27 +67,25 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.5.1** `bun run dev` starts a local server via `Bun.serve` with HMR (`scripts/dev.ts`).
 - **FR-1.5.2** `bun run build` invokes `scripts/build.ts`, which calls `Bun.build()` on `src/index.html`, writes to `dist/`, and then copies `public/` → `dist/` (the HTML bundler does not auto-copy `public/`).
 - **FR-1.5.3** `bun run preview` serves the built `dist/` locally via `scripts/preview.ts` (`Bun.serve` + SPA fallback), matching production rewrite semantics for deep links.
-- **FR-1.5.4** `bun run deploy` ships `dist/` via the Vercel CLI (`vercel deploy --prod`) as a break-glass path.
+- **FR-1.5.4** There is no committed deploy script. Vercel owns the production build, so break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
 - **FR-1.5.5** `bun run check` runs `biome check && tsc --noEmit`.
 - **FR-1.5.6** `bun test` runs unit tests.
 - **FR-1.5.7** `scripts/build.ts` and `scripts/dev.ts` continue to copy `public/` → `dist/` so `public/images/{avatar,portrait}.jpg`, `public/images/logos/`, and `public/cv.pdf` ride along to production.
 
 ### 1.6 Platform types
 - **FR-1.6.1** No platform-generated Worker/runtime type stubs are required. TypeScript uses Bun + DOM lib types only (`tsconfig.json` `"types": ["bun"]`).
-- **FR-1.6.2** Reserved — previously Worker `Env` / `ExportedHandler` generation; retired with the Cloudflare cutover.
-- **FR-1.6.3** Reserved — previously gitignored `worker-configuration.d.ts`; retired.
 
 ### 1.7 CI/CD
 - **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. A PR cannot merge until CI is green.
-- **FR-1.7.2** Pushes to `master` trigger an automated production deploy through GitHub Actions after CI passes. Production releases must not require an interactive `bun run deploy` from a developer's machine.
-- **FR-1.7.3** CI and CD both run on GitHub Actions. Deploys use the Vercel CLI (`vercel deploy`) against the built `dist/` directory.
+- **FR-1.7.2** Pushes to `master` deploy to production automatically. Production releases must not require an interactive deploy from a developer's machine.
+- **FR-1.7.3** There is exactly one production deploy path: Vercel Git Integration (the Vercel GitHub App), which builds from the repo root so `vercel.json` applies. GitHub Actions runs CI only — the workflow has no deploy job.
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
-- **FR-1.7.5** Vercel credentials needed for deploys are stored only as GitHub Actions secrets (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) and are never committed to the repository.
-- **FR-1.7.6** `bun run deploy` remains supported as a break-glass path (§FR-1.5.4) but is not the production source of truth.
-- **FR-1.7.7** Vercel Git Integration may optionally mirror production deploys; if enabled, it must not race ahead of the GitHub Actions `check` gate (prefer production deploys only from the Actions `deploy` job, or configure Vercel to deploy only after CI).
+- **FR-1.7.5** No deploy credentials exist in the repository or in GitHub Actions secrets. Git Integration authenticates through the Vercel GitHub App.
+- **FR-1.7.6** Manual `bunx vercel --prod` (§FR-1.5.4) remains available as break-glass but is not the production source of truth.
+- **FR-1.7.7** The `check` job is a required status check on `master` (GitHub branch protection). Because CD is owned by the host, that gate — not workflow job ordering — is what keeps un-tested commits out of production.
 
 ### 1.8 Performance monitoring
-- **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. Production deploys end at the `deploy` job; there is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
+- **FR-1.8.1** Automated Lighthouse CI is not part of the pipeline. There is no post-deploy or scheduled Lighthouse job, no `lighthouserc.json`, and no upload to an LHCI Server.
 
 ## 2. Non-functional requirements
 
@@ -150,7 +148,7 @@ Auth, database, comments, search, i18n, custom font hosting, MDX runtime, image 
 | Typography | System stack only |
 | Hosting | Vercel (static SPA from Bun `dist/`) |
 | Theme toggle | Spotlight-style light/dark switch; persisted in `localStorage["theme"]`; default `system` |
-| CI / CD | GitHub Actions for both CI and CD; deploy via Vercel CLI |
+| CI / CD | GitHub Actions for CI; Vercel Git Integration for CD |
 | Avatar image | `public/images/avatar.jpg` |
 | Portrait image | `public/images/portrait.jpg` |
 | Color palette | Zinc + Chick-fil-A red accent |
@@ -161,7 +159,8 @@ The v2 release is complete when *all* of the following hold:
 - [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS assets, and the contents of `public/` (including `public/images/` and `public/cv.pdf`).
 - [ ] `bun run dev` serves the site locally with HMR.
 - [ ] `bun run preview` serves the built site from `dist/` with SPA fallback.
-- [ ] Production deploys ship `dist/` to Vercel; `moster.dev` resolves over HTTPS and returns the SPA (after DNS cutover).
+- [ ] Vercel builds and promotes `master` automatically; `moster.dev` resolves over HTTPS and returns the SPA (after DNS cutover).
+- [ ] `bun run test:e2e:production` passes, including the `vercel.json` security headers — the only proof that the hosting config is live.
 - [ ] `bun run check` passes (biome + `tsc --noEmit`).
 - [ ] `bun test` passes; smoke test asserts the verbatim hero substring.
 - [ ] Playwright E2E suite passes the minimum coverage (§NFR-2.4.3).
@@ -174,4 +173,4 @@ The v2 release is complete when *all* of the following hold:
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
 - [ ] Footer renders on every route.
 - [ ] Each route swaps `document.title` to its own value per §FR-1.2.9 (e.g., visiting `/about` updates the tab title to "About — Jalo Moster").
-- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. On push to `master`, CD deploys via the Vercel CLI.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is a required status check on `master`, and a push to `master` produces a Vercel production deploy.
