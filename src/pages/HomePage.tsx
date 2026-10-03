@@ -1,4 +1,5 @@
 import { Container } from "../components/Container";
+import { EmptyState } from "../components/EmptyState";
 import { ArticleCard } from "../components/home/ArticleCard";
 import { Resume } from "../components/home/Resume";
 import { GitHubIcon, InstagramIcon, LinkedInIcon } from "../components/icons";
@@ -46,9 +47,10 @@ export function HomePage() {
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2">
           <div className="flex flex-col gap-16">
             {articles.length === 0 ? (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                First post coming soon.
-              </p>
+              <EmptyState
+                title="First post coming soon"
+                description="Write-ups will show up here as soon as the first one ships."
+              />
             ) : (
               articles.map((article) => (
                 <ArticleCard key={article.slug} article={article} />

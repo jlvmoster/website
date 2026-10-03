@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { navItems } from "../content/nav";
 import { clsx } from "../lib/clsx";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 
 export function MobileNavigation({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!open) return;
@@ -54,17 +55,26 @@ export function MobileNavigation({ className }: { className?: string }) {
             </div>
             <nav className="mt-6">
               <ul className="-my-2 divide-y divide-zinc-100 text-base text-zinc-800 dark:divide-zinc-100/5 dark:text-zinc-300">
-                {navItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      to={item.href}
-                      className="block py-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                {navItems.map((item) => {
+                  const active =
+                    pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        to={item.href}
+                        className={clsx(
+                          "block py-2 transition",
+                          active ? "text-accent" : "hover:text-accent",
+                        )}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>

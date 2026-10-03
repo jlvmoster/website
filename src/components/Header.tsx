@@ -26,7 +26,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
       >
         {label}
         {active ? (
-          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-accent/0 via-accent/40 to-accent/0" />
+          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-accent/0 via-accent/70 to-accent/0" />
         ) : null}
       </Link>
     </li>

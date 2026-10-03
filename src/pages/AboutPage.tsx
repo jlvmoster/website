@@ -50,7 +50,7 @@ export function AboutPage() {
             <img
               src="/images/portrait.jpg"
               alt="Portrait of Jalo Moster"
-              className="aspect-square rotate-3 rounded-2xl bg-zinc-100 object-cover dark:bg-zinc-800"
+              className="aspect-square rotate-3 rounded-2xl bg-zinc-100 object-cover shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-500 ease-out hover:rotate-0 hover:shadow-lg dark:bg-zinc-800 dark:ring-white/10"
             />
           </div>
         </div>
