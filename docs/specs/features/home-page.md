@@ -1,7 +1,7 @@
 # Home Page — Implementation Spec
 
 ## Goal
-The `/` route. Hero (verbatim copy + three social links) + 4 most-recent article cards + Resume timeline + Download CV.
+The `/` route. Hero (verbatim copy + three social links) + a labeled Writing column (heading + “View all” + 4 most-recent article cards) + Resume timeline + Download CV.
 
 ## Requirements covered
 - §FR-1.2.1, §FR-1.2.1.a, §FR-1.2.1.b — Hero copy verbatim, three socials.
@@ -19,13 +19,13 @@ The `/` route. Hero (verbatim copy + three social links) + 4 most-recent article
 - Hero block: `<Container className="mt-9">` wraps `<h1>` (Spotlight headline copy can sit above this — see open question) + `<p>` (verbatim bio) + social row.
 - Hero copy: the substring `"It's my pleasure to invite you into my portfolio."` must appear in the static markup of `HomePage.tsx` as a literal — no template, no concat, no i18n.
 - Social row: GitHub, Instagram, LinkedIn (X is omitted — Jalo has three socials). Each is a `<SocialLink>` opening in a new tab.
-- Body grid: `mt-24 md:mt-28 grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2`. Left column: `<getAllArticles().slice(0, 4).map(a => <ArticleCard key={a.slug} article={a} />)>`. Right column: `<Resume />`.
+- Body grid: `mt-24 md:mt-28 grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2`. Left column is the Writing column: a real `<h2>Writing</h2>` plus a `react-router-dom` `<Link to="/articles">View all</Link>` (`text-sm`, zinc, `hover:text-accent`), then `getAllArticles().slice(0, 4)` as existing `<ArticleCard>`s (or `<EmptyState>` when the list is empty). Do not change the hero `<h1>` or the verbatim “my pleasure” paragraph. Right column: `<Resume />`.
 - Resume: array of `{ company, title, logo, start, end }` from `src/content/resume.ts`. Each row: logo disc + company/title/dates. Button: `<Button href="/cv.pdf" variant="secondary" download>Download CV <ArrowDownIcon /></Button>` so the PDF is fetched as a static asset rather than handled by the client router.
 - No newsletter signup.
 
 ## Test plan
-- **Smoke** (`bun test`): `renderToStaticMarkup(<HomePage />)` (inside MemoryRouter) contains the verbatim hero substring, three social URLs, and four `article` elements.
-- **E2E**: Resume renders ≥ 1 row with the canonical job entries; "Download CV" link resolves to `/cv.pdf`.
+- **Smoke** (`bun test`): `renderToStaticMarkup(<HomePage />)` (inside MemoryRouter) contains the verbatim hero substring, three social URLs, the Writing `<h2>`, and a `Link` to `/articles` labeled “View all”.
+- **E2E**: Resume renders ≥ 1 row with the canonical job entries; "Download CV" link resolves to `/cv.pdf`. Home Writing heading is visible; “View all” navigates to `/articles` without a full reload. Hero `<h1>` and the “my pleasure” paragraph are unchanged.
 
 ## Open questions
 - Hero headline copy: Spotlight uses a name + role line above the bio. Default: keep just the verbatim §FR-1.2.1.a sentence.
