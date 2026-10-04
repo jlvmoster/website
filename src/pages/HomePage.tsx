@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Container } from "../components/Container";
 import { EmptyState } from "../components/EmptyState";
 import { ArticleCard } from "../components/home/ArticleCard";
@@ -45,17 +46,30 @@ export function HomePage() {
       </Container>
       <Container className="mt-24 md:mt-28">
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2">
-          <div className="flex flex-col gap-16">
-            {articles.length === 0 ? (
-              <EmptyState
-                title="First post coming soon"
-                description="Write-ups will show up here as soon as the first one ships."
-              />
-            ) : (
-              articles.map((article) => (
-                <ArticleCard key={article.slug} article={article} />
-              ))
-            )}
+          <div className="flex flex-col">
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+                Writing
+              </h2>
+              <Link
+                to="/articles"
+                className="text-sm font-medium text-zinc-600 transition hover:text-accent focus-visible:text-accent dark:text-zinc-400"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="mt-8 flex flex-col gap-16">
+              {articles.length === 0 ? (
+                <EmptyState
+                  title="First post coming soon"
+                  description="Write-ups will show up here as soon as the first one ships."
+                />
+              ) : (
+                articles.map((article) => (
+                  <ArticleCard key={article.slug} article={article} />
+                ))
+              )}
+            </div>
           </div>
           <div className="space-y-10 lg:pl-16 xl:pl-24">
             <Resume />

@@ -123,6 +123,31 @@ test("article back button returns to the articles page", async ({ page }) => {
   await expect(page).toHaveURL(/\/articles$/);
 });
 
+test("home writing column links to the articles archive", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Writing" })).toBeVisible();
+  await page.getByRole("link", { name: "View all" }).click();
+  await expect(page).toHaveURL(/\/articles$/);
+});
+
+test("article detail shows dek and reading time without a more-writing row", async ({
+  page,
+}) => {
+  await page.goto("/articles/hello-world");
+
+  await expect(
+    page.getByRole("heading", { name: "Hello, world" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Why this site exists and what's coming."),
+  ).toBeVisible();
+  await expect(page.locator("time[datetime='2026-05-18']")).toBeVisible();
+  await expect(page.getByText(/min read/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "More writing" })).toHaveCount(
+    0,
+  );
+});
+
 test("dark mode swaps the body background via prefers-color-scheme", async ({
   browser,
 }) => {

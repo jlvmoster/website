@@ -14,9 +14,10 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
 - `src/content/uses.ts` — typed categories list.
 - `src/content/resume.ts` — typed `Role[]`.
 - `src/lib/formatDate.ts` — pure helper.
+- `src/lib/readingTime.ts` — `readingTimeMinutes(markup)`: strip tags, ceil-divide by 200, minimum 1. No `react-dom/server`.
 
 ## Behavior & edge cases
-- Articles loader (canonical shape in `architecture.md` §4.9). Modules are hand-registered (no runtime glob).
+- Articles loader (canonical shape in `architecture.md` §4.9). Modules are hand-registered (no runtime glob). `getAdjacentArticles(slug)` returns `{ previous, next }` from the date-descending list (`next` = newer, `previous` = older) and returns `{}` when fewer than two articles exist.
 - Adding an article = two edits: drop the new TSX file under `src/content/articles/`, then add an `import` and a key in the `modules` record in `index.ts`.
 - `formatDate` matches Spotlight verbatim: `en-US`, day/long-month/year, UTC — e.g. `"May 18, 2026"`.
 - Typed shapes:
@@ -27,6 +28,7 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
 ## Test plan
 - **Smoke** (`bun test`):
   - `getAllArticles()` returns ≥ 1 article and is sorted by date descending.
+  - `getAdjacentArticles` hides neighbors for a single-article catalog.
   - Each project in `projects.ts` has all four required fields.
   - `formatDate("2026-05-18")` returns `"May 18, 2026"`.
 
