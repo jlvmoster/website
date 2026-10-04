@@ -14,7 +14,7 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
 - `src/content/uses.ts` — typed categories list.
 - `src/content/resume.ts` — typed `Role[]`.
 - `src/lib/formatDate.ts` — pure helper.
-- `src/lib/readingTime.ts` — derived reading time from article body markup.
+- `src/lib/readingTime.ts` — `readingTimeMinutes(markup)`: strip tags, ceil-divide by 200, minimum 1. No `react-dom/server`.
 
 ## Behavior & edge cases
 - Articles loader (canonical shape in `architecture.md` §4.9). Modules are hand-registered (no runtime glob). `getAdjacentArticles(slug)` returns `{ previous, next }` from the date-descending list (`next` = newer, `previous` = older) and returns `{}` when fewer than two articles exist.

@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArticleLayout } from "../components/ArticleLayout";
 import { Container } from "../components/Container";
 import { getAdjacentArticles, getArticleBySlug } from "../content/articles";
-import { readingTimeMinutesFromComponent } from "../lib/readingTime";
+import { readingTimeMinutes } from "../lib/readingTime";
 
 export function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -32,7 +32,7 @@ export function ArticlePage() {
 
   const Body = article.Component;
   const { previous, next } = getAdjacentArticles(article.slug);
-  const readingMinutes = readingTimeMinutesFromComponent(Body);
+  const readingMinutes = readingTimeMinutes(article.description);
   return (
     <ArticleLayout
       article={article}

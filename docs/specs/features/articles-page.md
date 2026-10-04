@@ -16,7 +16,7 @@
 - `src/content/articles/index.ts` — loader + types + `getAdjacentArticles()`.
 - `src/content/articles/hello-world.tsx` — placeholder first article.
 - `src/lib/formatDate.ts` — date formatter.
-- `src/lib/readingTime.ts` — derived “N min read” from the article body (200 wpm, ceil, minimum 1).
+- `src/lib/readingTime.ts` — `readingTimeMinutes(markup)` strips tags and `Math.max(1, ceil(words / 200))`. Does not render the article component.
 
 ## Behavior & edge cases
 - List page (`/articles`):
@@ -29,7 +29,7 @@
   - Reads `:slug` via `useParams()`; resolves with `getArticleBySlug(slug)`.
   - If no match: render `<NotFoundPage>` (or inline equivalent: h1 "Article not found." + link back to `/articles`).
   - If match: `<ArticleLayout article={article} readingMinutes={…} previous={…} next={…}><article.Component /></ArticleLayout>`.
-- `ArticleLayout`: a back-arrow button at the top navigates to `/articles` (handles cold deep-load). Header: `<h1>` (article.title), a one-line dek from `article.description` under the title, and a metadata row with `<time dateTime={article.date}>` (formatted date; keep `datetime`) beside a derived “N min read”. Date stays zinc (list dates remain `tone="accent"`). `<Prose>` wraps `{children}` (the article body). No table of contents, comments, likes, or audio.
+- `ArticleLayout`: a back-arrow button at the top navigates to `/articles` (handles cold deep-load). Header: `<h1>` (article.title), a one-line dek from `article.description` under the title, and a metadata row with `<time dateTime={article.date}>` (formatted date; keep `datetime`) beside a derived “N min read” (`readingTimeMinutes` on `article.description` so a body that uses `Link` / `useParams` cannot throw during counting). Date stays zinc (list dates remain `tone="accent"`). `<Prose>` wraps `{children}` (the article body). No table of contents, comments, likes, or audio.
 - “More writing”: below `Prose`, when `getAllArticles().length >= 2`, render a `<nav aria-labelledby="more-writing-heading">` with previous (older) and/or next (newer) `Card`s (up to two). Hide the whole block when the only article is `hello-world` (or any single-article catalog). No newsletter signup.
 - Article TSX module shape (no MDX):
 

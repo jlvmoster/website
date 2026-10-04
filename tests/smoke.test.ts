@@ -15,7 +15,9 @@ test("App renders without throwing and contains the canonical home content", () 
     "Software engineer building data systems at Chick-fil-A.",
   );
   expect(html).toMatch(/<h2[^>]*>Writing<\/h2>/);
+  expect(html).toMatch(/<h3[^>]*>[\s\S]*Hello, world/);
   expect(html).toMatch(/href="\/articles"[^>]*>View all/);
+  expect(html).toContain("focus-visible:text-accent");
 
   for (const url of [
     "https://github.com/jlvmoster",
