@@ -17,7 +17,7 @@ The fixed centered background panel + flex content column (Header / main / Foote
   - Outer: `fixed inset-0 flex justify-center sm:px-8`.
   - Middle: `flex w-full max-w-7xl lg:px-8`.
   - Inner: `w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]`.
-- Content column is `relative flex w-full flex-col`. Wraps Header / `<main className="flex-auto">{children}</main>` / Footer.
+- Content column is `relative flex w-full flex-col`. Wraps Header / `<main className="flex-auto">{children}</main>` / Footer. LayoutShell does not remount on client-side navigation, so `<main>` must not use a load/enter animation (`animation-fill-mode: both` + opacity 0 would hide LCP/hero on every hard refresh and would not replay on route change).
 - Container compound (Outer + Inner + composed Container) is used by SimpleLayout and individual pages.
 - `forwardRef` is required on Container components so Header's scroll math can capture an offset.
 

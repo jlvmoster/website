@@ -34,7 +34,7 @@ Card.Link = function CardLink({ children, href, ...props }: CardLinkProps) {
   if (isExternal(href)) {
     return (
       <>
-        <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
+        <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-95 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
         <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
           <span className="absolute -inset-x-4 -inset-y-6 z-20 sm:-inset-x-6 sm:rounded-2xl" />
           <span className="relative z-10">{children}</span>
@@ -44,7 +44,7 @@ Card.Link = function CardLink({ children, href, ...props }: CardLinkProps) {
   }
   return (
     <>
-      <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
+      <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-95 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
       <Link to={href} {...props}>
         <span className="absolute -inset-x-4 -inset-y-6 z-20 sm:-inset-x-6 sm:rounded-2xl" />
         <span className="relative z-10">{children}</span>
@@ -87,7 +87,7 @@ Card.Cta = function CardCta({ children }: { children: ReactNode }) {
       className="relative z-10 mt-4 flex items-center text-sm font-medium text-accent"
     >
       {children}
-      <ChevronRightIcon className="ml-1 h-4 w-4 stroke-current transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+      <ChevronRightIcon className="ml-1 h-4 w-4 stroke-current transition-transform duration-300 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
     </div>
   );
 };

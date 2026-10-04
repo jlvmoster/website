@@ -12,6 +12,7 @@
 - `src/pages/ArticlesPage.tsx` — list using `SimpleLayout`.
 - `src/pages/ArticlePage.tsx` — detail using `ArticleLayout`.
 - `src/components/ArticleLayout.tsx` — `Container` + back-arrow button + `<Prose>` body.
+- `src/components/EmptyState.tsx` — dashed empty-state panel used when the list is empty.
 - `src/content/articles/index.ts` — loader + types.
 - `src/content/articles/hello-world.tsx` — placeholder first article.
 - `src/lib/formatDate.ts` — date formatter.
@@ -20,9 +21,9 @@
 - List page (`/articles`):
   - `<SimpleLayout title="…" intro="…">` (final wording is an open question).
   - Body: left-bordered (`md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40`) flex column of article cards.
-  - Each card: `Card.Eyebrow` shows date (`formatDate(article.date)`); `Card.Title as="h2" href={`/articles/${article.slug}`}`; `Card.Description` shows `article.description`; `Card.Cta` shows "Read article" with `<ChevronRightIcon>`.
+  - Each card: `Card.Eyebrow` shows date (`formatDate(article.date)`) with `tone="accent"` (`text-accent`, decorated bar `bg-accent/50`); `Card.Title as="h2" href={`/articles/${article.slug}`}`; `Card.Description` shows `article.description`; `Card.Cta` shows "Read article" with `<ChevronRightIcon>`.
   - On `md+`, the date sits in a separate left column (`md:grid md:grid-cols-4 md:items-baseline`).
-  - Empty state: if `getAllArticles().length === 0`, render `<p>First post coming soon.</p>`.
+  - Empty state: if `getAllArticles().length === 0`, render `<EmptyState title="First post coming soon" description="…">` (dashed panel; still satisfies §FR-1.2.2's empty-state line).
 - Detail page (`/articles/:slug`):
   - Reads `:slug` via `useParams()`; resolves with `getArticleBySlug(slug)`.
   - If no match: render `<NotFoundPage>` (or inline equivalent: h1 "Article not found." + link back to `/articles`).

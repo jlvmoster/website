@@ -17,11 +17,11 @@ export function ProjectsPage() {
       <ul className="grid grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <Card as="li" key={project.name}>
-            <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lg dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0">
+            <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0">
               <img
                 src={project.logo}
                 alt=""
-                className="h-8 w-8 transition duration-300 ease-out group-hover:scale-105"
+                className="h-8 w-8 transition duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
             </div>
             <h2 className="mt-6 text-base font-semibold text-zinc-800 dark:text-zinc-100">

@@ -23,8 +23,8 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 - Scroll math runs only on `/`. A `useEffect` reads `useLocation()`; if path is `/`, it attaches a `scroll` listener that writes CSS custom properties on `document.documentElement` (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`). The Avatar element reads those via `style="transform: var(--avatar-image-transform)"`. No React re-renders per scroll tick.
 - Listeners are passive; cleanup on unmount/route change.
 - Desktop (≥`md`) nav pill: `rounded-full bg-white/90 px-3 text-sm font-medium text-zinc-800 ring-1 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10`. Contains four NavLinks (About / Articles / Projects / Uses).
-- Active route highlight: matching NavLink has `text-accent` and a faint gradient underline (`bg-linear-to-r from-accent/0 via-accent/40 to-accent/0`).
-- Mobile (<`md`): a "Menu" pill button replaces the nav pill. Clicking opens a popover panel containing the same four NavLinks and a close button. Close on Esc (`useEffect` keydown), close on backdrop click, close on NavLink click.
+- Active route highlight: matching NavLink has `text-accent`, `aria-current="page"`, and a faint gradient underline (`bg-linear-to-r from-accent/0 via-accent/70 to-accent/0`). The same `aria-current` + `text-accent` pairing is used in `MobileNavigation` and the Footer.
+- Mobile (<`md`): a "Menu" pill button replaces the nav pill. Clicking opens a popover panel containing the same four NavLinks and a close button. Close on Esc (`useEffect` keydown), close on backdrop click, close on NavLink click. The current route uses `text-accent` and `aria-current="page"`.
 - Theme toggle: single button switching between the resolved light and dark themes. Shows SunIcon when current resolved theme is light, MoonIcon when dark. `aria-label` reflects the **next** state.
 
 ## Test plan

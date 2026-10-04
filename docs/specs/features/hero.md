@@ -22,7 +22,7 @@ Top-of-page section that introduces Jalo with a fixed one-line copy and three so
 - Hero block is the first child of `HomePage.tsx`. The verbatim copy lives in `HomePage.tsx` as a string literal — the substring `"It's my pleasure"` must be present in the static markup so smoke tests (`renderToStaticMarkup`) detect it.
 - The h1 is `text-4xl sm:text-5xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100`.
 - The bio paragraph is `mt-6 text-base text-zinc-600 dark:text-zinc-400`.
-- Social-links row sits below the bio, gap-x-6, hover transitions tint icons to `fill-zinc-600 dark:fill-zinc-300`.
+- Social-links row sits below the bio, gap-x-6. Hover and `:focus-visible` tint icons to `fill-accent` (`group-hover:fill-accent group-focus-visible:fill-accent`); idle fill is `fill-zinc-500 dark:fill-zinc-400`. Hover motion elsewhere honors `prefers-reduced-motion` via `motion-reduce:` (no transform/transition).
 
 ## Test plan
 - **Unit:** `Hero.test.tsx` renders the component and asserts the exact copy string appears in the DOM (substring match on `"It's my pleasure"` is sufficient as a regression guard).

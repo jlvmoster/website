@@ -4,7 +4,7 @@ import { ArrowDownIcon, BriefcaseIcon } from "../icons";
 
 export function Resume() {
   return (
-    <div className="rounded-2xl border border-zinc-100 p-6 transition duration-300 dark:border-zinc-700/40 dark:bg-zinc-800/20">
+    <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40 dark:bg-zinc-800/20">
       <h2 className="flex text-sm font-semibold text-zinc-900 dark:text-zinc-100">
         <BriefcaseIcon className="h-6 w-6 flex-none" />
         <span className="ml-3">Work</span>

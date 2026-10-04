@@ -23,6 +23,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
           "relative block px-3 py-2 transition",
           active ? "text-accent" : "hover:text-accent",
         )}
+        aria-current={active ? "page" : undefined}
       >
         {label}
         {active ? (
