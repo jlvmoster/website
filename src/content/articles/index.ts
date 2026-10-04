@@ -26,3 +26,20 @@ export function getAllArticles(): ArticleWithSlug[] {
 export function getArticleBySlug(slug: string): ArticleWithSlug | undefined {
   return getAllArticles().find((a) => a.slug === slug);
 }
+
+export function getAdjacentArticles(
+  slug: string,
+  articles: ArticleWithSlug[] = getAllArticles(),
+): { previous?: ArticleWithSlug; next?: ArticleWithSlug } {
+  if (articles.length < 2) {
+    return {};
+  }
+  const index = articles.findIndex((article) => article.slug === slug);
+  if (index === -1) {
+    return {};
+  }
+  return {
+    next: index > 0 ? articles[index - 1] : undefined,
+    previous: index < articles.length - 1 ? articles[index + 1] : undefined,
+  };
+}
