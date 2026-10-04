@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!dist", "!.vercel", "!node_modules"]
+    "includes": ["**", "!dist", "!.vercel", "!node_modules", "!.cursor/skills"]
   },
   "formatter": {
     "enabled": true,
