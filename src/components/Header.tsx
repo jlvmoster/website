@@ -23,10 +23,11 @@ function NavLink({ href, label }: { href: string; label: string }) {
           "relative block px-3 py-2 transition",
           active ? "text-accent" : "hover:text-accent",
         )}
+        aria-current={active ? "page" : undefined}
       >
         {label}
         {active ? (
-          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-accent/0 via-accent/40 to-accent/0" />
+          <span className="absolute inset-x-1 -bottom-px h-px bg-linear-to-r from-accent/0 via-accent/70 to-accent/0" />
         ) : null}
       </Link>
     </li>
