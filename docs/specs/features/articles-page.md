@@ -1,7 +1,7 @@
 # Articles Pages — Implementation Spec
 
 ## Goal
-`/articles` lists articles using the Card compound. `/articles/:slug` renders an individual article using `Container` + `<Prose>`.
+`/articles` lists articles using the Card compound. `/articles/:slug` renders an individual article using `ArticleLayout` (dek + date + derived reading time + `<Prose>` + optional “More writing”).
 
 ## Requirements covered
 - §FR-1.2.2 — Articles surface.
@@ -11,11 +11,12 @@
 ## File layout
 - `src/pages/ArticlesPage.tsx` — list using `SimpleLayout`.
 - `src/pages/ArticlePage.tsx` — detail using `ArticleLayout`.
-- `src/components/ArticleLayout.tsx` — `Container` + back-arrow button + `<Prose>` body.
+- `src/components/ArticleLayout.tsx` — `Container` + back-arrow button + header (title, dek, date, reading time) + `<Prose>` body + optional “More writing” nav.
 - `src/components/EmptyState.tsx` — dashed empty-state panel used when the list is empty.
-- `src/content/articles/index.ts` — loader + types.
+- `src/content/articles/index.ts` — loader + types + `getAdjacentArticles()`.
 - `src/content/articles/hello-world.tsx` — placeholder first article.
 - `src/lib/formatDate.ts` — date formatter.
+- `src/lib/readingTime.ts` — derived “N min read” from the article body (200 wpm, ceil, minimum 1).
 
 ## Behavior & edge cases
 - List page (`/articles`):
@@ -27,8 +28,9 @@
 - Detail page (`/articles/:slug`):
   - Reads `:slug` via `useParams()`; resolves with `getArticleBySlug(slug)`.
   - If no match: render `<NotFoundPage>` (or inline equivalent: h1 "Article not found." + link back to `/articles`).
-  - If match: `<ArticleLayout article={article}><article.Component /></ArticleLayout>`.
-- `ArticleLayout`: a back-arrow button at the top calls `navigate(-1)` with a fallback to `/articles` (handles cold deep-load). Below: `<header>` with `<time>` (formatted date) + `<h1>` (article.title) + `<Prose>` wrapping `{children}` (the article body).
+  - If match: `<ArticleLayout article={article} readingMinutes={…} previous={…} next={…}><article.Component /></ArticleLayout>`.
+- `ArticleLayout`: a back-arrow button at the top navigates to `/articles` (handles cold deep-load). Header: `<h1>` (article.title), a one-line dek from `article.description` under the title, and a metadata row with `<time dateTime={article.date}>` (formatted date; keep `datetime`) beside a derived “N min read”. Date stays zinc (list dates remain `tone="accent"`). `<Prose>` wraps `{children}` (the article body). No table of contents, comments, likes, or audio.
+- “More writing”: below `Prose`, when `getAllArticles().length >= 2`, render a `<nav aria-labelledby="more-writing-heading">` with previous (older) and/or next (newer) `Card`s (up to two). Hide the whole block when the only article is `hello-world` (or any single-article catalog). No newsletter signup.
 - Article TSX module shape (no MDX):
 
   ```tsx
@@ -48,11 +50,11 @@
   ```
 
 ## Test plan
-- **Smoke**: `getAllArticles()` returns ≥ 1 entry (the placeholder) and sorts by date descending.
+- **Smoke**: `getAllArticles()` returns ≥ 1 entry (the placeholder) and sorts by date descending. `getAdjacentArticles` returns `{}` for a one-item list and previous/next for a multi-item list. `readingTimeMinutes` is at least 1.
 - **E2E**:
   - `/articles` renders ≥ 1 article card.
   - Clicking the first card navigates to `/articles/hello-world` and the URL updates.
-  - `/articles/hello-world` renders the title and the placeholder paragraph.
+  - `/articles/hello-world` renders the title, the meta description as a dek, a `datetime` on `<time>`, “N min read”, and the placeholder paragraph. “More writing” is not shown while only `hello-world` exists.
   - `/articles/does-not-exist` renders the "Article not found." state.
 
 ## Open questions

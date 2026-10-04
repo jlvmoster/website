@@ -378,7 +378,7 @@ Detailed spec: `docs/specs/features/document-metadata.md`.
 │   ├── pages/              # one .tsx per route (Home/About/Articles/Article/Projects/Uses/NotFound)
 │   ├── components/         # Header, Footer, LayoutShell, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, icons, home/{Resume,ArticleCard}
 │   ├── content/            # articles/{index.ts, <slug>.tsx}, projects.ts, uses.ts, resume.ts
-│   ├── lib/                # useTheme.ts, formatDate.ts, clsx.ts
+│   ├── lib/                # useTheme.ts, formatDate.ts, clsx.ts, readingTime.ts
 │   └── styles/globals.css  # Tailwind v4 + @plugin typography + zinc/red tokens
 ├── public/                 # favicon, og-image, robots.txt, images/{avatar,portrait}.jpg, images/logos/, cv.pdf — copied into dist/
 ├── scripts/
