@@ -16,14 +16,15 @@ test("hero copy renders verbatim", async ({ page }) => {
 test("hero exposes the three canonical social links", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.locator("a[href='https://github.com/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on GitHub" }),
   ).toBeVisible();
   await expect(
-    page.locator("a[href='https://instagram.com/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on Instagram" }),
   ).toBeVisible();
   await expect(
-    page.locator("a[href='https://linkedin.com/in/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on LinkedIn" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Email Jalo" })).toBeVisible();
 });
 
 test("home navbar hides after the avatar docks on scroll", async ({ page }) => {
