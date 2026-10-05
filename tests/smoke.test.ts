@@ -23,9 +23,13 @@ test("App renders without throwing and contains the canonical home content", () 
     "https://github.com/jlvmoster",
     "https://instagram.com/jlvmoster",
     "https://linkedin.com/in/jlvmoster",
+    "mailto:jalo@moster.dev",
   ]) {
     expect(html).toContain(url);
   }
+
+  expect(html).toContain("Jalo Moster");
+  expect(html).toContain("Back to top");
 });
 
 test("HomePage renders per-route title and description", () => {

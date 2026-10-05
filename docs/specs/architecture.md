@@ -138,12 +138,12 @@ import { Footer } from "./Footer";
 export function LayoutShell({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="fixed inset-0 flex justify-center sm:px-8">
+      <div className="fixed inset-0 flex justify-center sm:px-8" aria-hidden="true">
         <div className="flex w-full max-w-7xl lg:px-8">
           <div className="w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]" />
         </div>
       </div>
-      <div className="relative flex w-full flex-col">
+      <div id="top" className="relative flex w-full flex-col">
         <Header />
         <main className="flex-auto">{children}</main>
         <Footer />
@@ -153,7 +153,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
 }
 ```
 
-Body uses `bg-bg` (the page-behind-the-panel color, zinc-50 / zinc-950). The panel reads `--panel` and `--ring` from the token definitions in `globals.css`.
+Body uses `bg-bg` (the page-behind-the-panel color, zinc-50 / zinc-950) plus a soft zinc `--wash` radial for atmosphere. The panel reads `--panel` and `--ring` from the token definitions in `globals.css`. The content column exposes `id="top"` for the Footer “Back to top” link.
 
 ### 4.6 Container compound
 
@@ -325,7 +325,11 @@ Modules are hand-registered because Bun's HTML bundler statically resolves the i
 
 `SimpleLayout` wraps About / Articles / Projects / Uses pages with a title + intro header + body in a `Container`.
 
-`Section` (used by the Uses page) renders a left-bordered title with a right-column grid of children. Uses `useId()` for `aria-labelledby`.
+`Section` (used by the Uses page) renders a left-bordered title with a right-column grid of children. Accepts an optional `id` for in-page jump links (`scroll-mt-24` when set); otherwise uses `useId()` for `aria-labelledby`.
+
+`Footer` renders NavLinks (with `aria-current`), named social text links, a “Back to top” anchor to `#top`, and the copyright line.
+
+**Surface rhythm (ui-ux-overhaul):** Home is brand-first (name `<h1>` + role line + verbatim bio + socials including mailto). About contact rows are labeled (GitHub / Instagram / LinkedIn / Email). Projects uses an adaptive grid (sparse lists stay single-column instead of stretching across three). Uses tightens tool spacing and adds category jump links via `slugify()`.
 
 `Prose` is a thin wrapper applying `prose dark:prose-invert` so article bodies pick up the `@tailwindcss/typography` plugin styles.
 

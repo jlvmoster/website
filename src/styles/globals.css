@@ -9,6 +9,11 @@
   --accent: #e51636;
   --panel: #ffffff;
   --ring: rgb(244 244 245);
+  --wash: radial-gradient(
+    120% 80% at 50% -10%,
+    rgb(228 228 231 / 0.9),
+    transparent 55%
+  );
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -22,6 +27,11 @@
   --accent: #ff4f5e;
   --panel: #18181b;
   --ring: rgb(212 212 216 / 0.2);
+  --wash: radial-gradient(
+    120% 80% at 50% -10%,
+    rgb(63 63 70 / 0.55),
+    transparent 55%
+  );
 }
 
 @theme {
@@ -37,11 +47,13 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 4rem;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: var(--wash);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-sans);
 }
@@ -49,6 +61,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  body {
+    background-attachment: scroll;
   }
 }
 

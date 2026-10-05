@@ -21,7 +21,7 @@
 ## Behavior & edge cases
 - List page (`/articles`):
   - `<SimpleLayout title="…" intro="…">` (final wording is an open question).
-  - Body: left-bordered (`md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40`) flex column of article cards.
+  - Body: left-bordered (`md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40`) flex column of article cards with denser vertical rhythm (`space-y-12`).
   - Each card: `Card.Eyebrow` shows date (`formatDate(article.date)`) with `tone="accent"` (`text-accent`, decorated bar `bg-accent/50`); `Card.Title as="h2" href={`/articles/${article.slug}`}`; `Card.Description` shows `article.description`; `Card.Cta` shows "Read article" with `<ChevronRightIcon>`.
   - On `md+`, the date sits in a separate left column (`md:grid md:grid-cols-4 md:items-baseline`).
   - Empty state: if `getAllArticles().length === 0`, render `<EmptyState title="First post coming soon" description="…">` (dashed panel; still satisfies §FR-1.2.2's empty-state line).

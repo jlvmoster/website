@@ -2,8 +2,10 @@ import { Card } from "../components/Card";
 import { LinkIcon } from "../components/icons";
 import { SimpleLayout } from "../components/SimpleLayout";
 import { projects } from "../content/projects";
+import { clsx } from "../lib/clsx";
 
 export function ProjectsPage() {
+  const sparse = projects.length < 3;
   return (
     <SimpleLayout
       title="Things I've built — and a few that are still in flight."
@@ -14,7 +16,12 @@ export function ProjectsPage() {
         name="description"
         content="Things I've built — and a few that are still in flight. Side projects, write-ups, and infrastructure I've worked on outside of my day job."
       />
-      <ul className="grid grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        className={clsx(
+          "grid grid-cols-1 gap-x-12 gap-y-16",
+          sparse ? "max-w-md sm:grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3",
+        )}
+      >
         {projects.map((project) => (
           <Card as="li" key={project.name}>
             <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0">
