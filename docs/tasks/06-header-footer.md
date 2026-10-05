@@ -22,7 +22,7 @@ Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popo
    - Reads `useLocation()`; on `/`, attaches a passive scroll listener that writes CSS custom properties on `document.documentElement`. Cleanup on path change.
    - Desktop (≥`md`): nav pill with NavLinks for About / Articles / Projects / Uses + ThemeToggle.
    - Mobile (<`md`): "Menu" button → MobileNavigation popover.
-   - Avatar: 64×64 on Home (large), 36×36 in pill elsewhere.
+   - Avatar: 96×96 on Home (large), 36×36 in pill elsewhere.
 7. **Create `src/components/Footer.tsx`** — ContainerOuter/Inner, NavLinks (About / Articles / Projects / Uses), copyright `© {new Date().getFullYear()} Jalo Moster. All rights reserved.`.
 8. **Update `src/components/LayoutShell.tsx`** to render `<Header />` and `<Footer />` (replace any temporary stubs).
 

@@ -201,7 +201,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
 
 The Spotlight Header is a single component with three behaviors that toggle based on `useLocation()`:
 
-1. **Home route (`/`)**: a large 64×64 avatar sits in the page flow above the nav pill. As the user scrolls, the avatar shrinks to 36×36 and slides into the pill. The shrink is driven by CSS custom properties (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`) set on `document.documentElement` by a `useEffect` scroll listener. React does **not** re-render on scroll.
+1. **Home route (`/`)**: a large 96×96 avatar sits in the page flow above the nav pill. As the user scrolls, the avatar shrinks to 36×36 and slides into the pill. The shrink is driven by CSS custom properties (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`) set on `document.documentElement` by a `useEffect` scroll listener. React does **not** re-render on scroll.
 2. **Other routes**: the avatar renders at 36×36 inside the nav pill from page mount.
 3. **All routes**: desktop (≥`md`) shows a nav pill with NavLinks (About / Articles / Projects / Uses) on the right, with a theme toggle. Mobile (<`md`) shows a "Menu" button that opens a handwritten popover (no `@headlessui/react`).
 

@@ -14,13 +14,13 @@ This document is the authoritative source of truth for what the implementation m
 
 ### 1.1 Site shape & routing
 - **FR-1.1.1** The site is a multi-page client-side React SPA. Routes are mounted by a router and rendered without a full page reload.
-- **FR-1.1.2** Navigation uses a fixed Header (avatar + nav pill + theme toggle) plus a Footer (NavLinks + copyright). The Header collapses the avatar from 64px → 36px on scroll on the Home page only.
+- **FR-1.1.2** Navigation uses a fixed Header (avatar + nav pill + theme toggle) plus a Footer (NavLinks + copyright). The Header collapses the avatar from 96px → 36px on scroll on the Home page only.
 - **FR-1.1.3** Each page is a routed component under `src/pages/`; sections are subcomponents that can be lifted to their own route later without rewriting.
 - **FR-1.1.4** Client-side routing uses `react-router-dom`. The router lives in `src/main.tsx`/`src/App.tsx` and routes are statically declared. (Note: the v1 wording of this ID has been flipped — routing is now in.)
 - **FR-1.1.5** Routes registered with `react-router-dom`: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`. A wildcard route renders a minimal NotFoundPage.
 - **FR-1.1.6** Deep links to any route serve the SPA shell via Vercel rewrites to `index.html` (§FR-1.4.3) and react-router resolves the route client-side.
 - **FR-1.1.7** Navigation between routes does not trigger a full document load. In-app links use `Link` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`.
-- **FR-1.1.8** The Header is fixed across all routes. Home (`/`) shows a large avatar that scales from 64px to 36px on scroll; other routes show the avatar at 36px from page load.
+- **FR-1.1.8** The Header is fixed across all routes. Home (`/`) shows a large avatar that scales from 96px to 36px on scroll; other routes show the avatar at 36px from page load.
 - **FR-1.1.9** The Footer is present across all routes and contains NavLinks for About / Articles / Projects / Uses plus a copyright line.
 
 ### 1.2 Pages & content (v1)
@@ -168,7 +168,7 @@ The v2 release is complete when *all* of the following hold:
 - [ ] Hard-refresh on any deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via Vercel SPA rewrite.
 - [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
 - [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
-- [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 64px and scales to 36px on scroll.
+- [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 96px and scales to 36px on scroll.
 - [ ] Articles list renders ≥ 1 article card; clicking it loads `/articles/<slug>`.
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
 - [ ] Footer renders on every route.
