@@ -33,7 +33,7 @@ test("home navbar hides after the avatar docks on scroll", async ({ page }) => {
   const avatar = page.locator("a[aria-label='Home'] img");
   const navbar = page.locator("header > div.fixed");
   const before = await avatar.boundingBox();
-  expect(before?.width).toBeGreaterThan(60);
+  expect(before?.width).toBeGreaterThan(90);
 
   await page.evaluate(() => window.scrollTo(0, 136));
   await expect

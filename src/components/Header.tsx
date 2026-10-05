@@ -91,7 +91,7 @@ export function Header() {
       const targetLeft = navRect.left + 2;
       const top = startTop + (targetTop - startTop) * dockProgress;
       const left = startLeft + (targetLeft - startLeft) * dockProgress;
-      const scale = 1 + (36 / 64 - 1) * dockProgress;
+      const scale = 1 + (36 / 96 - 1) * dockProgress;
 
       avatar.style.opacity = "1";
       avatar.style.left = `${left}px`;
@@ -152,7 +152,7 @@ export function Header() {
             <ContainerInner className="w-full">
               <div
                 ref={homeAvatarSlotRef}
-                className="relative h-16 w-16 origin-left"
+                className="relative h-24 w-24 origin-left"
               >
                 <Avatar
                   ref={homeAvatarRef}

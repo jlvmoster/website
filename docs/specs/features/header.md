@@ -6,7 +6,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 ## Requirements covered
 - §FR-1.1.2 — Header is the navigation surface.
 - §FR-1.1.5 — Routes are navigated from the NavLinks.
-- §FR-1.1.8 — Avatar scales 64→36 on Home, static at 36 elsewhere.
+- §FR-1.1.8 — Avatar scales 96→36 on Home, static at 36 elsewhere.
 - §FR-1.3.1 — Theme toggle button lives here.
 - §FR-1.3.5, §FR-1.3.8 — No UI library; scroll math via CSS custom properties.
 
@@ -19,7 +19,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 - `src/lib/useTheme.ts` — choice/persist/apply hook.
 
 ## Behavior & edge cases
-- On `/` (home), the avatar starts at 64×64 in the page flow above the nav pill; on every other route, it sits at 36×36 inside the pill.
+- On `/` (home), the avatar starts at 96×96 in the page flow above the nav pill; on every other route, it sits at 36×36 inside the pill.
 - Scroll math runs only on `/`. A `useEffect` reads `useLocation()`; if path is `/`, it attaches a `scroll` listener that writes CSS custom properties on `document.documentElement` (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`). The Avatar element reads those via `style="transform: var(--avatar-image-transform)"`. No React re-renders per scroll tick.
 - Listeners are passive; cleanup on unmount/route change.
 - Desktop (≥`md`) nav pill: `rounded-full bg-white/90 px-3 text-sm font-medium text-zinc-800 ring-1 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10`. Contains four NavLinks (About / Articles / Projects / Uses).
