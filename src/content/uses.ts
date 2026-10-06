@@ -82,7 +82,7 @@ export const uses: UsesCategory[] = [
       {
         title: "Bialetti Venus Moka Pot 6 cups",
         description:
-          "For espresso-like shots when the beans aren't freshly ground. Stovetop, no fuss, and still a solid cup.",
+          "For espresso-like shots when the beans aren't freshly roasted. Stovetop, no fuss, and still a solid cup.",
       },
       {
         title: "Hario Switch",
