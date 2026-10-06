@@ -2,6 +2,7 @@ import { Card } from "../components/Card";
 import { Section } from "../components/Section";
 import { SimpleLayout } from "../components/SimpleLayout";
 import { type Tool, uses } from "../content/uses";
+import { slugify } from "../lib/slugify";
 
 function ToolItem({ tool }: { tool: Tool }) {
   return (
@@ -31,10 +32,31 @@ export function UsesPage() {
         name="description"
         content="The hardware, software, and small luxuries I use to do my job — a running inventory of the tools I actually reach for day to day."
       />
-      <div className="space-y-20">
+      <nav
+        aria-label="Uses categories"
+        className="mb-10 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-zinc-600 dark:text-zinc-400"
+      >
+        {uses.map((section) => {
+          const id = slugify(section.category);
+          return (
+            <a
+              key={section.category}
+              href={`#${id}`}
+              className="transition hover:text-accent"
+            >
+              {section.category}
+            </a>
+          );
+        })}
+      </nav>
+      <div className="space-y-12">
         {uses.map((section) => (
-          <Section key={section.category} title={section.category}>
-            <ul className="space-y-16">
+          <Section
+            key={section.category}
+            title={section.category}
+            id={slugify(section.category)}
+          >
+            <ul className="space-y-8">
               {section.tools.map((tool) => (
                 <ToolItem key={tool.title} tool={tool} />
               ))}

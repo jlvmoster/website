@@ -9,7 +9,7 @@ Zinc + red palette via CSS variables, class-based dark mode, Spotlight-style the
 - §FR-1.3.3 — System-stack fonts only.
 - §FR-1.3.4 — Prose max-width 65ch.
 - §FR-1.3.5 — No UI library.
-- §FR-1.3.6 — Two additional tokens for the Spotlight panel: `--panel`, `--ring`.
+- §FR-1.3.6 — Two additional tokens for the Spotlight panel: `--panel`, `--ring`. Soft atmosphere uses a companion `--wash` radial (not exposed as a Tailwind color utility).
 - §FR-1.3.7 — `@plugin "@tailwindcss/typography";` for Prose.
 
 ## File layout
@@ -26,6 +26,7 @@ Zinc + red palette via CSS variables, class-based dark mode, Spotlight-style the
   - `--accent: #e51636;` (Chick-fil-A red)
   - `--panel: #ffffff;`
   - `--ring: rgb(244 244 245);` (zinc-100)
+  - `--wash: radial-gradient(120% 80% at 50% -10%, rgb(228 228 231 / 0.9), transparent 55%);`
 - Dark tokens on `:root.dark`:
   - `--bg: #09090b;` (zinc-950)
   - `--fg: #e4e4e7;` (zinc-200)
@@ -33,10 +34,12 @@ Zinc + red palette via CSS variables, class-based dark mode, Spotlight-style the
   - `--accent: #ff4f5e;` (red accent, dark)
   - `--panel: #18181b;` (zinc-900)
   - `--ring: rgb(212 212 216 / 0.2);` (zinc-300/20)
+  - `--wash: radial-gradient(120% 80% at 50% -10%, rgb(63 63 70 / 0.55), transparent 55%);`
 - `--font-sans` and `--font-serif` keep verbatim system stacks from v1.
-- The `@theme` block maps each token into a Tailwind utility (`--color-bg: var(--bg)`, etc.) so `bg-bg`, `text-fg`, `text-muted`, `text-accent`, `font-sans`, `font-serif` continue to work. Adds two new tokens: `--color-panel`, `--color-ring`.
+- The `@theme` block maps each token into a Tailwind utility (`--color-bg: var(--bg)`, etc.) so `bg-bg`, `text-fg`, `text-muted`, `text-accent`, `font-sans`, `font-serif` continue to work. Adds two new tokens: `--color-panel`, `--color-ring`. `--wash` stays a raw CSS variable for `body` background-image only.
 - The v1 `@media (prefers-color-scheme: dark) { :root { ... } }` block is removed — replaced by the class strategy + anti-flicker script.
-- `body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); }`.
+- `body { background-color: var(--bg); background-image: var(--wash); background-attachment: fixed; color: var(--fg); font-family: var(--font-sans); }`. Under `prefers-reduced-motion: reduce`, attachment is `scroll`.
+- `html { scroll-behavior: smooth; scroll-padding-top: 5rem; }` with `auto` under reduced motion (Footer jump links / Uses category anchors).
 - Prose: `article, .prose { max-width: 65ch; line-height: 1.7; }` — guard for plain `<article>` tags outside `<Prose>`. The typography plugin caps prose width too.
 
 ## Test plan

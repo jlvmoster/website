@@ -12,12 +12,13 @@ The fixed centered background panel + flex content column (Header / main / Foote
 - `src/components/Container.tsx` — ContainerOuter, ContainerInner, composed Container.
 
 ## Behavior & edge cases
-- Body uses `bg-bg dark:bg-bg` (zinc-50 / zinc-950) — the page-behind-the-panel color. Set on `<body>` via the body rule in `globals.css`.
-- The panel is a fixed sibling layer:
+- Body uses `bg-bg` (zinc-50 / zinc-950) plus a soft zinc `--wash` radial gradient (`background-image: var(--wash)`, `background-attachment: fixed`) — atmosphere behind the panel without purple/cream AI-default looks. Under `prefers-reduced-motion: reduce`, attachment falls back to `scroll`.
+- The panel is a fixed sibling layer (decorative; `aria-hidden="true"`):
   - Outer: `fixed inset-0 flex justify-center sm:px-8`.
   - Middle: `flex w-full max-w-7xl lg:px-8`.
   - Inner: `w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]`.
-- Content column is `relative flex w-full flex-col`. Wraps Header / `<main className="flex-auto">{children}</main>` / Footer. LayoutShell does not remount on client-side navigation, so `<main>` must not use a load/enter animation (`animation-fill-mode: both` + opacity 0 would hide LCP/hero on every hard refresh and would not replay on route change).
+- Content column is `relative flex w-full flex-col` with `id="top"` so the Footer “Back to top” anchor has a real target. Wraps Header / `<main className="flex-auto">{children}</main>` / Footer. LayoutShell does not remount on client-side navigation, so `<main>` must not use a load/enter animation (`animation-fill-mode: both` + opacity 0 would hide LCP/hero on every hard refresh and would not replay on route change).
+- Footer: NavLinks + named social text links + “Back to top” (`href="#top"`) + copyright. Smooth scroll is owned by `html { scroll-behavior }`, which becomes `auto` under reduced motion.
 - Container compound (Outer + Inner + composed Container) is used by SimpleLayout and individual pages.
 - `forwardRef` is required on Container components so Header's scroll math can capture an offset.
 

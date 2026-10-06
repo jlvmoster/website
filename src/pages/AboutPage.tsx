@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import { Container } from "../components/Container";
 import {
   GitHubIcon,
@@ -7,19 +8,21 @@ import {
 } from "../components/icons";
 import { clsx } from "../lib/clsx";
 
-type SocialItemProps = {
+type ContactItemProps = {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  children: string;
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
   className?: string;
 };
 
-function SocialItem({
+function ContactItem({
   href,
   icon: Icon,
-  children,
+  label,
+  value,
   className,
-}: SocialItemProps) {
+}: ContactItemProps) {
   const external = href.startsWith("http");
   return (
     <li className={clsx(className, "flex")}>
@@ -27,10 +30,17 @@ function SocialItem({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
-        className="group flex text-sm font-medium text-zinc-800 transition hover:text-accent dark:text-zinc-200"
+        className="group flex w-full items-start gap-4 text-sm transition"
       >
-        <Icon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-accent" />
-        <span className="ml-4">{children}</span>
+        <Icon className="mt-0.5 h-5 w-5 flex-none fill-zinc-500 text-zinc-500 transition group-hover:fill-accent group-hover:text-accent dark:fill-zinc-400 dark:text-zinc-400" />
+        <span className="min-w-0 flex-auto">
+          <span className="block text-xs font-medium tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
+            {label}
+          </span>
+          <span className="mt-0.5 block font-medium text-zinc-800 transition group-hover:text-accent dark:text-zinc-200">
+            {value}
+          </span>
+        </span>
       </a>
     </li>
   );
@@ -50,7 +60,7 @@ export function AboutPage() {
             <img
               src="/images/portrait.jpg"
               alt="Portrait of Jalo Moster"
-              className="aspect-square rotate-3 rounded-2xl bg-zinc-100 object-contain shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-500 ease-out hover:rotate-0 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:rotate-3 dark:bg-zinc-800 dark:ring-white/10"
+              className="aspect-square rotate-3 rounded-2xl bg-zinc-100 object-cover shadow-md ring-1 shadow-zinc-800/5 ring-zinc-900/5 transition duration-500 ease-out hover:rotate-0 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:rotate-3 dark:bg-zinc-800 dark:ring-white/10"
             />
           </div>
         </div>
@@ -92,31 +102,32 @@ export function AboutPage() {
           </div>
         </div>
         <div className="lg:pl-20">
-          <ul>
-            <SocialItem href="https://github.com/jlvmoster" icon={GitHubIcon}>
-              Follow on GitHub
-            </SocialItem>
-            <SocialItem
+          <ul className="space-y-5">
+            <ContactItem
+              href="https://github.com/jlvmoster"
+              icon={GitHubIcon}
+              label="GitHub"
+              value="@jlvmoster"
+            />
+            <ContactItem
               href="https://instagram.com/jlvmoster"
               icon={InstagramIcon}
-              className="mt-4"
-            >
-              Follow on Instagram
-            </SocialItem>
-            <SocialItem
+              label="Instagram"
+              value="@jlvmoster"
+            />
+            <ContactItem
               href="https://linkedin.com/in/jlvmoster"
               icon={LinkedInIcon}
-              className="mt-4"
-            >
-              Follow on LinkedIn
-            </SocialItem>
-            <SocialItem
+              label="LinkedIn"
+              value="jlvmoster"
+            />
+            <ContactItem
               href="mailto:jalo@moster.dev"
               icon={MailIcon}
-              className="mt-8 border-t border-zinc-100 pt-8 dark:border-zinc-700/40"
-            >
-              jalo@moster.dev
-            </SocialItem>
+              label="Email"
+              value="jalo@moster.dev"
+              className="border-t border-zinc-100 pt-5 dark:border-zinc-700/40"
+            />
           </ul>
         </div>
       </div>

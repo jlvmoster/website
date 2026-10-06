@@ -1,20 +1,27 @@
 import { type ReactNode, useId } from "react";
+import { clsx } from "../lib/clsx";
 
 type SectionProps = {
   title: string;
+  id?: string;
   children: ReactNode;
 };
 
-export function Section({ title, children }: SectionProps) {
-  const id = useId();
+export function Section({ title, id, children }: SectionProps) {
+  const generatedId = useId();
+  const headingId = id ?? generatedId;
   return (
     <section
-      aria-labelledby={id}
-      className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40"
+      id={id}
+      aria-labelledby={headingId}
+      className={clsx(
+        "md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40",
+        id && "scroll-mt-24",
+      )}
     >
       <div className="grid max-w-3xl grid-cols-1 items-baseline gap-y-8 md:grid-cols-4">
         <h2
-          id={id}
+          id={headingId}
           className="text-sm font-semibold text-zinc-800 dark:text-zinc-100"
         >
           {title}

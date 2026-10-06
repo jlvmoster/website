@@ -3,7 +3,12 @@ import { Container } from "../components/Container";
 import { EmptyState } from "../components/EmptyState";
 import { ArticleCard } from "../components/home/ArticleCard";
 import { Resume } from "../components/home/Resume";
-import { GitHubIcon, InstagramIcon, LinkedInIcon } from "../components/icons";
+import {
+  GitHubIcon,
+  InstagramIcon,
+  LinkedInIcon,
+  MailIcon,
+} from "../components/icons";
 import { SocialLink } from "../components/SocialLink";
 import { getAllArticles } from "../content/articles";
 
@@ -19,8 +24,11 @@ export function HomePage() {
       <Container className="mt-9">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
-            Software engineer building data systems at Chick-fil-A.
+            Jalo Moster
           </h1>
+          <p className="mt-3 text-lg font-medium tracking-tight text-zinc-700 dark:text-zinc-300">
+            Software engineer building data systems at Chick-fil-A.
+          </p>
           <p className="mt-6 text-base text-zinc-600 dark:text-zinc-400">
             Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my
             pleasure to invite you into my portfolio.
@@ -41,11 +49,16 @@ export function HomePage() {
               icon={LinkedInIcon}
               aria-label="Follow on LinkedIn"
             />
+            <SocialLink
+              href="mailto:jalo@moster.dev"
+              icon={MailIcon}
+              aria-label="Email Jalo"
+            />
           </div>
         </div>
       </Container>
-      <Container className="mt-24 md:mt-28">
-        <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2">
+      <Container className="mt-20 md:mt-24">
+        <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-16 lg:max-w-none lg:grid-cols-2 lg:gap-y-20">
           <div className="flex flex-col">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
@@ -58,7 +71,7 @@ export function HomePage() {
                 View all
               </Link>
             </div>
-            <div className="mt-8 flex flex-col gap-16">
+            <div className="mt-8 flex flex-col gap-12">
               {articles.length === 0 ? (
                 <EmptyState
                   title="First post coming soon"

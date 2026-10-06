@@ -36,21 +36,23 @@ test("production exposes the three canonical social links", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.locator("a[href='https://github.com/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on GitHub" }),
   ).toBeVisible();
   await expect(
-    page.locator("a[href='https://instagram.com/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on Instagram" }),
   ).toBeVisible();
   await expect(
-    page.locator("a[href='https://linkedin.com/in/jlvmoster']"),
+    page.getByRole("link", { name: "Follow on LinkedIn" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Email Jalo" })).toBeVisible();
 });
 
 test("production applies Tailwind utility classes", async ({ page }) => {
   await page.goto("/");
 
   const heroHeading = page.getByRole("heading", {
-    name: "Software engineer building data systems at Chick-fil-A.",
+    name: "Jalo Moster",
+    exact: true,
   });
   const heroHeadingStyles = await heroHeading.evaluate((el) => {
     const cs = getComputedStyle(el);
@@ -65,7 +67,7 @@ test("production applies Tailwind utility classes", async ({ page }) => {
   expect(heroHeadingStyles.marginTop).toBe(0);
 
   const ghLinkPadding = await page
-    .locator("a[href='https://github.com/jlvmoster']")
+    .getByRole("link", { name: "Follow on GitHub" })
     .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
   expect(ghLinkPadding).toBeGreaterThan(0);
 });
