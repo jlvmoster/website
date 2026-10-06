@@ -42,9 +42,9 @@ export const uses: UsesCategory[] = [
       },
       {
         title: "Grok Bot",
-        href: "https://grok.com",
+        href: "https://x.ai/bot",
         description:
-          "xAI's Grok for quick research, brainstorming, and a second opinion when I want a different model in the loop.",
+          "xAI's agentic AI engineering — a team of bots that work as AI teammates.",
       },
     ],
   },
@@ -82,7 +82,7 @@ export const uses: UsesCategory[] = [
       {
         title: "Bialetti Venus Moka Pot 6 cups",
         description:
-          "For espresso-like shots when the beans aren't freshly ground. Stovetop, no fuss, and still a solid cup.",
+          "For espresso-like shots when the beans aren't freshly roasted. Stovetop, no fuss, and still a solid cup.",
       },
       {
         title: "Hario Switch",
