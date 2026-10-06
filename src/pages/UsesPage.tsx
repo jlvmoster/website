@@ -7,15 +7,9 @@ import { slugify } from "../lib/slugify";
 function ToolItem({ tool }: { tool: Tool }) {
   return (
     <Card as="li">
-      {tool.href ? (
-        <Card.Title as="h3" href={tool.href}>
-          {tool.title}
-        </Card.Title>
-      ) : (
-        <h3 className="text-base font-semibold tracking-tight text-zinc-800 dark:text-zinc-100">
-          {tool.title}
-        </h3>
-      )}
+      <Card.Title as="h3" href={tool.href}>
+        {tool.title}
+      </Card.Title>
       <Card.Description>{tool.description}</Card.Description>
     </Card>
   );
@@ -34,7 +28,7 @@ export function UsesPage() {
       />
       <nav
         aria-label="Uses categories"
-        className="mb-10 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-zinc-600 dark:text-zinc-400"
+        className="mb-10 flex flex-wrap gap-x-5 gap-y-2 border-b border-zinc-100 pb-6 text-sm font-medium text-zinc-600 dark:border-zinc-700/40 dark:text-zinc-400"
       >
         {uses.map((section) => {
           const id = slugify(section.category);
@@ -42,21 +36,21 @@ export function UsesPage() {
             <a
               key={section.category}
               href={`#${id}`}
-              className="transition hover:text-accent"
+              className="py-1 transition hover:text-accent focus-visible:text-accent"
             >
               {section.category}
             </a>
           );
         })}
       </nav>
-      <div className="space-y-12">
+      <div className="space-y-14">
         {uses.map((section) => (
           <Section
             key={section.category}
             title={section.category}
             id={slugify(section.category)}
           >
-            <ul className="space-y-8">
+            <ul className="space-y-6">
               {section.tools.map((tool) => (
                 <ToolItem key={tool.title} tool={tool} />
               ))}
