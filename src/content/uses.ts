@@ -44,7 +44,7 @@ export const uses: UsesCategory[] = [
         title: "Grok Bot",
         href: "https://x.ai/bot",
         description:
-          "xAI's agentic AI engineering with a team of bots as AI teammates — I keep Grok itself for general-purpose and coding prompts.",
+          "xAI's agentic AI engineering — a team of bots that work as AI teammates.",
       },
     ],
   },
