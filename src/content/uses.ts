@@ -71,4 +71,24 @@ export const uses: UsesCategory[] = [
       },
     ],
   },
+  {
+    category: "Barista's counter",
+    tools: [
+      {
+        title: "Breville Bambino Plus",
+        description:
+          "My go-to espresso machine for dark and medium roasts — quick heat-up, consistent shots, and small enough to live on the counter every day.",
+      },
+      {
+        title: "Bialetti Venus Moka Pot 6 cups",
+        description:
+          "For espresso-like shots when the beans aren't freshly ground. Stovetop, no fuss, and still a solid cup.",
+      },
+      {
+        title: "Hario Switch",
+        description:
+          "Quick pour-over with a valve for immersion brew when I want more control without slowing the morning down.",
+      },
+    ],
+  },
 ];
