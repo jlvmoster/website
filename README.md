@@ -46,7 +46,7 @@ bun run dev              # http://localhost:3000 with HMR
 | `/articles` | Reverse-chronological list of typed TSX article modules. |
 | `/articles/:slug` | Individual article rendered via `ArticleLayout` + `<Prose>` (back-arrow navigates to `/articles`). |
 | `/projects` | Three-column grid of project cards (logo, title, description, external link). |
-| `/uses` | Section-based list of hardware, dev tools, and productivity software. |
+| `/uses` | Section-based list of hardware, AI tools, and skills & plugins. |
 | `*` | Minimal NotFoundPage. |
 
 Hard-refresh on any deep link returns 200 from Vercel via the SPA rewrite; the client router resolves the URL after mount.

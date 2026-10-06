@@ -22,7 +22,7 @@ export function Section({ title, id, children }: SectionProps) {
       <div className="grid max-w-3xl grid-cols-1 items-baseline gap-y-8 md:grid-cols-4">
         <h2
           id={headingId}
-          className="text-sm font-semibold text-zinc-800 dark:text-zinc-100"
+          className="text-sm font-semibold text-zinc-600 dark:text-zinc-400"
         >
           {title}
         </h2>

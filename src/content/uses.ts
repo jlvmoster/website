@@ -14,7 +14,7 @@ export const uses: UsesCategory[] = [
     category: "Workstation",
     tools: [
       {
-        title: "16” MacBook Pro, M-series, 32GB RAM",
+        title: "14” MacBook Pro, M-series, 32GB RAM",
         description:
           "Daily driver. Handles Spark notebooks, large containers, and a stack of Chrome windows without complaint.",
       },
@@ -26,19 +26,13 @@ export const uses: UsesCategory[] = [
     ],
   },
   {
-    category: "Development tools",
+    category: "AI tools",
     tools: [
       {
-        title: "Bun",
-        href: "https://bun.com",
+        title: "Cursor",
+        href: "https://cursor.com",
         description:
-          "Replaces Node, npm, ts-node, jest, esbuild, and a handful of other tools with one fast runtime.",
-      },
-      {
-        title: "Vercel",
-        href: "https://vercel.com",
-        description:
-          "How this site is hosted. Static SPA from the Bun build, SPA rewrites for client routes, and room to grow into serverless functions when I need them.",
+          "AI-native editor where I do most of my day-to-day coding. Agent mode plus inline edits beat hopping between chat and an IDE.",
       },
       {
         title: "Claude Code",
@@ -46,21 +40,54 @@ export const uses: UsesCategory[] = [
         description:
           "Coding agent that lives in my terminal. Cuts the time from spec to working code for the kind of side projects I tend to build.",
       },
+      {
+        title: "Grok Bot",
+        href: "https://grok.com",
+        description:
+          "xAI's Grok for quick research, brainstorming, and a second opinion when I want a different model in the loop.",
+      },
     ],
   },
   {
-    category: "Productivity",
+    category: "Skills & plugins",
     tools: [
       {
-        title: "Linear",
-        href: "https://linear.app",
-        description: "Tracks the side projects I actually intend to finish.",
+        title: "ponytail",
+        href: "https://ponytail.dev/",
+        description:
+          "Complexity-focused code review skill. Keeps diffs lean and flags YAGNI before it ships.",
       },
       {
-        title: "1Password",
-        href: "https://1password.com",
+        title: "context7",
+        href: "https://context7.com/",
         description:
-          "Password manager and SSH/git signing agent in one. Keys never touch the disk in plaintext.",
+          "Pulls up-to-date library docs into the agent context so answers track the current API, not training cutoff.",
+      },
+      {
+        title: "UI UX Pro Max",
+        href: "https://uupm.cc/",
+        description:
+          "Design-system and UI/UX guidance for agent-built interfaces — useful when restyling pages without inventing a new aesthetic.",
+      },
+    ],
+  },
+  {
+    category: "Barista's counter",
+    tools: [
+      {
+        title: "Breville Bambino Plus",
+        description:
+          "My go-to espresso machine for dark and medium roasts — quick heat-up, consistent shots, and small enough to live on the counter every day.",
+      },
+      {
+        title: "Bialetti Venus Moka Pot 6 cups",
+        description:
+          "For espresso-like shots when the beans aren't freshly ground. Stovetop, no fuss, and still a solid cup.",
+      },
+      {
+        title: "Hario Switch",
+        description:
+          "Quick pour-over with a valve for immersion brew when I want more control without slowing the morning down.",
       },
     ],
   },
