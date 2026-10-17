@@ -19,6 +19,11 @@ export const uses: UsesCategory[] = [
           "Daily driver. Handles Spark notebooks, large containers, and a stack of Chrome windows without complaint.",
       },
       {
+        title: "NVIDIA GeForce RTX 3090 Ti, 24GB VRAM",
+        description:
+          "The card behind my local LLM projects. 24GB of VRAM is enough to load a model and try a proof of concept on my own hardware.",
+      },
+      {
         title: "Mechanical keyboard + vertical mouse",
         description:
           "After years on laptop keyboards, switching to a mechanical board and a vertical mouse has been the biggest comfort upgrade.",
@@ -45,6 +50,18 @@ export const uses: UsesCategory[] = [
         href: "https://x.ai/bot",
         description:
           "xAI's agentic AI engineering — a team of bots that work as AI teammates.",
+      },
+      {
+        title: "Ollama",
+        href: "https://ollama.com",
+        description:
+          "How I pull a model and try a quick local LLM proof of concept before an idea earns a bigger stack.",
+      },
+      {
+        title: "Hermes Agent",
+        href: "https://hermes-agent.nousresearch.com",
+        description:
+          "Nous Research's agent for the same kind of local proofs of concept — a small loop I can point at a model on my own machine.",
       },
     ],
   },
