@@ -11,6 +11,22 @@ function ToolItem({ tool }: { tool: Tool }) {
         {tool.title}
       </Card.Title>
       <Card.Description>{tool.description}</Card.Description>
+      {tool.links && tool.links.length > 0 ? (
+        <ul className="relative z-10 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
+          {tool.links.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer transition-colors duration-200 ease-out hover:text-accent focus-visible:text-accent"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </Card>
   );
 }
