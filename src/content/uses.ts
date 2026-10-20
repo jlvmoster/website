@@ -76,11 +76,22 @@ export const uses: UsesCategory[] = [
     category: "Skills & plugins",
     tools: [
       {
+        title: "ponytail",
+        href: "https://ponytail.dev/",
+        description:
+          "Complexity-focused code review skill. Keeps diffs lean and flags YAGNI before it ships.",
+      },
+      {
+        title: "context7",
+        href: "https://context7.com/",
+        description:
+          "Pulls up-to-date library docs into the agent context so answers track the current API, not training cutoff.",
+      },
+      {
         title: "UI/UX skills",
         description:
-          "The set I load when polishing the site — lean review, design-system guidance, art direction, craft, and animation — without inventing a new aesthetic every time.",
+          "The set I load when polishing the site — design-system guidance, art direction, craft, and animation — without inventing a new aesthetic every time.",
         links: [
-          { label: "ponytail", href: "https://ponytail.dev/" },
           { label: "UI UX Pro Max", href: "https://uupm.cc/" },
           {
             label: "Taste",
@@ -95,12 +106,6 @@ export const uses: UsesCategory[] = [
             href: "https://github.com/emilkowalski/skills",
           },
         ],
-      },
-      {
-        title: "context7",
-        href: "https://context7.com/",
-        description:
-          "Pulls up-to-date library docs into the agent context so answers track the current API, not training cutoff.",
       },
     ],
   },
