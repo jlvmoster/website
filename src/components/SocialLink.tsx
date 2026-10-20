@@ -22,9 +22,9 @@ export function SocialLink({
       aria-label={
         ariaLabel ?? (typeof children === "string" ? children : undefined)
       }
-      className="group -m-1 p-1"
+      className="group -m-1 cursor-pointer rounded-md p-1 transition-transform duration-200 ease-out active:scale-95 motion-reduce:active:scale-100"
     >
-      <Icon className="h-6 w-6 fill-zinc-500 text-zinc-500 transition duration-200 group-hover:fill-accent group-hover:text-accent group-focus-visible:fill-accent group-focus-visible:text-accent dark:fill-zinc-400 dark:text-zinc-400" />
+      <Icon className="h-6 w-6 fill-zinc-500 text-zinc-500 transition-[fill,color] duration-200 ease-out group-hover:fill-accent group-hover:text-accent group-focus-visible:fill-accent group-focus-visible:text-accent dark:fill-zinc-400 dark:text-zinc-400" />
     </a>
   );
 }

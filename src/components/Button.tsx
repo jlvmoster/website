@@ -30,7 +30,7 @@ type NativeButtonProps = CommonProps &
 export function Button(props: AnchorButtonProps | NativeButtonProps) {
   const { variant = "primary", className, children, ...rest } = props;
   const classes = clsx(
-    "inline-flex items-center gap-2 justify-center rounded-md py-2 px-3 text-sm outline-offset-2 transition active:transition-none",
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm outline-offset-2 transition-[color,background-color,transform,box-shadow] duration-200 ease-out active:scale-[0.97] active:transition-none motion-reduce:active:scale-100",
     variantStyles[variant],
     className,
   );

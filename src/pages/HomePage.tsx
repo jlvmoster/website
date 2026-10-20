@@ -66,7 +66,7 @@ export function HomePage() {
               </h2>
               <Link
                 to="/articles"
-                className="text-sm font-medium text-zinc-600 transition hover:text-accent focus-visible:text-accent dark:text-zinc-400"
+                className="cursor-pointer text-sm font-medium text-zinc-600 transition-colors duration-200 ease-out hover:text-accent focus-visible:text-accent dark:text-zinc-400"
               >
                 View all
               </Link>

@@ -36,7 +36,7 @@ export function UsesPage() {
             <a
               key={section.category}
               href={`#${id}`}
-              className="py-1 transition hover:text-accent focus-visible:text-accent"
+              className="cursor-pointer py-1 transition-colors duration-200 ease-out hover:text-accent focus-visible:text-accent"
             >
               {section.category}
             </a>

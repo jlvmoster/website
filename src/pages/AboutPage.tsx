@@ -30,14 +30,14 @@ function ContactItem({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
-        className="group flex w-full items-start gap-4 text-sm transition"
+        className="group flex w-full cursor-pointer items-start gap-4 rounded-md text-sm transition-colors duration-200 ease-out"
       >
-        <Icon className="mt-0.5 h-5 w-5 flex-none fill-zinc-500 text-zinc-500 transition group-hover:fill-accent group-hover:text-accent dark:fill-zinc-400 dark:text-zinc-400" />
+        <Icon className="mt-0.5 h-5 w-5 flex-none fill-zinc-500 text-zinc-500 transition-[fill,color] duration-200 ease-out group-hover:fill-accent group-hover:text-accent dark:fill-zinc-400 dark:text-zinc-400" />
         <span className="min-w-0 flex-auto">
           <span className="block text-xs font-medium tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             {label}
           </span>
-          <span className="mt-0.5 block font-medium text-zinc-800 transition group-hover:text-accent dark:text-zinc-200">
+          <span className="mt-0.5 block font-medium text-zinc-800 transition-colors duration-200 ease-out group-hover:text-accent dark:text-zinc-200">
             {value}
           </span>
         </span>

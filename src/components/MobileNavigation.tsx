@@ -23,19 +23,21 @@ export function MobileNavigation({ className }: { className?: string }) {
         type="button"
         className={clsx(
           className,
-          "group flex items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20",
+          "group flex cursor-pointer items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition-[box-shadow,background-color,transform] duration-200 ease-out active:scale-[0.97] motion-reduce:active:scale-100 dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20",
         )}
         onClick={() => setOpen(true)}
+        aria-expanded={open}
+        aria-haspopup="dialog"
         aria-label="Open menu"
       >
         Menu
-        <ChevronDownIcon className="ml-3 h-2 w-2 stroke-zinc-500 group-hover:stroke-zinc-700 dark:group-hover:stroke-zinc-400" />
+        <ChevronDownIcon className="ml-3 h-2 w-2 stroke-zinc-500 transition-[stroke] duration-200 group-hover:stroke-zinc-700 dark:group-hover:stroke-zinc-400" />
       </button>
       {open ? (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
           <button
             type="button"
-            className="fixed inset-0 bg-zinc-800/40 backdrop-blur-xs dark:bg-black/80"
+            className="fixed inset-0 cursor-pointer bg-zinc-800/40 backdrop-blur-xs dark:bg-black/80"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           />
@@ -44,7 +46,7 @@ export function MobileNavigation({ className }: { className?: string }) {
               <button
                 type="button"
                 aria-label="Close menu"
-                className="-m-1 p-1"
+                className="-m-1 cursor-pointer rounded-md p-1 transition-colors duration-200 ease-out hover:text-zinc-800 dark:hover:text-zinc-200"
                 onClick={() => setOpen(false)}
               >
                 <CloseIcon className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
@@ -64,7 +66,7 @@ export function MobileNavigation({ className }: { className?: string }) {
                       <Link
                         to={item.href}
                         className={clsx(
-                          "block py-2 transition",
+                          "block cursor-pointer py-2 transition-colors duration-200 ease-out",
                           active ? "text-accent" : "hover:text-accent",
                         )}
                         aria-current={active ? "page" : undefined}

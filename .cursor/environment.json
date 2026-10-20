@@ -1,6 +1,6 @@
 {
   "name": "moster.dev",
-  "install": "curl -fsSL https://bun.com/install | bash && export PATH=\"$HOME/.bun/bin:$PATH\" && bun install && bun run setup:browsers",
+  "install": "curl -fsSL https://bun.com/install | bash && export PATH=\"$HOME/.bun/bin:$PATH\" && bun install && bun run setup:browsers && bash .cursor/install-ui-skills.sh",
   "terminals": [
     {
       "name": "dev",
