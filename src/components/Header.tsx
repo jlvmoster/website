@@ -20,7 +20,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
       <Link
         to={href}
         className={clsx(
-          "relative block px-3 py-2 transition",
+          "relative block cursor-pointer px-3 py-2 transition-colors duration-200 ease-out",
           active ? "text-accent" : "hover:text-accent",
         )}
         aria-current={active ? "page" : undefined}

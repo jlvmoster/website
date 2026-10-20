@@ -28,7 +28,7 @@ export function Footer() {
                         key={item.href}
                         to={item.href}
                         className={clsx(
-                          "transition",
+                          "cursor-pointer transition-colors duration-200 ease-out",
                           active ? "text-accent" : "hover:text-accent",
                         )}
                         aria-current={active ? "page" : undefined}
@@ -45,12 +45,15 @@ export function Footer() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="transition hover:text-accent"
+                      className="cursor-pointer transition-colors duration-200 ease-out hover:text-accent"
                     >
                       {item.label}
                     </a>
                   ))}
-                  <a href="#top" className="transition hover:text-accent">
+                  <a
+                    href="#top"
+                    className="cursor-pointer transition-colors duration-200 ease-out hover:text-accent"
+                  >
                     Back to top
                   </a>
                 </div>

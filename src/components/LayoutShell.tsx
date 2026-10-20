@@ -10,7 +10,7 @@ export function LayoutShell({ children }: { children: ReactNode }) {
         aria-hidden="true"
       >
         <div className="flex w-full max-w-7xl lg:px-8">
-          <div className="w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]" />
+          <div className="w-full bg-[var(--panel)] shadow-[0_1px_0_rgba(24,24,27,0.04)] ring-1 ring-[var(--ring)] dark:shadow-[0_1px_0_rgba(0,0,0,0.35)]" />
         </div>
       </div>
       <div id="top" className="relative flex w-full flex-col">

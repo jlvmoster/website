@@ -1,7 +1,14 @@
+export type ToolLink = {
+  label: string;
+  href: string;
+};
+
 export type Tool = {
   title: string;
   href?: string;
   description: string;
+  /** Optional related links for compound entries (e.g. a skill pack). */
+  links?: ToolLink[];
 };
 
 export type UsesCategory = {
@@ -81,10 +88,24 @@ export const uses: UsesCategory[] = [
           "Pulls up-to-date library docs into the agent context so answers track the current API, not training cutoff.",
       },
       {
-        title: "UI UX Pro Max",
-        href: "https://uupm.cc/",
+        title: "UI/UX skills",
         description:
-          "Design-system and UI/UX guidance for agent-built interfaces — useful when restyling pages without inventing a new aesthetic.",
+          "The set I load when polishing the site — design-system guidance, art direction, craft, and animation — without inventing a new aesthetic every time.",
+        links: [
+          { label: "UI UX Pro Max", href: "https://uupm.cc/" },
+          {
+            label: "Taste",
+            href: "https://github.com/Leonxlnx/taste-skill",
+          },
+          {
+            label: "Impeccable",
+            href: "https://github.com/pbakaus/impeccable",
+          },
+          {
+            label: "emilkowalski/skills",
+            href: "https://github.com/emilkowalski/skills",
+          },
+        ],
       },
     ],
   },
