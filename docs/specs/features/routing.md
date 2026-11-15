@@ -1,15 +1,18 @@
 # Routing — Implementation Spec
 
 ## Goal
+
 Single source of truth for the router config and the SPA-fallback handshake with Vercel.
 
 ## Requirements covered
+
 - §FR-1.1.4 — `react-router-dom` is the routing library.
 - §FR-1.1.5 — Six declared routes + wildcard NotFound.
 - §FR-1.1.6 — Vercel rewrites unknown paths to `index.html`; the client router resolves the URL after mount.
 - §FR-1.1.7 — In-app navigation uses `<Link>`; external uses plain `<a>`.
 
 ## File layout
+
 - `src/main.tsx` — `BrowserRouter` wrap.
 - `src/App.tsx` — `<Routes>` + LayoutShell.
 - `src/pages/*.tsx` — one file per route.
@@ -18,6 +21,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
 - `scripts/preview.ts` — SPA fallback for built `dist/`.
 
 ## Behavior & edge cases
+
 - Use `BrowserRouter` from `react-router-dom@^7`.
 - Routes:
   - `/` → `<HomePage />`
@@ -32,6 +36,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
 - `<Link>` for in-app navigation. External links (`href` starts with `http`) use plain `<a target="_blank" rel="noopener noreferrer">`.
 
 ## Test plan
+
 - **E2E**:
   - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses` returns 200 and the right page renders.
   - Hard-refresh on `/articles/hello-world` renders the article detail.
@@ -39,8 +44,10 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - `/some-unknown-path` returns 200 and renders NotFoundPage.
 
 ## Related
+
 - Per-route document metadata (titles + descriptions): `docs/specs/features/document-metadata.md` (covers §FR-1.2.9).
 
 ## Open questions
+
 - Wildcard 404: minimal NotFoundPage (default) vs. redirect to `/`.
 - Use BrowserRouter (default, History API) vs. HashRouter (no SPA rewrite needed). Default: BrowserRouter — Vercel already handles SPA rewrite.

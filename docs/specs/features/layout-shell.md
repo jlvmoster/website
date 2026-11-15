@@ -1,17 +1,21 @@
 # LayoutShell — Implementation Spec
 
 ## Goal
+
 The fixed centered background panel + flex content column (Header / main / Footer). Every page renders into the shell.
 
 ## Requirements covered
+
 - §FR-1.1.8, §FR-1.1.9 — Header + Footer present on every route.
 - §FR-1.3.6 — `--panel` and `--ring` tokens drive panel chrome.
 
 ## File layout
+
 - `src/components/LayoutShell.tsx` — composes the panel + Header + main + Footer.
 - `src/components/Container.tsx` — ContainerOuter, ContainerInner, composed Container.
 
 ## Behavior & edge cases
+
 - Body uses `bg-bg` (zinc-50 / zinc-950) plus a soft zinc `--wash` radial gradient (`background-image: var(--wash)`, `background-attachment: fixed`) — atmosphere behind the panel without purple/cream AI-default looks. Under `prefers-reduced-motion: reduce`, attachment falls back to `scroll`.
 - The panel is a fixed sibling layer (decorative; `aria-hidden="true"`):
   - Outer: `fixed inset-0 flex justify-center sm:px-8`.
@@ -23,7 +27,9 @@ The fixed centered background panel + flex content column (Header / main / Foote
 - `forwardRef` is required on Container components so Header's scroll math can capture an offset.
 
 ## Test plan
+
 - **E2E**: panel sibling element is in DOM with the expected `--panel` background color (read computed style). Header and Footer render. `main` has non-zero `clientHeight`.
 
 ## Open questions
+
 - None.

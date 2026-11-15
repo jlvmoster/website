@@ -20,17 +20,18 @@ Turn git commit history into a clean, reader-friendly changelog. The audience is
 
 Inspect both the commit prefix and the body. Multiple signals can apply — pick the highest-priority bucket.
 
-| Bucket | Triggers | Examples |
-|---|---|---|
-| **Breaking** | `BREAKING CHANGE:` in body, Conventional Commit `!` marker before the colon (`feat!:`, `feat(scope)!:`, `fix!:`, `fix(scope)!:`), removed/renamed user-visible behavior | "Drop legacy `/blog` redirect", "Rename `/about` → `/me`" |
-| **New** | `feat:`, `feat(scope):` | New page, new section, new visible feature |
-| **Improvements** | `perf:`, visual `style:`, `a11y:`, copy/typography tweaks, design polish | Faster image loading, better dark mode contrast, refreshed hero |
-| **Fixes** | `fix:`, `fix(scope):` | Bug fixes the reader could have hit |
-| **Internal** *(excluded)* | `chore:`, `refactor:`, `test:`, `docs:`, `build:`, `ci:`, dependency bumps, `[skip changelog]` in subject | Tooling, lockfile updates, README edits |
+| Bucket                    | Triggers                                                                                                                                                                | Examples                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Breaking**              | `BREAKING CHANGE:` in body, Conventional Commit `!` marker before the colon (`feat!:`, `feat(scope)!:`, `fix!:`, `fix(scope)!:`), removed/renamed user-visible behavior | "Drop legacy `/blog` redirect", "Rename `/about` → `/me`"       |
+| **New**                   | `feat:`, `feat(scope):`                                                                                                                                                 | New page, new section, new visible feature                      |
+| **Improvements**          | `perf:`, visual `style:`, `a11y:`, copy/typography tweaks, design polish                                                                                                | Faster image loading, better dark mode contrast, refreshed hero |
+| **Fixes**                 | `fix:`, `fix(scope):`                                                                                                                                                   | Bug fixes the reader could have hit                             |
+| **Internal** _(excluded)_ | `chore:`, `refactor:`, `test:`, `docs:`, `build:`, `ci:`, dependency bumps, `[skip changelog]` in subject                                                               | Tooling, lockfile updates, README edits                         |
 
 **Edge cases:**
+
 - A `chore:` that's actually user-visible (e.g., "chore: rewrite hero copy") belongs in **Improvements** — judge by impact, not prefix.
-- **Only upgrade when there's an observable change.** A refactor that moves code around (e.g., "refactor: pull theme variables into globals.css", "refactor: extract Nav component") stays **Internal**, even if the topic *sounds* user-facing. If you can't describe what a non-developer would see or feel differently, it's Internal.
+- **Only upgrade when there's an observable change.** A refactor that moves code around (e.g., "refactor: pull theme variables into globals.css", "refactor: extract Nav component") stays **Internal**, even if the topic _sounds_ user-facing. If you can't describe what a non-developer would see or feel differently, it's Internal.
 - Ambiguous commits go in the bucket the reader cares about more (a fix that adds a new affordance → **New**).
 - Drop entries too small to matter to readers (a typo fix in a deleted draft).
 - If the project doesn't use conventional commit prefixes, fall back to judging each commit's user-facing impact from its subject and body.
@@ -43,15 +44,19 @@ Inspect both the commit prefix and the body. Multiple signals can apply — pick
 # Updates — <date or version>
 
 ## New
+
 - **<Short title>.** <One-sentence reader-facing description.>
 
 ## Improvements
+
 - <Sentence describing the change and why it matters.>
 
 ## Fixes
+
 - <Sentence describing what no longer goes wrong.>
 
 ## Breaking
+
 - <Sentence describing the change and what readers need to do.>
 ```
 
@@ -69,12 +74,12 @@ Drop empty sections. If the entire range produces no user-facing changes, return
 
 ## Examples
 
-| Input commit | Bucket | Reader entry |
-|---|---|---|
-| `feat(blog): add MDX support with frontmatter parsing and code block syntax highlighting` | New | **Rich post formatting.** Posts now support code blocks, callouts, and inline formatting. |
-| `perf: lazy-load hero image and inline critical CSS` | Improvements | The home page paints noticeably faster on the first visit. |
-| `fix: prevent dark-mode flash on initial paint` | Fixes | Dark mode no longer flashes white when the page first loads. |
-| `chore(deps): bump typescript to 5.9.4` | Internal *(excluded)* | — |
+| Input commit                                                                              | Bucket                | Reader entry                                                                              |
+| ----------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| `feat(blog): add MDX support with frontmatter parsing and code block syntax highlighting` | New                   | **Rich post formatting.** Posts now support code blocks, callouts, and inline formatting. |
+| `perf: lazy-load hero image and inline critical CSS`                                      | Improvements          | The home page paints noticeably faster on the first visit.                                |
+| `fix: prevent dark-mode flash on initial paint`                                           | Fixes                 | Dark mode no longer flashes white when the page first loads.                              |
+| `chore(deps): bump typescript to 5.9.4`                                                   | Internal _(excluded)_ | —                                                                                         |
 
 ## Common mistakes
 

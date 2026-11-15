@@ -1,20 +1,24 @@
 # Task 05 — Layout primitives
 
 ## Goal
+
 Create the Spotlight primitive components used by every page: Container compound, LayoutShell, Card compound, Button, SimpleLayout, Section, Prose, the icon catalog, plus `formatDate` and `clsx` helpers.
 
 ## Source spec
+
 - [`features/layout-shell.md`](../specs/features/layout-shell.md)
 - [`features/iconography.md`](../specs/features/iconography.md)
 - Architecture: §4.5, §4.6, §4.10, §4.11
 
 ## Prereqs
+
 - Task 04 (router + LayoutShell stub in place).
 
 ## Steps
 
 1. **Create `src/lib/clsx.ts`** (or `bun add clsx` per the open question in Task 01).
 2. **Create `src/lib/formatDate.ts`** — verbatim Spotlight shape:
+
    ```ts
    export function formatDate(dateString: string) {
      return new Date(`${dateString}T00:00:00Z`).toLocaleDateString("en-US", {
@@ -32,11 +36,14 @@ Create the Spotlight primitive components used by every page: Container compound
 10. **Rewrite `src/components/LayoutShell.tsx`** to the real shape (canonical in `architecture.md` §4.5). Wire it into `App.tsx`.
 
 ## Outputs
+
 - New: 9 files under `src/components/` + 2 under `src/lib/`.
 
 ## Verification
+
 - `bunx tsc --noEmit` passes.
 - `bun run dev` renders the panel background on every route. Pages still show stub h1 bodies (until Tasks 07–09).
 
 ## Open questions
+
 - See `features/tooling.md` for `clsx` source (npm vs. inline).

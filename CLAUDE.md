@@ -1,4 +1,3 @@
-
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
@@ -32,6 +31,7 @@ test("hello world", () => {
 ```
 
 ## Frontend
+
 - Use `Bun.serve` + HTML imports for both dev and the entrypoint. **Don't use Vite, webpack, or esbuild.**
 - HTML files can `<script src="./*.tsx">` and `<link href="./*.css">` directly; Bun bundles JSX/TS/CSS/Tailwind automatically.
 - Run locally with `bun --hot ./scripts/dev.ts` (HMR + console forwarding).
@@ -47,21 +47,22 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 
 ## Commands
 
-| Purpose | Command |
-|---|---|
-| Install deps (also runs `husky` via `prepare`) | `bun install` |
-| Install browser deps | `bun run setup:browsers` (`playwright install chromium`) |
-| Dev server (HMR) | `bun run dev` (`scripts/dev.ts` + `Bun.serve`) |
-| Production build | `bun run build` (`scripts/build.ts` → `dist/`) |
-| Local built preview | `bun run preview` (`scripts/preview.ts` serves `dist/`) |
-| Deploy | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md` |
-| Type + lint check | `bun run check` (`biome check && tsc --noEmit`) |
-| Unit tests | `bun test` |
-| E2E (dev server) | `bun run test:e2e` against `bun run dev` |
-| E2E (built artifact) | `bun run test:e2e:built` against `bun run preview` |
-| E2E (production) | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev` |
+| Purpose                                        | Command                                                                                                                 |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Install deps (also runs `husky` via `prepare`) | `bun install`                                                                                                           |
+| Install browser deps                           | `bun run setup:browsers` (`playwright install chromium`)                                                                |
+| Dev server (HMR)                               | `bun run dev` (`scripts/dev.ts` + `Bun.serve`)                                                                          |
+| Production build                               | `bun run build` (`scripts/build.ts` → `dist/`)                                                                          |
+| Local built preview                            | `bun run preview` (`scripts/preview.ts` serves `dist/`)                                                                 |
+| Deploy                                         | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md` |
+| Type + lint check                              | `bun run check` (`biome check && tsc --noEmit`)                                                                         |
+| Unit tests                                     | `bun test`                                                                                                              |
+| E2E (dev server)                               | `bun run test:e2e` against `bun run dev`                                                                                |
+| E2E (built artifact)                           | `bun run test:e2e:built` against `bun run preview`                                                                      |
+| E2E (production)                               | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev`                                          |
 
 ## Key files
+
 - `docs/specs/requirements.md` — authoritative requirements doc (read first).
 - `docs/specs/architecture.md` — rationale, code shapes, and operational notes (router config, LayoutShell, Header scroll math, theme toggle hook, article content model, primitives, iconography).
 - `docs/specs/features/*.md` — per-feature implementation specs (Hero, Theming, ThemeToggle, Routing, LayoutShell, Header, HomePage, ArticlesPage, ContentModel, Iconography, Hosting, BuildPipeline, Tooling, Testing, CI/CD). Read the relevant one before touching a feature.
@@ -87,17 +88,20 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - `.husky/` — pre-commit hook installed automatically by `prepare` on `bun install`.
 
 ## Docs conventions
-- **Three layers under `docs/specs/`:** `requirements.md` is *what must be true* (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is *why + canonical code shapes*; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
-- **Implementation playbook in `docs/tasks/`** is a separate layer: *order and gates*, not spec content. Numbered tasks (`01-…` through `13-…`) sequence the work and cite feature specs by path; they must not restate spec content. When a task is ambiguous, the spec is authoritative.
+
+- **Three layers under `docs/specs/`:** `requirements.md` is _what must be true_ (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is _why + canonical code shapes_; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
+- **Implementation playbook in `docs/tasks/`** is a separate layer: _order and gates_, not spec content. Numbered tasks (`01-…` through `13-…`) sequence the work and cite feature specs by path; they must not restate spec content. When a task is ambiguous, the spec is authoritative.
 - **Feature-spec template** (used by every file under `features/`): Goal → Requirements covered → File layout → Behavior & edge cases → Test plan → Open questions. Match it when adding a new feature spec.
 - **Open questions** at the bottom of each feature spec are unresolved decisions, not idle musings. Surface them (and resolve them) when implementing that feature.
 
 ## Conductor workspace layout
+
 - This project is usually edited through Conductor, which creates separate git worktrees under a shared project directory. The shared project directory is named `website`; individual worktrees are city-named directories such as `dublin`, and future sessions may use a different city.
 - Treat the current working directory / `git rev-parse --show-toplevel` as the active worktree root for commands, diffs, tests, and file edits. Do not assume the current city directory is the canonical repo root across sessions.
 - When documenting workflows, writing repo-local skills, or giving run instructions, prefer relative paths from the active worktree root. Avoid hard-coded absolute paths like `/Users/jalo/Dev/Conductor/workspaces/website/<city>`; if an absolute example is unavoidable, describe it as a Conductor worktree example, not a stable path.
 
 ## Frontend conventions
+
 - Stack: Bun + React 19 + `react-router-dom` v7 + Tailwind v4 SPA, multi-page client routing, deployed to Vercel as static files from `dist/`.
 - Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.).
 - **Use the `--accent` token utility class (`text-accent`, `hover:text-accent`, `from-accent/0`)** for the brand color across hover states, active links, and links; do not hard-code palette-specific accent pairs. The accent value swaps automatically via the class-based dark mode.
@@ -108,12 +112,13 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - No third-party UI component libraries (no shadcn, Radix, MUI, HeadlessUI). Handwritten components in `src/components/`. The mobile-nav popover is ~80 lines of handwritten React; backdrop click + Esc keydown both close it.
 - Routing: `react-router-dom` v7 with `BrowserRouter` wrap in `src/main.tsx`. In-app links use `<Link>` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`. The router table lives in `src/App.tsx`.
 - `<Card>` is a compound component with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, and `.Link`. `Card.Link` swaps between `<Link>` and external `<a>` based on whether the href starts with `http` or `mailto:`. Lift article/project/uses cards from this primitive — don't roll your own card shape.
-- **Hero copy is canonical and must be preserved verbatim:** *"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."* Lives in `src/pages/HomePage.tsx`. Do not paraphrase "my pleasure" away — it's a deliberate Chick-fil-A tie-in.
+- **Hero copy is canonical and must be preserved verbatim:** _"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."_ Lives in `src/pages/HomePage.tsx`. Do not paraphrase "my pleasure" away — it's a deliberate Chick-fil-A tie-in.
 - Images live under `public/images/` and ride along via `scripts/build.ts`'s `cp public dist`. Referenced as string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, `/cv.pdf`). React does not import them.
 - When building or restyling UI, invoke the `frontend-design` skill before generating code. It produces distinctive, non-generic components that fit the minimal aesthetic.
 - **Per-route document metadata uses React 19's native support, not `react-helmet`.** Each page in `src/pages/` renders its own `<title>` and `<meta name="description">` directly in the returned tree. React 19 deduplicates `<title>` (so the static `<title>` in `src/index.html` is the pre-hydration fallback, replaced on mount) but **does not** dedupe `<meta>` — that's why `src/index.html` ships no static `<meta name="description">`. Article detail derives its tags from `article.title` / `article.description`. Spec: `docs/specs/features/document-metadata.md`. Adding a new route = add a `<title>` + `<meta name="description">` at the top of the returned tree.
 
 ## Testing
+
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`. The smoke spec wraps `<App />` in `<MemoryRouter initialEntries={["/"]}>` (since `BrowserRouter` is mounted in `src/main.tsx`, outside `App`) and asserts the verbatim hero substring + three social URLs.
 - **Browser smoke (dev E2E):** `bun run test:e2e` runs `tests/e2e/site.e2e.ts` against `bun run dev` (wired via `playwright.config.ts`).
 - **Built artifact acceptance:** `bun run test:e2e:built` runs `tests/e2e/built.e2e.ts` after `bun run build`, served through `bun run preview` (wired via `playwright.built.config.ts`).
@@ -123,21 +128,26 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
 
 ## Agents and skills
+
 Plugins enabled in `.claude/settings.json`: official marketplace plugins `claude-md-management`, `frontend-design`, `playwright`, `skill-creator`, `superpowers`, `typescript-lsp`. The `cloudflare@cloudflare` plugin and its marketplace were removed with the hosting cutover.
 
 Built-in subagents to lean on:
+
 - **`Explore`** — locating code under `src/` or facts in `docs/specs/requirements.md`.
 - **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Vercel Function).
 
 Repo-local skills in `.claude/skills/`:
+
 - **`changelog-generator`** — turns git commits in a chosen range into a reader-facing changelog (categories: New, Improvements, Fixes, Breaking; filters internal/tooling commits; defaults to no emojis to match the site's minimal aesthetic). Triggers on "changelog", "release notes", "what's new", "site updates", weekly/monthly digest asks, etc.
 
 Skills worth authoring **only when the workflow recurs** (don't pre-build):
+
 - `new-post` — scaffold an MDX file under `src/content/` with frontmatter, once the blog ships.
 - `deploy-check` — chain `bun run check && bun run build && bun run test:e2e:built` as a one-shot pre-push gate. Nothing deploys locally, so there's no CLI step.
 - `requirements-sync` — flag a diff between `docs/specs/requirements.md` and the implemented state if requirements start drifting.
 
 ## Hard rules specific to this repo
+
 - Never paraphrase the hero copy. "my pleasure" stays verbatim in `src/pages/HomePage.tsx`.
 - Never reintroduce Cloudflare Workers or Pages hosting; the requirements doc deliberately chose Vercel.
 - Never add Next.js, Vite, MDX runtime, or a third-party UI component library (shadcn, Radix, MUI, HeadlessUI). `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
@@ -149,6 +159,7 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - Never add `react-helmet` or `react-helmet-async`. Per-route `<title>` / `<meta>` go directly in the page component via React 19 native head support (see Frontend conventions).
 
 ## Git conventions
+
 - Branch naming: `<github-username>/<feature-slug>` (e.g., `jlvmoster/website-spec`).
 - Base branch for PRs: `origin/master`.
 - First push of a new branch: `git push -u origin <branch>` to set upstream.

@@ -1,9 +1,11 @@
 # Header — Implementation Spec
 
 ## Goal
+
 Fixed header on every route showing avatar (scaling on Home), desktop nav pill, mobile popover, and theme toggle.
 
 ## Requirements covered
+
 - §FR-1.1.2 — Header is the navigation surface.
 - §FR-1.1.5 — Routes are navigated from the NavLinks.
 - §FR-1.1.8 — Avatar scales 96→36 on Home, static at 36 elsewhere.
@@ -11,6 +13,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 - §FR-1.3.5, §FR-1.3.8 — No UI library; scroll math via CSS custom properties.
 
 ## File layout
+
 - `src/components/Header.tsx` — composes Avatar, NavPill, ThemeToggle, MobileNavigation.
 - `src/components/Avatar.tsx` — Avatar + AvatarContainer (forwardRef).
 - `src/components/ThemeToggle.tsx` — sun/moon button switching between resolved light/dark themes.
@@ -19,6 +22,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 - `src/lib/useTheme.ts` — choice/persist/apply hook.
 
 ## Behavior & edge cases
+
 - On `/` (home), the avatar starts at 96×96 in the page flow above the nav pill; on every other route, it sits at 36×36 inside the pill.
 - Scroll math runs only on `/`. A `useEffect` reads `useLocation()`; if path is `/`, it attaches a `scroll` listener that writes CSS custom properties on `document.documentElement` (`--avatar-image-transform`, `--avatar-border-transform`, `--header-height`, `--header-mb`, `--content-offset`). The Avatar element reads those via `style="transform: var(--avatar-image-transform)"`. No React re-renders per scroll tick.
 - Listeners are passive; cleanup on unmount/route change.
@@ -28,6 +32,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
 - Theme toggle: single button switching between the resolved light and dark themes. Shows SunIcon when current resolved theme is light, MoonIcon when dark. `aria-label` reflects the **next** state.
 
 ## Test plan
+
 - **Smoke** (`renderToStaticMarkup(<Header />)` inside `<MemoryRouter initialEntries={["/about"]}>`): asserts three NavLinks render with correct hrefs.
 - **E2E**:
   - `/`: scroll 400px; avatar `getBoundingClientRect().width` ≤ 40 (shrunk).
@@ -36,6 +41,7 @@ Fixed header on every route showing avatar (scaling on Home), desktop nav pill, 
   - Mobile (viewport 360x800): Menu button visible; click opens popover; Esc closes it.
 
 ## Open questions
+
 - Active-route underline: gradient (default) vs. solid accent border.
 - Mobile breakpoint: `md` (768px) — Spotlight default. Confirm or pick `lg`.
 - Theme toggle UX: two-state Spotlight button (default) vs. separate "follow system" sub-menu.

@@ -1,14 +1,17 @@
 # Task 10 — Build pipeline & `public/`
 
 ## Goal
+
 Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `public/` copy), and ship the static files that aren't in the import graph.
 
 ## Source spec
+
 - [`features/build-pipeline.md`](../specs/features/build-pipeline.md)
 - Architecture: [§4.3 scripts/build.ts](../specs/architecture.md#43-scriptsbuildts-programmatic-build--public-copy)
 - Requirements: §FR-1.5.1, §FR-1.5.2, §NFR-2.1.2, §NFR-2.3.2, §NFR-2.3.4
 
 ## Prereqs
+
 - Task 02 (`wrangler.toml` and `src/worker.ts` exist for `bun run preview`).
 - Task 04 (`src/index.html`, `src/main.tsx` exist as the bundler entrypoint chain).
 - Task 05 (real components exist for the dev-server render/HMR checks).
@@ -32,9 +35,11 @@ Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `
 4. **Confirm `.gitignore`** excludes `dist/` (it does as of Task 01).
 
 ## Outputs
+
 - New: `scripts/dev.ts`, `scripts/build.ts`, `public/favicon.ico`, `public/robots.txt`, optionally `public/og-image.png`.
 
 ## Verification
+
 - `bun run dev` serves the site at the chosen port; opening it renders Task 05's components.
 - `bun run dev` HMR works: edit a component, browser updates without a full reload.
 - `bun run build` produces:
@@ -44,5 +49,6 @@ Wire up `scripts/dev.ts` (Bun.serve + HMR) and `scripts/build.ts` (Bun.build + `
 - After `bun run build`, `bun run preview` (`wrangler dev`, defined Task 01) serves the built `dist/` through the Workers runtime.
 
 ## Open questions to surface
+
 - Robots policy at launch — open or closed?
 - OG image — ship a placeholder now or defer to the post-scaffold operational steps in architecture §7?

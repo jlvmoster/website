@@ -1,20 +1,24 @@
 # Hero — Implementation Spec
 
 ## Goal
+
 Top-of-page section that introduces Jalo with a brand-first name headline, a one-line role, the fixed bio copy, and primary contact links.
 
 ## Requirements covered
+
 - §FR-1.2.1 — Hero renders name, one-line bio, and primary links.
-- §FR-1.2.1.a — Copy verbatim: *"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."* "my pleasure" is non-negotiable.
+- §FR-1.2.1.a — Copy verbatim: _"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."_ "my pleasure" is non-negotiable.
 - §FR-1.2.1.b — Three social links to `github.com/jlvmoster`, `instagram.com/jlvmoster`, `linkedin.com/in/jlvmoster`. A quiet `mailto:jalo@moster.dev` icon may sit in the same row (Polywork-style Contact Me) without becoming a filled CTA.
 - §FR-1.1.3 — Implemented as its own component for future route-lifting.
 
 ## File layout
+
 - `src/pages/HomePage.tsx` — composes the Hero block (inline JSX, no separate component) along with Articles preview and Resume.
 - (Optional) `src/components/home/Hero.tsx` if the inline block grows past ~30 lines.
 - Container wrapping: `<Container className="mt-9">`.
 
 ## Behavior & edge cases
+
 - Copy is a single string literal in the component — no templating, no i18n indirection. The verbatim constraint should be self-evident on inspection.
 - Social links open in a new tab: `target="_blank" rel="noopener noreferrer"`.
 - Icons are inline SVGs (no icon library — see §FR-1.3.5). Each link has accessible text or `aria-label`.
@@ -27,8 +31,10 @@ Top-of-page section that introduces Jalo with a brand-first name headline, a one
 - `SocialLink` only sets `target="_blank"` for `http(s)` hrefs — mailto stays same-tab.
 
 ## Test plan
+
 - **Unit:** `Hero.test.tsx` renders the component and asserts the exact copy string appears in the DOM (substring match on `"It's my pleasure"` is sufficient as a regression guard).
 - **E2E** (in `tests/e2e/site.spec.ts`): hero copy renders verbatim; each of the three social anchors has the correct `href`.
 
 ## Open questions
+
 - Hero headline font: keep `font-serif` from v1 or switch to `font-sans` (Spotlight uses sans). Default: switch to sans for visual consistency with the rest of the Spotlight aesthetic.
