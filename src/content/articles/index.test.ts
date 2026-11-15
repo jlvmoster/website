@@ -5,13 +5,15 @@ import {
   getAllArticles,
 } from "./index";
 
+const NullArticle = () => null;
+
 function stub(slug: string, date: string): ArticleWithSlug {
   return {
     slug,
     title: slug,
     description: slug,
     date,
-    Component: () => null,
+    Component: NullArticle,
   };
 }
 
