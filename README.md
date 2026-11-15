@@ -25,29 +25,29 @@ bun run dev              # http://localhost:3000 with HMR
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `bun run dev` | Local dev server with HMR (`scripts/dev.ts` → `Bun.serve`). |
-| `bun run build` | Bundles `src/index.html` to `dist/` and copies `public/` over (`scripts/build.ts`). |
-| `bun run preview` | Serves built `dist/` locally with SPA fallback (`scripts/preview.ts`). |
-| `bun run check` | `biome check && tsc --noEmit`. |
-| `bun test` | Unit / integration tests. |
-| `bun run test:e2e` | Browser E2E against the Bun dev server. |
-| `bun run test:e2e:built` | Browser E2E against a freshly built `dist/` served by `bun run preview`. |
-| `bun run test:e2e:production` | Browser E2E against `PRODUCTION_URL` or `https://moster.dev`. |
-| `bun run setup:browsers` | `playwright install chromium`. |
+| Command                       | What it does                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `bun run dev`                 | Local dev server with HMR (`scripts/dev.ts` → `Bun.serve`).                         |
+| `bun run build`               | Bundles `src/index.html` to `dist/` and copies `public/` over (`scripts/build.ts`). |
+| `bun run preview`             | Serves built `dist/` locally with SPA fallback (`scripts/preview.ts`).              |
+| `bun run check`               | `biome check && tsc --noEmit`.                                                      |
+| `bun test`                    | Unit / integration tests.                                                           |
+| `bun run test:e2e`            | Browser E2E against the Bun dev server.                                             |
+| `bun run test:e2e:built`      | Browser E2E against a freshly built `dist/` served by `bun run preview`.            |
+| `bun run test:e2e:production` | Browser E2E against `PRODUCTION_URL` or `https://moster.dev`.                       |
+| `bun run setup:browsers`      | `playwright install chromium`.                                                      |
 
 ## Routes
 
-| Path | What |
-|---|---|
-| `/` | Hero (verbatim "my pleasure" copy + three socials), 4 most-recent articles, Resume timeline + Download CV. |
-| `/about` | Portrait + multi-paragraph bio + social column with mailto. |
-| `/articles` | Reverse-chronological list of typed TSX article modules. |
-| `/articles/:slug` | Individual article rendered via `ArticleLayout` + `<Prose>` (back-arrow navigates to `/articles`). |
-| `/projects` | Three-column grid of project cards (logo, title, description, external link). |
-| `/uses` | Section-based list of hardware, AI tools, and skills & plugins. |
-| `*` | Minimal NotFoundPage. |
+| Path              | What                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `/`               | Hero (verbatim "my pleasure" copy + three socials), 4 most-recent articles, Resume timeline + Download CV. |
+| `/about`          | Portrait + multi-paragraph bio + social column with mailto.                                                |
+| `/articles`       | Reverse-chronological list of typed TSX article modules.                                                   |
+| `/articles/:slug` | Individual article rendered via `ArticleLayout` + `<Prose>` (back-arrow navigates to `/articles`).         |
+| `/projects`       | Three-column grid of project cards (logo, title, description, external link).                              |
+| `/uses`           | Section-based list of hardware, AI tools, and skills & plugins.                                            |
+| `*`               | Minimal NotFoundPage.                                                                                      |
 
 Hard-refresh on any deep link returns 200 from Vercel via the SPA rewrite; the client router resolves the URL after mount.
 

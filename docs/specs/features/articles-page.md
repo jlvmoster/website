@@ -1,14 +1,17 @@
 # Articles Pages — Implementation Spec
 
 ## Goal
+
 `/articles` lists articles using the Card compound. `/articles/:slug` renders an individual article using `ArticleLayout` (dek + date + derived reading time + `<Prose>` + optional “More writing”).
 
 ## Requirements covered
+
 - §FR-1.2.2 — Articles surface.
 - §FR-1.2.8 — Articles content model (typed TSX modules).
 - §FR-1.1.5, §FR-1.1.7 — Both routes are part of the router config.
 
 ## File layout
+
 - `src/pages/ArticlesPage.tsx` — list using `SimpleLayout`.
 - `src/pages/ArticlePage.tsx` — detail using `ArticleLayout`.
 - `src/components/ArticleLayout.tsx` — `Container` + back-arrow button + header (title, dek, date, reading time) + `<Prose>` body + optional “More writing” nav.
@@ -19,6 +22,7 @@
 - `src/lib/readingTime.ts` — `readingTimeMinutes(markup)` strips tags and `Math.max(1, ceil(words / 200))`. Does not render the article component.
 
 ## Behavior & edge cases
+
 - List page (`/articles`):
   - `<SimpleLayout title="…" intro="…">` (final wording is an open question).
   - Body: left-bordered (`md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40`) flex column of article cards with denser vertical rhythm (`space-y-12`).
@@ -50,6 +54,7 @@
   ```
 
 ## Test plan
+
 - **Smoke**: `getAllArticles()` returns ≥ 1 entry (the placeholder) and sorts by date descending. `getAdjacentArticles` returns `{}` for a one-item list and previous/next for a multi-item list. `readingTimeMinutes` is at least 1.
 - **E2E**:
   - `/articles` renders ≥ 1 article card.
@@ -58,6 +63,7 @@
   - `/articles/does-not-exist` renders the "Article not found." state.
 
 ## Open questions
+
 - List page title + intro copy. User to provide.
 - First article content. Placeholder for v2; user replaces later.
 - Date format. Default: Spotlight's `en-US`, day/long-month/year, UTC — produces "May 18, 2026".

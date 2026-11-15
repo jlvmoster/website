@@ -1,14 +1,17 @@
 # Task 03 — Theming & global styles
 
 ## Goal
+
 Rewrite `src/styles/globals.css` with the zinc + red palette, class-based dark mode, `@plugin "@tailwindcss/typography";`, and the six existing CSS-variable tokens plus the two new `--panel` and `--ring` tokens.
 
 ## Source spec
+
 - [`features/theming.md`](../specs/features/theming.md)
 - [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
 - Requirements: §FR-1.3.1–§FR-1.3.8
 
 ## Prereqs
+
 - Task 01 (deps installed including `@tailwindcss/typography`).
 
 ## Steps
@@ -16,6 +19,7 @@ Rewrite `src/styles/globals.css` with the zinc + red palette, class-based dark m
 1. **Confirm token values.** The defaults (zinc-50/950, zinc-900/200, zinc-600/400, Chick-fil-A red, white/zinc-900 panel, zinc-100/zinc-300-20 ring) are resolved unless the user changes them. Only re-ask if Jalo specifies a different accent.
 
 2. **Rewrite `src/styles/globals.css`:**
+
    ```css
    @import "tailwindcss";
    @plugin "@tailwindcss/typography";
@@ -63,18 +67,22 @@ Rewrite `src/styles/globals.css` with the zinc + red palette, class-based dark m
 3. **Remove the old `@media (prefers-color-scheme: dark) { :root { ... } }` block.** Class-based dark mode replaces it.
 
 4. **Update `src/index.html` `<head>`** with the anti-flicker script (Task 04 step 1) and updated theme-color meta tags using the new palette:
+
    ```html
    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
    ```
 
 ## Outputs
+
 - Rewritten: `src/styles/globals.css`.
 - Edited: `src/index.html` (theme-color meta only at this step; anti-flicker script lands in Task 04).
 
 ## Verification
+
 - `bunx tsc --noEmit` passes (no TS impact).
 - Manual DevTools dark-mode emulation no longer flips colors (it's class-based now). The flip happens after Task 04 (anti-flicker script) and Task 06 (theme toggle).
 
 ## Open questions
+
 - Override the red accent? Default: keep Chick-fil-A red.

@@ -1,20 +1,24 @@
 # Task 04 — App shell & Router
 
 ## Goal
+
 Wire `react-router-dom` BrowserRouter, set up `src/App.tsx` with the Routes table, add the anti-flicker theme script to `src/index.html`, and create page-component stubs so the router compiles.
 
 ## Source spec
+
 - [`features/routing.md`](../specs/features/routing.md)
 - [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
 - Requirements: §FR-1.1.1, §FR-1.1.4, §FR-1.1.5, §FR-1.1.6, §FR-1.3.1
 
 ## Prereqs
+
 - Task 01 (`react-router-dom` installed).
 - Task 03 (globals.css uses class-based dark).
 
 ## Steps
 
 1. **Add the anti-flicker `<script>`** to `src/index.html` `<head>`, before the React script:
+
    ```html
    <script>
      (function () {
@@ -29,6 +33,7 @@ Wire `react-router-dom` BrowserRouter, set up `src/App.tsx` with the Routes tabl
    ```
 
 2. **Edit `src/main.tsx`** to wrap with `<BrowserRouter>`:
+
    ```tsx
    import { StrictMode } from "react";
    import { createRoot } from "react-dom/client";
@@ -51,13 +56,16 @@ Wire `react-router-dom` BrowserRouter, set up `src/App.tsx` with the Routes tabl
 5. **Temporary: render the v1 Hero inside `HomePage.tsx`** so the verbatim-hero E2E assertion continues to pass through Tasks 05–07. Delete the v1 components and inline the Hero block in Task 07.
 
 ## Outputs
+
 - Edited: `src/index.html`, `src/main.tsx`.
 - New: `src/App.tsx`, `src/pages/*.tsx` (7 stubs).
 
 ## Verification
+
 - `bun run check` passes.
 - `bun run dev` serves all six routes; clicking around shows the stub bodies; URL updates without a full page load.
 - `/` still renders the verbatim hero substring.
 
 ## Open questions
+
 - See `routing.md` (wildcard 404 strategy).

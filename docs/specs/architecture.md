@@ -1,6 +1,6 @@
 # Personal Website — Architecture
 
-Companion to `docs/specs/requirements.md`. Requirements answer *what must be true*; this doc answers *how* and *why* — the rationale behind the chosen stack, the concrete code shapes that satisfy the requirements, and the implementation notes that don't belong in a constraints list.
+Companion to `docs/specs/requirements.md`. Requirements answer _what must be true_; this doc answers _how_ and _why_ — the rationale behind the chosen stack, the concrete code shapes that satisfy the requirements, and the implementation notes that don't belong in a constraints list.
 
 ## 1. Why Vercel
 
@@ -28,15 +28,15 @@ These shape a few decisions: keep the site static until a real `/api/*` need app
 
 The same project supports these runtime contexts, in this order of "production-likeness":
 
-| Surface | Command | Runtime | Purpose |
-|---|---|---|---|
-| Local dev | `bun run dev` | Bun.serve + HMR | Tight feedback loop. Fastest. |
-| Pre-deploy check | `bun run preview` | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing. |
-| CI | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1. |
-| Preview deploy | (auto, on every PR branch push) | Vercel build + edge CDN | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
-| CD | (auto, on push to `master`) | Vercel build + edge CDN | Vercel Git Integration builds from the repo root and promotes to production. See §8.2. |
-| Break-glass deploy | `bunx vercel --prod` | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path. |
-| Production | (auto, after CD) | Vercel edge CDN | What users see. |
+| Surface            | Command                                       | Runtime                             | Purpose                                                                                                                                               |
+| ------------------ | --------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local dev          | `bun run dev`                                 | Bun.serve + HMR                     | Tight feedback loop. Fastest.                                                                                                                         |
+| Pre-deploy check   | `bun run preview`                             | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing.                                                                                |
+| CI                 | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner              | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1.                                                                     |
+| Preview deploy     | (auto, on every PR branch push)               | Vercel build + edge CDN             | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
+| CD                 | (auto, on push to `master`)                   | Vercel build + edge CDN             | Vercel Git Integration builds from the repo root and promotes to production. See §8.2.                                                                |
+| Break-glass deploy | `bunx vercel --prod`                          | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path.                                                                            |
+| Production         | (auto, after CD)                              | Vercel edge CDN                     | What users see.                                                                                                                                       |
 
 Local `preview` does not need to emulate a remote serverless runtime while the site is static-only. When `/api/*` functions land, add a Vercel-local preview path for those handlers.
 
@@ -50,7 +50,7 @@ Both are short committed files and are their own canonical form — read them ra
 
 - **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), a catch-all `rewrites` entry to `/index.html`, and the security headers that used to live in `src/worker.ts`. Files present under the output directory are matched before rewrites apply, so hashed assets and `public/` files still win and only client routes fall through to the shell (§FR-1.4.3).
 - **The file's location is load-bearing.** Vercel reads `vercel.json` from the root of whatever is deployed. Git Integration deploys the repo root, so it applies. Uploading a built directory instead (`vercel deploy dist`) produces a deployment with no `vercel.json` at its root: every rewrite and header disappears, deep links 404, and nothing in CI notices. See `features/hosting.md`.
-- **`scripts/preview.ts`** is a 13-line `Bun.serve` that returns the requested file from `dist/` if it exists and `dist/index.html` otherwise. That single fallback is the entire feature; it mirrors the rewrite but *not* the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
+- **`scripts/preview.ts`** is a 13-line `Bun.serve` that returns the requested file from `dist/` if it exists and `dist/index.html` otherwise. That single fallback is the entire feature; it mirrors the rewrite but _not_ the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
 
 ### 4.3 `scripts/build.ts` (programmatic build + public/ copy)
 
@@ -138,7 +138,10 @@ import { Footer } from "./Footer";
 export function LayoutShell({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="fixed inset-0 flex justify-center sm:px-8" aria-hidden="true">
+      <div
+        className="fixed inset-0 flex justify-center sm:px-8"
+        aria-hidden="true"
+      >
         <div className="flex w-full max-w-7xl lg:px-8">
           <div className="w-full bg-[var(--panel)] ring-1 ring-[var(--ring)]" />
         </div>
@@ -177,7 +180,10 @@ export const ContainerOuter = forwardRef<HTMLDivElement, ContainerProps>(
 export const ContainerInner = forwardRef<HTMLDivElement, ContainerProps>(
   function ContainerInner({ children, className }, ref) {
     return (
-      <div ref={ref} className={clsx("relative px-4 sm:px-8 lg:px-12", className)}>
+      <div
+        ref={ref}
+        className={clsx("relative px-4 sm:px-8 lg:px-12", className)}
+      >
         <div className="mx-auto max-w-2xl lg:max-w-5xl">{children}</div>
       </div>
     );
@@ -212,6 +218,7 @@ The scroll math is transliterated verbatim from Spotlight `src/components/Header
 - `next/image` → plain `<img src="/images/avatar.jpg">` (`public/` is copied to `dist/` by `scripts/build.ts` and Vercel serves `/images/avatar.jpg` from there)
 
 Mobile popover (handwritten, not HeadlessUI) outline:
+
 - A button toggles an `open: boolean` state.
 - Backdrop: `fixed inset-0 z-50 bg-zinc-800/40 backdrop-blur-xs` with click-to-close.
 - Panel: `fixed inset-x-4 top-8 z-50` rounded card with a close button.
@@ -241,8 +248,7 @@ function readChoice(): ThemeChoice {
 }
 
 function applyChoice(choice: ThemeChoice) {
-  const prefersDark =
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const isDark = choice === "dark" || (choice === "system" && prefersDark);
   document.documentElement.classList.toggle("dark", isDark);
 }
@@ -250,12 +256,16 @@ function applyChoice(choice: ThemeChoice) {
 export function useTheme() {
   const [choice, setChoice] = useState<ThemeChoice>(readChoice);
   useEffect(() => {
-    try { localStorage.setItem("theme", choice); } catch {}
+    try {
+      localStorage.setItem("theme", choice);
+    } catch {}
     applyChoice(choice);
   }, [choice]);
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => { if (choice === "system") applyChoice("system"); };
+    const onChange = () => {
+      if (choice === "system") applyChoice("system");
+    };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [choice]);
@@ -348,9 +358,9 @@ Single icon catalog at `src/components/icons.tsx` — no `@heroicons/react`, no 
 
 ### 4.12 Per-route document metadata
 
-Per-route `<title>` and `<meta name="description">` are rendered directly inside the page components using React 19's native document-metadata support — *not* `react-helmet` / `react-helmet-async`. React 19 hoists `<title>`, `<meta>`, and `<link>` tags rendered in the tree into `<head>`. `<title>` is deduplicated by React 19 (only one is ever in `<head>`), so the static fallback in `src/index.html` is safely replaced on mount. `<meta>` tags are *appended* rather than deduplicated against pre-existing HTML — to avoid shipping two `<meta name="description">` per page, the static one was removed from `src/index.html`; the per-route React-rendered description is the only one.
+Per-route `<title>` and `<meta name="description">` are rendered directly inside the page components using React 19's native document-metadata support — _not_ `react-helmet` / `react-helmet-async`. React 19 hoists `<title>`, `<meta>`, and `<link>` tags rendered in the tree into `<head>`. `<title>` is deduplicated by React 19 (only one is ever in `<head>`), so the static fallback in `src/index.html` is safely replaced on mount. `<meta>` tags are _appended_ rather than deduplicated against pre-existing HTML — to avoid shipping two `<meta name="description">` per page, the static one was removed from `src/index.html`; the per-route React-rendered description is the only one.
 
-Why no Helmet: most security headers declared in `vercel.json` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options) cannot be set via `<meta>` at all — they're HTTP response headers. The CSP that *can* live in `<meta>` would not cover the inline anti-flicker `<script>` in `src/index.html` (which runs before any `<meta>` parses). Helmet only addresses per-route document tags, and React 19 already covers that natively.
+Why no Helmet: most security headers declared in `vercel.json` (HSTS, X-Frame-Options, Permissions-Policy, COOP, Referrer-Policy, X-Content-Type-Options) cannot be set via `<meta>` at all — they're HTTP response headers. The CSP that _can_ live in `<meta>` would not cover the inline anti-flicker `<script>` in `src/index.html` (which runs before any `<meta>` parses). Helmet only addresses per-route document tags, and React 19 already covers that natively.
 
 ```tsx
 // src/pages/AboutPage.tsx (shape)
@@ -415,7 +425,7 @@ These aren't in the requirements doc because they're one-time setup performed in
 
 1. **Create a Vercel project** (Hobby) with framework `Other` / `null` and install the [Vercel GitHub App](https://github.com/apps/vercel) on `jlvmoster/website`. Git Integration is the production deploy path (§FR-1.7.3), so the link is required, not optional. Build settings come from the committed `vercel.json`, which overrides the dashboard — leave the dashboard fields empty rather than keeping a second copy that silently does nothing.
 2. **Require `check` in two dashboards** (§FR-1.7.7). GitHub branch protection on `master` blocks a red pull request. Vercel → Project Settings → Deployment Checks → GitHub → the `check` workflow holds the production alias, because Vercel builds as soon as the production branch updates and does not read the GitHub ruleset. No deploy tokens.
-3. **Confirm the project's Production Branch is `master`.** Now that Git Integration owns production, that setting is what decides which branch reaches users; every other branch must resolve to a preview. Check it explicitly on a freshly linked project: Vercel promotes the *first* deployment it ever builds to production regardless of branch, which makes the dashboard briefly look as though any branch deploys to production.
+3. **Confirm the project's Production Branch is `master`.** Now that Git Integration owns production, that setting is what decides which branch reaches users; every other branch must resolve to a preview. Check it explicitly on a freshly linked project: Vercel promotes the _first_ deployment it ever builds to production regardless of branch, which makes the dashboard briefly look as though any branch deploys to production.
 4. **Add custom domain `moster.dev`** in the Vercel project. Point DNS (typically apex + `www`) at Vercel per the dashboard instructions; remove the old Cloudflare Workers custom-domain binding when ready. The custom domain also matters for testing: Deployment Protection is set to `all_except_custom_domains`, so `bun run test:e2e:production` only works against `moster.dev`.
 5. **`worker-configuration.d.ts` stays gitignored.** Nothing generates it. A leftover copy from the Workers era fails Biome's `noExplicitAny` if the ignore is removed.
 6. **Drop a favicon and OG image into `public/`.** Anything referenced from `<link rel="icon">` or `<meta property="og:image">` lives here and rides along via the `cp public dist` step in `scripts/build.ts`.

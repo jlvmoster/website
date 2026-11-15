@@ -1,9 +1,11 @@
 # Testing — Implementation Spec
 
 ## Goal
+
 Wire up a unit-test smoke check and the minimum Playwright E2E coverage required by the acceptance criteria.
 
 ## Requirements covered
+
 - §NFR-2.4.1 — At least one smoke test exists under `tests/`.
 - §NFR-2.4.2 — Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
 - §NFR-2.4.3 — E2E minimum coverage: every route loads, hard-refresh deep links work, hero copy renders verbatim on `/`, social links resolve on `/` and `/about`, theme toggle switches and persists, portrait image renders on `/about`, footer renders on every route, and SPA fallback handles unknown paths.
@@ -11,6 +13,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 - §FR-1.7.1 — `bunx playwright test` is part of the GitHub Actions CI gate (see [`features/ci-cd.md`](./ci-cd.md)).
 
 ## File layout
+
 - `tests/smoke.test.ts` — unit-level smoke test for the App shell.
 - `tests/e2e/site.e2e.ts` — Playwright spec covering local dev-server behavior.
 - `tests/e2e/built.e2e.ts` — Playwright spec covering built output via `bun run preview` (`scripts/preview.ts` on port 4173).
@@ -18,6 +21,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 - `playwright.config.ts` / `playwright.built.config.ts` — Playwright configs at repo root.
 
 ## Behavior & edge cases
+
 - **`bun test`:**
   - Finds `tests/**/*.test.ts` plus any colocated `src/**/*.test.ts`.
   - `smoke.test.ts` renders `<App />` inside a `MemoryRouter` and asserts the canonical Home page content renders without throwing.
@@ -44,9 +48,11 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
     - Footer renders on every route.
 
 ## Test plan
+
 - `bun test` passes (the smoke file is the test).
 - `bunx playwright test` passes against `bun run dev`.
 - Both run cleanly from a fresh clone after `bun install && bun run setup:browsers`.
 
 ## Open questions
+
 - Visual regression tooling (e.g., Playwright screenshot diffs) — explicitly out of scope per §NFR-2.4.3, but worth confirming we won't add it casually later.

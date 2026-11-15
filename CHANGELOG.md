@@ -3,6 +3,7 @@
 Site reliability work — nothing visible on the page, but the deploy pipeline is now self-auditing and runs with the minimum permissions it needs.
 
 ## Internal
+
 - Every production deploy now runs a Lighthouse audit against the live site and reports the scores back to the build, so regressions in performance, accessibility, or best practices surface automatically instead of waiting to be noticed by hand.
 - The deploy workflow runs with read-only token permissions by default, scoping write access only to the steps that need it.
 
@@ -13,6 +14,7 @@ Site reliability work — nothing visible on the page, but the deploy pipeline i
 A round of Lighthouse-driven polish: faster paints, accessible contrast, per-page browser metadata, and tighter security defaults.
 
 ## Improvements
+
 - **Per-page browser metadata.** Each page now sets its own tab title and description, so browser tabs, bookmarks, and search results show the right page instead of a generic site title.
 - **Quicker first paint.** The avatar reserves its space up front so the layout doesn't shift while it loads, and the production build no longer ships development-only code.
 - **Readable text everywhere.** Work dates on the resume and the footer copyright now meet WCAG AA contrast in both light and dark themes.
@@ -25,6 +27,7 @@ A round of Lighthouse-driven polish: faster paints, accessible contrast, per-pag
 The site has been redesigned around a multi-page structure inspired by the Tailwind Plus "Spotlight" template.
 
 ## New
+
 - **Multi-page navigation.** The Home page now lives alongside dedicated About, Articles, Projects, and Uses pages — five places to land instead of one long scroll.
 - **Theme toggle.** A button in the header switches between light, dark, and system themes. Your choice is remembered between visits.
 - **Articles surface.** A reverse-chronological list of posts at `/articles`, each with its own page. The first post is a placeholder; more on the way.
@@ -34,6 +37,7 @@ The site has been redesigned around a multi-page structure inspired by the Tailw
 - **Resume timeline.** A compact work history on the Home page with a "Download CV" button.
 
 ## Improvements
+
 - **Header with scaling avatar.** A fixed header is present on every route. On the Home page the avatar starts large and scales down as you scroll.
 - **Zinc + red palette.** The site now uses a zinc base with a Chick-fil-A red accent. Backgrounds, text, and accent tones all shift between light and dark in lockstep.
 - **No flash on load.** The right theme is applied before the page paints, so the site never flickers between light and dark on first load.
@@ -48,6 +52,7 @@ The site has been redesigned around a multi-page structure inspired by the Tailw
 moster.dev is live. This is the initial release.
 
 ## New
+
 - **The site is live at moster.dev.** A single-page portfolio with a sticky top nav linking to Writing, About, and Contact.
 - **Hero introduction.** "Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."
 - **Writing section.** A placeholder for the first post — more to come.
@@ -57,5 +62,6 @@ moster.dev is live. This is the initial release.
 - **Deep links work.** Sharing a link to any section opens the site to the right place.
 
 ## Improvements
+
 - **Loads fast.** The site uses your device's built-in fonts, so nothing extra has to download before the page renders.
 - **Readable typography.** Generous line height and a comfortable reading width keep things easy on the eyes.

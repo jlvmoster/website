@@ -1,14 +1,17 @@
 # Task 06 — Header & Footer
 
 ## Goal
+
 Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popover, theme toggle) and Footer (NavLinks + copyright), wire both into LayoutShell.
 
 ## Source spec
+
 - [`features/header.md`](../specs/features/header.md)
 - [`features/theme-toggle.md`](../specs/features/theme-toggle.md)
 - Architecture: §4.7, §4.8
 
 ## Prereqs
+
 - Task 05 (primitives and LayoutShell ready).
 
 ## Steps
@@ -27,9 +30,11 @@ Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popo
 8. **Update `src/components/LayoutShell.tsx`** to render `<Header />` and `<Footer />` (replace any temporary stubs).
 
 ## Outputs
+
 - New: 6 files under `src/components/` + 1 under `src/lib/`.
 
 ## Verification
+
 - `bunx tsc --noEmit` passes.
 - `bun run dev`:
   - Header visible on every route.
@@ -39,4 +44,5 @@ Implement the fixed Header (avatar scroll on Home, desktop nav pill, mobile popo
 - Hero copy assertion still passes (v1 Hero is still rendered inside `HomePage` until Task 07).
 
 ## Open questions
+
 - Active-route highlight style: gradient underline (default) vs. solid border.

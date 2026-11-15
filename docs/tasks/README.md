@@ -6,29 +6,29 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 
 ## How to use
 
-1. Read `docs/specs/requirements.md` and `docs/specs/architecture.md` first — they are the source of truth. The tasks here orchestrate *order* and *gates*; they do not restate spec content.
+1. Read `docs/specs/requirements.md` and `docs/specs/architecture.md` first — they are the source of truth. The tasks here orchestrate _order_ and _gates_; they do not restate spec content.
 2. Work tasks in numeric order. Each task lists its prereqs at the top; do not skip ahead.
 3. Each task ends with a **Verification** block. The task is not done until those commands pass.
-4. Each task also lists **Open questions** that the corresponding feature spec flagged. Surface them to the user *before* implementing. Where a task lists a "Default to X unless …" fallback, treat it as advisory — only apply the default after the user has been asked and either confirms or defers. Never pick a default silently.
+4. Each task also lists **Open questions** that the corresponding feature spec flagged. Surface them to the user _before_ implementing. Where a task lists a "Default to X unless …" fallback, treat it as advisory — only apply the default after the user has been asked and either confirms or defers. Never pick a default silently.
 5. When a task creates files that appear in `docs/specs/architecture.md` §4 (canonical code shapes), copy from there verbatim; don't paraphrase.
 
 ## Order
 
-| # | Task | Source spec(s) |
-|---|---|---|
-| 01 | [Tooling & TS config](./01-tooling.md) | `features/tooling.md` |
-| 02 | [Hosting config (Vercel)](./02-hosting-config.md) | `features/hosting.md` |
-| 03 | [Theming & global styles](./03-theming.md) | `features/theming.md`, `features/theme-toggle.md` |
-| 04 | [App shell & router](./04-app-shell.md) | `features/routing.md` |
-| 05 | [Layout primitives](./05-layout-primitives.md) | `features/layout-shell.md`, `features/iconography.md` |
-| 06 | [Header & Footer](./06-header-footer.md) | `features/header.md` |
-| 07 | [Home page](./07-home-page.md) | `features/home-page.md`, `features/hero.md` |
-| 08 | [About & Articles](./08-about-articles.md) | `features/articles-page.md`, `features/content-model.md` |
-| 09 | [Projects & Uses](./09-projects-uses.md) | `requirements.md` §FR-1.2.6, §FR-1.2.7 |
-| 10 | [Build pipeline & `public/`](./10-build-pipeline.md) | `features/build-pipeline.md` |
-| 11 | [Unit smoke + Playwright E2E](./11-testing.md) | `features/testing.md` |
-| 12 | [CI/CD bootstrap](./12-ci-cd.md) | `features/ci-cd.md` |
-| 13 | [Acceptance verification](./13-acceptance.md) | `requirements.md` §6 |
+| #   | Task                                                 | Source spec(s)                                           |
+| --- | ---------------------------------------------------- | -------------------------------------------------------- |
+| 01  | [Tooling & TS config](./01-tooling.md)               | `features/tooling.md`                                    |
+| 02  | [Hosting config (Vercel)](./02-hosting-config.md)    | `features/hosting.md`                                    |
+| 03  | [Theming & global styles](./03-theming.md)           | `features/theming.md`, `features/theme-toggle.md`        |
+| 04  | [App shell & router](./04-app-shell.md)              | `features/routing.md`                                    |
+| 05  | [Layout primitives](./05-layout-primitives.md)       | `features/layout-shell.md`, `features/iconography.md`    |
+| 06  | [Header & Footer](./06-header-footer.md)             | `features/header.md`                                     |
+| 07  | [Home page](./07-home-page.md)                       | `features/home-page.md`, `features/hero.md`              |
+| 08  | [About & Articles](./08-about-articles.md)           | `features/articles-page.md`, `features/content-model.md` |
+| 09  | [Projects & Uses](./09-projects-uses.md)             | `requirements.md` §FR-1.2.6, §FR-1.2.7                   |
+| 10  | [Build pipeline & `public/`](./10-build-pipeline.md) | `features/build-pipeline.md`                             |
+| 11  | [Unit smoke + Playwright E2E](./11-testing.md)       | `features/testing.md`                                    |
+| 12  | [CI/CD bootstrap](./12-ci-cd.md)                     | `features/ci-cd.md`                                      |
+| 13  | [Acceptance verification](./13-acceptance.md)        | `requirements.md` §6                                     |
 
 ## Hard rules (v2)
 
@@ -43,4 +43,4 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 
 - Work on a branch named `<github-username>/<feature-slug>`.
 - Base branch for PRs is `origin/master`. First push: `git push -u origin <branch>`.
-- Commit subjects are imperative; bodies explain the *why*.
+- Commit subjects are imperative; bodies explain the _why_.

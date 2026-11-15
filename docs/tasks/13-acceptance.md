@@ -1,12 +1,15 @@
 # Task 13 — Acceptance verification
 
 ## Goal
+
 Run the §6 v2 acceptance checklist from `requirements.md` end-to-end. v2 is "done" only when every line passes.
 
 ## Source
+
 - [`requirements.md` §6 Acceptance criteria](../specs/requirements.md#6-acceptance-criteria-v2-done)
 
 ## Prereqs
+
 - Tasks 01–12 complete.
 
 ## Checklist
@@ -16,7 +19,7 @@ Run each command from a clean state. Tick each box only after the corresponding 
 - [ ] `bun install && bun run setup:browsers && bun run build` produces a `dist/` containing `index.html`, hashed JS/CSS assets, and the contents of `public/` (including `public/images/` and `public/cv.pdf`).
 - [ ] `bun run dev` serves the site locally with HMR.
 - [ ] `bun run preview` serves the built site through `wrangler dev`.
-- [ ] `bun run deploy` publishes the site; `moster.dev` resolves over HTTPS and returns the SPA. *Break-glass only — the canonical CD surface is GitHub Actions.*
+- [ ] `bun run deploy` publishes the site; `moster.dev` resolves over HTTPS and returns the SPA. _Break-glass only — the canonical CD surface is GitHub Actions._
 - [ ] `bun run check` passes (wrangler types regen + biome + `tsc --noEmit`).
 - [ ] `bun test` passes; smoke test asserts the verbatim hero substring.
 - [ ] Playwright E2E suite passes the minimum coverage (§NFR-2.4.3).
@@ -39,5 +42,5 @@ Run each command from a clean state. Tick each box only after the corresponding 
 ## After all boxes pass
 
 - Open a PR against `origin/master`. Branch is already `jlvmoster/<feature-slug>`; first push uses `git push -u origin <branch>`.
-- PR title is imperative; body explains the *why*, not the *what*.
+- PR title is imperative; body explains the _why_, not the _what_.
 - The post-scaffold ops in architecture §7 can ship in follow-up PRs.

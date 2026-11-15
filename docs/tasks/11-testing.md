@@ -1,13 +1,16 @@
 # Task 11 — Unit smoke + Playwright E2E
 
 ## Goal
+
 Add the smoke unit test and the Playwright config + spec that cover the minimum E2E surface required by §NFR-2.4.3, without pulling in a DOM polyfill.
 
 ## Source spec
+
 - [`features/testing.md`](../specs/features/testing.md)
 - Requirements: §NFR-2.4.1–§NFR-2.4.4
 
 ## Prereqs
+
 - Task 10 (`bun run dev` serves the routed v2 site — Playwright's `webServer` points at it).
 
 ## Approach: server-render the smoke test, leave DOM concerns to Playwright
@@ -24,6 +27,7 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
 ## Steps
 
 1. **`tests/smoke.test.ts`** — `bun:test` unit smoke using `react-dom/server`. No preload, no globals, no DOM:
+
    ```ts
    import { test, expect } from "bun:test";
    import { createElement } from "react";
@@ -53,6 +57,7 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
      }
    });
    ```
+
    - The "renders without throwing" requirement of §NFR-2.4.1 is satisfied by the call itself — `renderToStaticMarkup` throws on a broken tree.
    - `App` must be wrapped in `MemoryRouter` because the production `BrowserRouter` is mounted in `src/main.tsx`, outside `App`.
    - The hero-copy substring is the unit-level guard for FR-1.2.1.a / the CLAUDE.md "my pleasure" hard rule. Worth duplicating at this layer because regressing it is cheap to introduce and expensive to notice.
@@ -78,14 +83,17 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
    - Footer renders on every route.
 
 ## Outputs
+
 - New/updated: `tests/smoke.test.ts`, `tests/e2e/site.e2e.ts`, `tests/e2e/built.e2e.ts`, `tests/e2e/production.e2e.ts`, `playwright.config.ts`.
 - No new deps. No `bunfig.toml` changes (no test preload required).
 
 ## Verification
+
 - `bun test` passes; the smoke test exists and exercises real React rendering (§NFR-2.4.1).
 - `bunx playwright test` passes against `bun run dev`.
 - From a clean state: `bun install && bun run setup:browsers && bun test && bunx playwright test` all succeed (§NFR-2.4.4).
 
 ## Open questions to surface
+
 - Confirm visual regression remains out of scope — don't add it casually later.
 - Confirm we're comfortable deferring a DOM polyfill until a component actually needs one. If you'd rather have Happy DOM in place from day 1 (e.g. so a future contributor can `bun add` a testing-library without re-plumbing the preload), say so and we'll restore the Task 01 dep and a minimal `tests/setup-dom.ts`.

@@ -1,9 +1,11 @@
 # Tooling — Implementation Spec
 
 ## Goal
+
 The non-runtime config that makes the project install, build, lint, type-check, and run scripts uniformly.
 
 ## Requirements covered
+
 - §FR-1.5.4 — No committed deploy script; Vercel owns the production build.
 - §FR-1.5.5 — `bun run check` runs `biome check && tsc --noEmit`.
 - §FR-1.5.6 — `bun test` runs unit tests.
@@ -13,6 +15,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - §FR-1.7.1 — The same bootstrap (`bun install`, `bun run setup:browsers`, `bun run check`, `bun test`) runs in CI. CI workflow shape is owned by [`features/ci-cd.md`](./ci-cd.md), not this spec.
 
 ## File layout
+
 - `package.json` — `scripts` block + deps + `"prepare": "husky"`.
 - `.husky/pre-commit` — shell script that runs `bun run check`.
 - `tsconfig.json` — already strict; `"types": ["bun"]`.
@@ -21,7 +24,9 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - No hosting CLI is a dependency. Vercel deploys through Git Integration, so the CLI is not needed to ship; ad-hoc use is `bunx vercel …`.
 
 ## Behavior & edge cases
+
 - `package.json` scripts (canonical):
+
   ```json
   {
     "scripts": {
@@ -35,6 +40,7 @@ The non-runtime config that makes the project install, build, lint, type-check, 
     }
   }
   ```
+
   `"prepare"` runs automatically after `bun install`. Husky points `core.hooksPath` at `.husky/_/`, so fresh clones — including Conductor worktrees — get the pre-commit hook without writing to `.git/hooks/`. The hook itself lives at `.husky/pre-commit` and is a one-liner: `bun run check`.
 - `tsconfig.json` `compilerOptions`:
   - `strict: true`, `noUncheckedIndexedAccess: true` (recommended), `noImplicitOverride: true`.
@@ -60,11 +66,13 @@ The non-runtime config that makes the project install, build, lint, type-check, 
 - `@tailwindcss/typography` is loaded CSS-first via `@plugin "@tailwindcss/typography";` in `globals.css` — no `tailwind.config.ts`.
 
 ## Test plan
+
 - **Clean install:** `rm -rf node_modules && bun install && bun run setup:browsers && bun run check && bun test && bunx playwright test` succeeds on a fresh clone.
 - **Lint guard:** introduce a known violation (e.g., unused import), confirm `biome check` flags it; revert.
 - **Type guard:** introduce a type error in a component, confirm `tsc --noEmit` flags it; revert.
 
 ## Open questions
+
 - Override any Biome recommended rules? **Resolved:** no — use the recommended ruleset as-is. Document this as the default for future agents.
 - Pre-commit hook: **Resolved:** wired in Task 01 via `husky` (v9). Hook script lives at `.husky/pre-commit`; `"prepare": "husky"` installs it automatically on `bun install`. Chosen over `simple-git-hooks` because Conductor worktrees (where the user develops day-to-day) have `.git` as a file rather than a directory; `simple-git-hooks` blindly `mkdir`s `.git/hooks/` and fails silently in worktrees, while `husky` uses `core.hooksPath` and works everywhere.
 - Pull `clsx@^2` (~500 bytes) or inline a six-liner at `src/lib/clsx.ts`? Default: inline (no new dep).

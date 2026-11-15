@@ -1,13 +1,16 @@
 # Content Model — Implementation Spec
 
 ## Goal
+
 Where the data lives for Articles, Projects, Uses, and Resume. All four are typed TS files under `src/content/`.
 
 ## Requirements covered
+
 - §FR-1.2.5 (Resume), §FR-1.2.6 (Projects), §FR-1.2.7 (Uses), §FR-1.2.8 (Articles).
 - §NFR-2.1.4 — TypeScript strict.
 
 ## File layout
+
 - `src/content/articles/index.ts` — loader + `ArticleMeta` + `ArticleWithSlug` types.
 - `src/content/articles/<slug>.tsx` — one file per article. Each exports `meta` + default React component.
 - `src/content/projects.ts` — typed `Project[]`.
@@ -17,6 +20,7 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
 - `src/lib/readingTime.ts` — `readingTimeMinutes(markup)`: strip tags, ceil-divide by 200, minimum 1. No `react-dom/server`.
 
 ## Behavior & edge cases
+
 - Articles loader (canonical shape in `architecture.md` §4.9). Modules are hand-registered (no runtime glob). `getAdjacentArticles(slug)` returns `{ previous, next }` from the date-descending list (`next` = newer, `previous` = older) and returns `{}` when fewer than two articles exist.
 - Adding an article = two edits: drop the new TSX file under `src/content/articles/`, then add an `import` and a key in the `modules` record in `index.ts`.
 - `formatDate` matches Spotlight verbatim: `en-US`, day/long-month/year, UTC — e.g. `"May 18, 2026"`.
@@ -26,6 +30,7 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
   - `Role = { company: string; title: string; logo: string; start: string; end: string }`.
 
 ## Test plan
+
 - **Smoke** (`bun test`):
   - `getAllArticles()` returns ≥ 1 article and is sorted by date descending.
   - `getAdjacentArticles` hides neighbors for a single-article catalog.
@@ -33,5 +38,6 @@ Where the data lives for Articles, Projects, Uses, and Resume. All four are type
   - `formatDate("2026-05-18")` returns `"May 18, 2026"`.
 
 ## Open questions
+
 - Slug regex / validation. Default: lowercase-kebab from the filename, no runtime validation.
 - Whether to support an `image` field on `ArticleMeta` for OG cards. Default: defer.

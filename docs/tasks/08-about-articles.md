@@ -1,13 +1,16 @@
 # Task 08 — About & Articles
 
 ## Goal
+
 Build the About page (portrait + prose + social column) and the Articles surface (list + detail) including the article content loader and a placeholder first article.
 
 ## Source spec
+
 - [`features/articles-page.md`](../specs/features/articles-page.md)
 - [`features/content-model.md`](../specs/features/content-model.md)
 
 ## Prereqs
+
 - Task 07 (Home renders).
 - User-provided: `public/images/portrait.jpg`, About-page bio copy, articles list-page title + intro.
 
@@ -16,6 +19,7 @@ Build the About page (portrait + prose + social column) and the Articles surface
 1. **Drop `public/images/portrait.jpg`** (user provides).
 2. **Create `src/content/articles/index.ts`** — types + `getAllArticles()` + `getArticleBySlug()` (canonical shape in `architecture.md` §4.9).
 3. **Create `src/content/articles/hello-world.tsx`** — placeholder first article:
+
    ```tsx
    export const meta = {
      title: "Hello, world",
@@ -40,10 +44,12 @@ Build the About page (portrait + prose + social column) and the Articles surface
    - If match: `<ArticleLayout article={article}><article.Component /></ArticleLayout>`.
 
 ## Outputs
+
 - Edited: `src/pages/AboutPage.tsx`, `src/pages/ArticlesPage.tsx`, `src/pages/ArticlePage.tsx`.
 - New: `src/components/ArticleLayout.tsx`, `src/content/articles/index.ts`, `src/content/articles/hello-world.tsx`.
 
 ## Verification
+
 - `bun test`: `getAllArticles()` returns `[helloWorld]`.
 - `bun run dev`:
   - `/about`: portrait visible; mailto link works; three socials.
@@ -52,4 +58,5 @@ Build the About page (portrait + prose + social column) and the Articles surface
   - `/articles/does-not-exist`: "Article not found." state.
 
 ## Open questions
+
 - See `features/articles-page.md` (list-page title + intro).
