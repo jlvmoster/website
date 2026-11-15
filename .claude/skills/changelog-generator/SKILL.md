@@ -1,5 +1,4 @@
 ---
-
 name: changelog-generator
 description: Use when the user asks for a changelog, release notes, "what's new", "what shipped", a weekly or monthly digest, or any curated reader-facing list of recent project changes — even if they don't say "changelog". Skip only when the user explicitly wants raw `git log` output.
 ---
