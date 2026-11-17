@@ -8,7 +8,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
 
 - §FR-1.1.4 — `react-router-dom` is the routing library.
 - §FR-1.1.5 — Six declared routes + wildcard NotFound.
-- §FR-1.1.6 — Vercel rewrites unknown paths to `index.html`; the client router resolves the URL after mount.
+- §FR-1.1.6 — Vercel rewrites the registered routes to `index.html` (HTTP 200). Unknown paths are HTTP 404 and the client wildcard still renders NotFoundPage.
 - §FR-1.1.7 — In-app navigation uses `<Link>`; external uses plain `<a>`.
 
 ## File layout
@@ -16,9 +16,9 @@ Single source of truth for the router config and the SPA-fallback handshake with
 - `src/main.tsx` — `BrowserRouter` wrap.
 - `src/App.tsx` — `<Routes>` + LayoutShell.
 - `src/pages/*.tsx` — one file per route.
-- `vercel.json` — `rewrites` to `/index.html` (existing).
-- `scripts/dev.ts` — already serves `index.html` for unknown paths (existing).
-- `scripts/preview.ts` — SPA fallback for built `dist/`.
+- `vercel.json` — rewrites for `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
+- `scripts/dev.ts` — serves `index.html` for unknown paths during HMR (HTTP 200; not the Vercel status contract).
+- `scripts/preview.ts` — file, then rewrite, then `404.html` at HTTP 404.
 
 ## Behavior & edge cases
 
@@ -31,7 +31,8 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - `/projects` → `<ProjectsPage />`
   - `/uses` → `<UsesPage />`
   - `*` → `<NotFoundPage />`
-- Hard refresh on any of the six static routes returns 200 from Vercel via SPA rewrite; the client router then renders the right page.
+- Hard refresh on `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, or `/uses` returns 200; the client router then renders the right page. `/` is the `index.html` file. The other five are rewrites.
+- Hard refresh on any other path returns 404. The response body is `404.html` (a copy of the shell), so NotFoundPage still renders. `/articles/<slug>` stays 200 even when that slug has no article; ArticlePage renders its own not-found state.
 - `<NotFoundPage>` is a minimal component (heading + link back to `/`).
 - `<Link>` for in-app navigation. External links (`href` starts with `http`) use plain `<a target="_blank" rel="noopener noreferrer">`.
 
@@ -41,7 +42,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses` returns 200 and the right page renders.
   - Hard-refresh on `/articles/hello-world` renders the article detail.
   - Client-side `<Link>` navigation doesn't trigger a full page load — verify by setting `window.__navMarker = "kept"` in the page, clicking a Link, and asserting the marker survives.
-  - `/some-unknown-path` returns 200 and renders NotFoundPage.
+  - `/some-unknown-path` returns 404 and renders NotFoundPage.
 
 ## Related
 
