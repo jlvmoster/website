@@ -25,11 +25,11 @@ Land the GitHub Actions workflow that gates PRs and deploys `master` through Clo
    - Add `CLOUDFLARE_ACCOUNT_ID`.
    - Do not commit either value.
 2. **Create `.github/workflows/ci.yml`** matching the canonical YAML in [architecture §8.1](../specs/architecture.md#81-ci-on-github-actions). Do not paraphrase — copy verbatim. The workflow has:
-   - `check` job for PRs and pushes to `master`.
+   - `check` job for pull requests and pushes to `qa` and `master`.
    - `deploy` job with `needs: check`, guarded to `push` events on `refs/heads/master`.
    - `actions/cache@v5` steps keyed by `bun.lock` for `~/.bun/install/cache` and `~/.cache/ms-playwright`.
    - `cloudflare/wrangler-action@v3` as the deploy step.
-3. **Enable branch protection on `master`** (GitHub repo settings → Branches): require the `check` status check to pass before merge; require PRs (no direct push). This is what enforces §FR-1.7.1's "PR cannot merge until CI is green."
+3. **Enable branch protection on `qa` and `master`** (GitHub repo settings → Branches): require the `check` status check to pass before merge; require PRs (no direct push). The same ruleset covers both. This is what enforces §FR-1.7.1's "PR cannot merge until CI is green."
 4. **Confirm `bun run deploy` still works** locally as a break-glass path (§FR-1.7.6). Do not delete the script.
 
 ## Outputs

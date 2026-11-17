@@ -42,5 +42,5 @@ Ordered task list for implementing `docs/specs/` into a working v1 site. Each ta
 ## Branch & PR convention
 
 - Work on a branch named `<github-username>/<feature-slug>`.
-- Base branch for PRs is `origin/master`. First push: `git push -u origin <branch>`.
+- Feature branches are cut from `origin/qa`. Pull requests target `qa`. A release is a `qa` -> `master` pull request. First push: `git push -u origin <branch>`.
 - Commit subjects are imperative; bodies explain the _why_.

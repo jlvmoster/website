@@ -161,7 +161,7 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 ## Git conventions
 
 - Branch naming: `<github-username>/<feature-slug>` (e.g., `jlvmoster/website-spec`).
-- Base branch for PRs: `origin/master`.
+- Feature branches are cut from `origin/qa`. Pull requests target `qa`. A release is a `qa` -> `master` pull request.
 - First push of a new branch: `git push -u origin <branch>` to set upstream.
 - Pre-approved Bash (no permission prompt): `bun *`, `bunx *`, `git *`. See `.claude/settings.json`.
 - Commit subject: imperative ("Add X"). Body: bullets explaining the "why". Trail with `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` when applicable.

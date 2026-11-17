@@ -11,7 +11,7 @@ Jalo Moster's personal website — a multi-page React SPA deployed to Vercel.
 - **Hosting:** [Vercel](https://vercel.com) static SPA on `moster.dev`. `vercel.json` rewrites deep links to `index.html`.
 - **Lint / format:** Biome. **Types:** TypeScript strict mode.
 - **Testing:** `bun test` for units, `@playwright/test` for browser E2E.
-- **CI/CD:** GitHub Actions runs `check` on every PR/push; Vercel Git Integration deploys `master`.
+- **CI/CD:** GitHub Actions runs `check` on every pull request and push to `qa` and `master`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request; Vercel Git Integration deploys `master`.
 
 No Vite, webpack, esbuild, Next.js, MDX, or third-party UI component libraries — the Bun HTML bundler is the entire build pipeline. `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 
@@ -105,7 +105,7 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 
 Two systems, one job each:
 
-- **GitHub Actions** runs the `check` job on every PR and push: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`. It never deploys.
+- **GitHub Actions** runs the `check` job on every pull request and push to `qa` and `master`: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`. Feature pull requests target `qa`. It never deploys.
 - **Vercel Git Integration** deploys. Push to `master` → production; push to a PR branch → preview. Vercel builds from the repo root so the committed `vercel.json` (SPA rewrites + security headers) applies.
 
 GitHub branch protection should require `check` before a pull request merges. Vercel does not read that ruleset: add the `check` workflow under the project's Deployment Checks or a push to the production branch promotes while CI is still running. Confirm the Production Branch is `master`. No deploy credentials exist in the repo or in Actions secrets — the Vercel GitHub App authenticates. Break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.

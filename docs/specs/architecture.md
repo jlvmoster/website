@@ -28,15 +28,15 @@ These shape a few decisions: keep the site static until a real `/api/*` need app
 
 The same project supports these runtime contexts, in this order of "production-likeness":
 
-| Surface            | Command                                       | Runtime                             | Purpose                                                                                                                                               |
-| ------------------ | --------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local dev          | `bun run dev`                                 | Bun.serve + HMR                     | Tight feedback loop. Fastest.                                                                                                                         |
-| Pre-deploy check   | `bun run preview`                             | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing.                                                                                |
-| CI                 | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner              | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1.                                                                     |
-| Preview deploy     | (auto, on every PR branch push)               | Vercel build + edge CDN             | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
-| CD                 | (auto, on push to `master`)                   | Vercel build + edge CDN             | Vercel Git Integration builds from the repo root and promotes to production. See §8.2.                                                                |
-| Break-glass deploy | `bunx vercel --prod`                          | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path.                                                                            |
-| Production         | (auto, after CD)                              | Vercel edge CDN                     | What users see.                                                                                                                                       |
+| Surface            | Command                                             | Runtime                             | Purpose                                                                                                                                               |
+| ------------------ | --------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local dev          | `bun run dev`                                       | Bun.serve + HMR                     | Tight feedback loop. Fastest.                                                                                                                         |
+| Pre-deploy check   | `bun run preview`                                   | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing.                                                                                |
+| CI                 | GitHub Actions on PRs + pushes to `qa` and `master` | `ubuntu-latest` runner              | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1.                                                                     |
+| Preview deploy     | (auto, on every PR branch push)                     | Vercel build + edge CDN             | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
+| CD                 | (auto, on push to `master`)                         | Vercel build + edge CDN             | Vercel Git Integration builds from the repo root and promotes to production. See §8.2.                                                                |
+| Break-glass deploy | `bunx vercel --prod`                                | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path.                                                                            |
+| Production         | (auto, after CD)                                    | Vercel edge CDN                     | What users see.                                                                                                                                       |
 
 Local `preview` does not need to emulate a remote serverless runtime while the site is static-only. When `/api/*` functions land, add a Vercel-local preview path for those handlers.
 
@@ -424,7 +424,7 @@ Requirements §1.6 no longer require Cloudflare Worker type generation. `bun run
 These aren't in the requirements doc because they're one-time setup performed in dashboards, not code:
 
 1. **Create a Vercel project** (Hobby) with framework `Other` / `null` and install the [Vercel GitHub App](https://github.com/apps/vercel) on `jlvmoster/website`. Git Integration is the production deploy path (§FR-1.7.3), so the link is required, not optional. Build settings come from the committed `vercel.json`, which overrides the dashboard — leave the dashboard fields empty rather than keeping a second copy that silently does nothing.
-2. **Require `check` in two dashboards** (§FR-1.7.7). GitHub branch protection on `master` blocks a red pull request. Vercel → Project Settings → Deployment Checks → GitHub → the `check` workflow holds the production alias, because Vercel builds as soon as the production branch updates and does not read the GitHub ruleset. No deploy tokens.
+2. **Require `check` in two dashboards** (§FR-1.7.7). GitHub branch protection on `master` and `qa` blocks a red pull request. The same ruleset covers `qa`. Vercel → Project Settings → Deployment Checks → GitHub → the `check` workflow holds the production alias, because Vercel builds as soon as the production branch updates and does not read the GitHub ruleset. No deploy tokens.
 3. **Confirm the project's Production Branch is `master`.** Now that Git Integration owns production, that setting is what decides which branch reaches users; every other branch must resolve to a preview. Check it explicitly on a freshly linked project: Vercel promotes the _first_ deployment it ever builds to production regardless of branch, which makes the dashboard briefly look as though any branch deploys to production.
 4. **Add custom domain `moster.dev`** in the Vercel project. Point DNS (typically apex + `www`) at Vercel per the dashboard instructions; remove the old Cloudflare Workers custom-domain binding when ready. The custom domain also matters for testing: Deployment Protection is set to `all_except_custom_domains`, so `bun run test:e2e:production` only works against `moster.dev`.
 5. **`worker-configuration.d.ts` stays gitignored.** Nothing generates it. A leftover copy from the Workers era fails Biome's `noExplicitAny` if the ignore is removed.
@@ -437,15 +437,15 @@ Requirements §1.7 splits the two: GitHub Actions owns CI, Vercel Git Integratio
 
 ### 8.1 CI on GitHub Actions
 
-One workflow at `.github/workflows/ci.yml` runs on every PR against `master` and every push to `master`:
+One workflow at `.github/workflows/ci.yml` runs on every pull request and push to `qa` and `master`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request.
 
 ```yaml
 name: ci
 on:
   pull_request:
-    branches: [master]
+    branches: [master, qa]
   push:
-    branches: [master]
+    branches: [master, qa]
 permissions:
   contents: read
 jobs:

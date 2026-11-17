@@ -41,6 +41,6 @@ Run each command from a clean state. Tick each box only after the corresponding 
 
 ## After all boxes pass
 
-- Open a PR against `origin/master`. Branch is already `jlvmoster/<feature-slug>`; first push uses `git push -u origin <branch>`.
+- Open a feature pull request against `origin/qa`. A release is a `qa` -> `master` pull request. Branch is already `jlvmoster/<feature-slug>`; first push uses `git push -u origin <branch>`.
 - PR title is imperative; body explains the _why_, not the _what_.
 - The post-scaffold ops in architecture §7 can ship in follow-up PRs.

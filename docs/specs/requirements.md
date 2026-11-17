@@ -83,13 +83,13 @@ This document is the authoritative source of truth for what the implementation m
 
 ### 1.7 CI/CD
 
-- **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. A PR cannot merge until CI is green.
+- **FR-1.7.1** Every pull request against `qa` or `master`, and every push to `qa` or `master`, triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request. A PR cannot merge until CI is green.
 - **FR-1.7.2** Pushes to `master` deploy to production automatically. Production releases must not require an interactive deploy from a developer's machine.
 - **FR-1.7.3** There is exactly one production deploy path: Vercel Git Integration (the Vercel GitHub App), which builds from the repo root so `vercel.json` applies. GitHub Actions runs CI only — the workflow has no deploy job.
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.
 - **FR-1.7.5** No deploy credentials exist in the repository or in GitHub Actions secrets. Git Integration authenticates through the Vercel GitHub App.
 - **FR-1.7.6** Manual `bunx vercel --prod` (§FR-1.5.4) remains available as break-glass but is not the production source of truth.
-- **FR-1.7.7** Two dashboard settings gate production. GitHub branch protection requires the `check` job before a pull request merges to `master`. Vercel Deployment Checks include that same `check` workflow so a push to the production branch is not promoted while `check` is pending or red. Branch protection alone does not hold the Vercel promotion.
+- **FR-1.7.7** Two dashboard settings gate production. GitHub branch protection requires the `check` job before a pull request merges to `master` or `qa`. The same ruleset covers `qa`. Vercel Deployment Checks include that same `check` workflow so a push to the production branch is not promoted while `check` is pending or red. Branch protection alone does not hold the Vercel promotion.
 
 ### 1.8 Performance monitoring
 
@@ -189,4 +189,4 @@ The v2 release is complete when _all_ of the following hold:
 - [ ] About page renders the portrait image at `/images/portrait.jpg` and the mailto link.
 - [ ] Footer renders on every route.
 - [ ] Each route swaps `document.title` to its own value per §FR-1.2.9 (e.g., visiting `/about` updates the tab title to "About — Jalo Moster").
-- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is required by GitHub branch protection on `master` and by a Vercel Deployment Check, and a push to `master` produces a Vercel production deploy.
+- [ ] On a fresh PR, GitHub Actions runs `check`, `bun test`, and Playwright and reports green. `check` is required by GitHub branch protection on `master` and `qa` (the same ruleset covers `qa`) and by a Vercel Deployment Check, and a push to `master` produces a Vercel production deploy.
