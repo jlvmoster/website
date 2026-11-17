@@ -232,10 +232,15 @@ test("theme toggle switches back to light when system is dark", async ({
   }
 });
 
+// Bun.serve in scripts/dev.ts is not Vercel. Unknown paths stay 200 here so
+// HMR still paints NotFoundPage. The HTTP 404 contract is tests/e2e/built.e2e.ts.
 test("dev server serves the SPA shell for unknown paths", async ({ page }) => {
   const response = await page.goto("/some-unknown-path");
   expect(response?.status()).toBe(200);
   await expect(page.locator("#root")).toBeAttached();
+  await expect(
+    page.getByRole("heading", { name: "Page not found." }),
+  ).toBeVisible();
 });
 
 test("each route sets its own document title and description", async ({

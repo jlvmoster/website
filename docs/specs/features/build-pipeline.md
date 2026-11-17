@@ -22,7 +22,7 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
 
 - `scripts/dev.ts`:
   - `Bun.serve({ static: { ... }, fetch: req => ... })` configured to serve `src/index.html` as the root document with bundled JS/CSS resolved by Bun's HTML imports.
-  - SPA fallback: the `fetch` handler returns the bundled `src/index.html` for any unknown path, mirroring Vercel's rewrite-to-`index.html` behavior in `vercel.json` so local dev matches production for unknown routes.
+  - SPA fallback: the `fetch` handler returns the bundled `src/index.html` for any unknown path so HMR can paint NotFoundPage. That response is HTTP 200. The HTTP 404 contract lives in `vercel.json` plus `dist/404.html`, and `scripts/preview.ts` mirrors it.
   - Listens on port `3000` (matched by `playwright.config.ts`).
   - HMR is enabled by running with `bun --hot`.
 - `scripts/build.ts`:
@@ -30,6 +30,7 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
   - Calls `Bun.build({ entrypoints: ["src/index.html"], outdir: "dist", minify: true, sourcemap: "linked" })`.
   - On build failure, prints every log and `process.exit(1)` — no partial dist left around.
   - Then `cp("public", "dist", { recursive: true })` — **mandatory**; the HTML bundler does not auto-copy `public/`.
+  - Then `cp("dist/index.html", "dist/404.html")` so Vercel has a root 404 page.
 - `public/` contents at v1:
   - `favicon.ico` — small favicon, referenced from `index.html` via `<link rel="icon" href="/favicon.ico">`.
   - `robots.txt` — `User-agent: *` + `Allow: /` (open by default; switch to `Disallow: /` only if you want to delay indexing).
