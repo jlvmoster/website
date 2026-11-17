@@ -28,15 +28,15 @@ These shape a few decisions: keep the site static until a real `/api/*` need app
 
 The same project supports these runtime contexts, in this order of "production-likeness":
 
-| Surface            | Command                                       | Runtime                             | Purpose                                                                                                                                               |
-| ------------------ | --------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local dev          | `bun run dev`                                 | Bun.serve + HMR                     | Tight feedback loop. Fastest.                                                                                                                         |
-| Pre-deploy check   | `bun run preview`                             | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing.                                                                                |
-| CI                 | GitHub Actions on every PR + push to `master` | `ubuntu-latest` runner              | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1.                                                                     |
-| Preview deploy     | (auto, on every PR branch push)               | Vercel build + edge CDN             | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
-| CD                 | (auto, on push to `master`)                   | Vercel build + edge CDN             | Vercel Git Integration builds from the repo root and promotes to production. See §8.2.                                                                |
-| Break-glass deploy | `bunx vercel --prod`                          | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path.                                                                            |
-| Production         | (auto, after CD)                              | Vercel edge CDN                     | What users see.                                                                                                                                       |
+| Surface            | Command                                             | Runtime                             | Purpose                                                                                                                                               |
+| ------------------ | --------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local dev          | `bun run dev`                                       | Bun.serve + HMR                     | Tight feedback loop. Fastest.                                                                                                                         |
+| Pre-deploy check   | `bun run preview`                                   | Bun.serve of `dist/` + SPA fallback | Sanity-check the built artifact and deep-link rewrites before pushing.                                                                                |
+| CI                 | GitHub Actions on PRs + pushes to `qa` and `master` | `ubuntu-latest` runner              | Runs `bun run check`, `bun test`, Playwright (dev + built). Merge gate. See §8.1.                                                                     |
+| Preview deploy     | (auto, on every PR branch push)                     | Vercel build + edge CDN             | Real platform, real `vercel.json`. Manual review only — Deployment Protection blocks automated runs against `*.vercel.app` (see `features/ci-cd.md`). |
+| CD                 | (auto, on push to `master`)                         | Vercel build + edge CDN             | Vercel Git Integration builds from the repo root and promotes to production. See §8.2.                                                                |
+| Break-glass deploy | `bunx vercel --prod`                                | Vercel build from a linked checkout | Manual fallback when Git Integration is unavailable; not the default path.                                                                            |
+| Production         | (auto, after CD)                                    | Vercel edge CDN                     | What users see.                                                                                                                                       |
 
 Local `preview` does not need to emulate a remote serverless runtime while the site is static-only. When `/api/*` functions land, add a Vercel-local preview path for those handlers.
 
@@ -437,15 +437,15 @@ Requirements §1.7 splits the two: GitHub Actions owns CI, Vercel Git Integratio
 
 ### 8.1 CI on GitHub Actions
 
-One workflow at `.github/workflows/ci.yml` runs on every PR against `master` and every push to `master`:
+One workflow at `.github/workflows/ci.yml` runs on every pull request and push to `qa` and `master`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request.
 
 ```yaml
 name: ci
 on:
   pull_request:
-    branches: [master]
+    branches: [master, qa]
   push:
-    branches: [master]
+    branches: [master, qa]
 permissions:
   contents: read
 jobs:

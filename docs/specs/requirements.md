@@ -83,7 +83,7 @@ This document is the authoritative source of truth for what the implementation m
 
 ### 1.7 CI/CD
 
-- **FR-1.7.1** Every pull request against `master` and every push to `master` triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. A PR cannot merge until CI is green.
+- **FR-1.7.1** Every pull request against `qa` or `master`, and every push to `qa` or `master`, triggers an automated CI run that executes `bun install --frozen-lockfile`, `bun run setup:browsers`, `bun run check`, `bun run build`, `bun test`, `bunx playwright test`, and `bunx playwright test -c playwright.built.config.ts`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request. A PR cannot merge until CI is green.
 - **FR-1.7.2** Pushes to `master` deploy to production automatically. Production releases must not require an interactive deploy from a developer's machine.
 - **FR-1.7.3** There is exactly one production deploy path: Vercel Git Integration (the Vercel GitHub App), which builds from the repo root so `vercel.json` applies. GitHub Actions runs CI only — the workflow has no deploy job.
 - **FR-1.7.4** Workflow definitions live under `.github/workflows/` and are committed.

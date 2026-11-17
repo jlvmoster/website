@@ -2,7 +2,7 @@
 
 ## Goal
 
-Automated CI on every PR and push to `master` through GitHub Actions, and automated production deploys on push to `master` through Vercel Git Integration. Two systems, one job each — GitHub Actions never deploys.
+Automated CI on every pull request and push to `qa` and `master` through GitHub Actions, and automated production deploys on push to `master` through Vercel Git Integration. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request. Two systems, one job each — GitHub Actions never deploys.
 
 ## Requirements covered
 
@@ -24,7 +24,7 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
 ## Behavior & edge cases
 
 - **Workflow (`.github/workflows/ci.yml`):**
-  - Triggers: `pull_request` against `master` and `push` to `master`.
+  - Triggers: `pull_request` and `push` on `qa` and `master`. Feature pull requests target `qa`. A release is a `qa` -> `master` pull request.
   - `check` job runs on `ubuntu-latest`.
   - `check` steps in order: `actions/checkout@v6` → `oven-sh/setup-bun@v2` → restore Bun package cache → restore Playwright browser cache → `bun install --frozen-lockfile` → `bun run setup:browsers` → `bun run check` → `bun run build` → `bun test` → `bunx playwright test` → `bunx playwright test -c playwright.built.config.ts`.
   - `--frozen-lockfile` enforces that PRs touching dependencies update `bun.lock`.
@@ -34,7 +34,7 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
   - Keep `bun run setup:browsers` after the Playwright cache restore so CI works on cold caches.
   - `permissions: contents: read` — checkout is all `GITHUB_TOKEN` needs now that nothing deploys.
 - **Production gate (load-bearing, §FR-1.7.7):**
-  - GitHub branch protection requires `check` on `master`. That blocks a red pull request. It does not pause Vercel.
+  - GitHub branch protection requires `check` on `master`. That blocks a red `qa` -> `master` release. It does not pause Vercel.
   - Vercel Deployment Checks include the `check` workflow (Project Settings → Deployment Checks → GitHub). Vercel still builds when the production branch updates; the check holds the production alias until `check` is green.
   - Branch protection is also what enforces §FR-1.7.1's "PR cannot merge until CI is green."
 - **Vercel Git Integration:**
@@ -43,7 +43,7 @@ Automated CI on every PR and push to `master` through GitHub Actions, and automa
   - Preview URLs are **not** an automated acceptance surface as configured: the project has Deployment Protection set to `all_except_custom_domains`, so `*.vercel.app` URLs redirect to Vercel's login page and `bun run test:e2e:production` fails on every assertion. Pointing it at a preview would require a Protection Bypass for Automation secret; not worth adding until something needs it.
   - Vercel builds from the repo root, so the committed `vercel.json` (rewrites + security headers) applies. A build that uploads only `dist/` would _not_ pick up `vercel.json` — that is why nothing in this repo runs `vercel deploy dist`.
 - **Failure semantics:**
-  - CI failure on a PR → branch protection blocks the merge, so the commit never reaches `master` and never deploys.
+  - CI failure on a feature pull request blocks the merge into `qa`. Production deploys only after a `qa` -> `master` release lands on `master`.
   - Build failure on Vercel → visible in the Vercel dashboard and on the commit's checks; the live site stays on the previous deploy (Vercel only promotes successful builds).
 - **Break-glass deploy:** `bunx vercel --prod` from a `vercel link`-ed checkout (§FR-1.5.4). Use only when Git Integration is unavailable. There is deliberately no committed `deploy` script — a script pinned in `package.json` invites routine use of the path that skips CI.
 
