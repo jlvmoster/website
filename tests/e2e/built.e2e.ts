@@ -100,3 +100,10 @@ test("built artifact sets per-route document titles", async ({ page }) => {
     await expect(page).toHaveTitle(route.title);
   }
 });
+
+test("built artifact serves /cv.pdf as a PDF", async ({ request }) => {
+  const response = await request.get("/cv.pdf");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("application/pdf");
+  expect((await response.body()).byteLength).toBeGreaterThan(1000);
+});
