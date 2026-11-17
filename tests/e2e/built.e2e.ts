@@ -78,12 +78,35 @@ test("built artifact applies dark mode via prefers-color-scheme", async ({
   expect(lightBg).not.toBe(darkBg);
 });
 
-test("built artifact returns the SPA shell for unknown paths", async ({
+test("known routes return 200 and unknown paths return the not-found page at 404", async ({
   page,
 }) => {
-  const response = await page.goto("/some-unknown-path");
-  expect(response?.status()).toBe(200);
-  await expect(page.locator("#root")).toBeAttached();
+  const known = [
+    "/",
+    "/about",
+    "/articles",
+    "/articles/hello-world",
+    "/projects",
+    "/uses",
+  ];
+  for (const path of known) {
+    await test.step(path, async () => {
+      const response = await page.goto(path);
+      expect(response?.status()).toBe(200);
+    });
+  }
+
+  const asset = await page.request.get("/images/avatar.jpg");
+  expect(asset.status()).toBe(200);
+
+  const nested = await page.request.get("/articles/hello-world/more");
+  expect(nested.status()).toBe(404);
+
+  const missing = await page.goto("/some-unknown-path");
+  expect(missing?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", { name: "Page not found." }),
+  ).toBeVisible();
 });
 
 test("built artifact sets per-route document titles", async ({ page }) => {

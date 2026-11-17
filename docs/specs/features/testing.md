@@ -8,7 +8,7 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
 
 - §NFR-2.4.1 — At least one smoke test exists under `tests/`.
 - §NFR-2.4.2 — Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
-- §NFR-2.4.3 — E2E minimum coverage: every route loads, hard-refresh deep links work, hero copy renders verbatim on `/`, social links resolve on `/` and `/about`, theme toggle switches and persists, portrait image renders on `/about`, footer renders on every route, and SPA fallback handles unknown paths.
+- §NFR-2.4.3 — E2E minimum coverage: every route loads, hard-refresh deep links return HTTP 200, hero copy renders verbatim on `/`, social links resolve on `/` and `/about`, theme toggle switches and persists, portrait image renders on `/about`, footer renders on every route, and an unknown path returns HTTP 404 and renders NotFoundPage.
 - §NFR-2.4.4 — Fresh machines and CI workers install Playwright's Chromium before E2E.
 - §FR-1.7.1 — `bunx playwright test` is part of the GitHub Actions CI gate (see [`features/ci-cd.md`](./ci-cd.md)).
 
@@ -41,7 +41,8 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
   - Out of scope per the requirements: full-DOM snapshots, visual regression, multi-browser matrix.
   - Additional v2 assertions:
     - Navigate to each route (`/about`, `/articles`, `/projects`, `/uses`) via Header NavLinks; verify no full reload (scroll-position trick) and URL updates.
-    - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses`: each returns 200 and the page renders (Vercel / preview SPA fallback).
+    - Hard-refresh on `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`: each returns 200 and the page renders.
+    - `/some-unknown-path` returns 404 and renders NotFoundPage (`tests/e2e/built.e2e.ts`, or the same suite with `E2E_BASE_URL` pointed at a deployment).
     - Theme toggle: click cycles `html.dark`; reload persists the choice via `localStorage["theme"]`.
     - `/about` renders an `<img src="/images/portrait.jpg">`.
     - `/articles` renders ≥ 1 article card; clicking it navigates to `/articles/:slug`.
