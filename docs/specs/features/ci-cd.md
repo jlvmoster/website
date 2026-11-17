@@ -12,7 +12,7 @@ Automated CI on every pull request and push to `qa` and `master` through GitHub 
 - §FR-1.7.4 — Workflow files committed under `.github/workflows/`.
 - §FR-1.7.5 — No deploy credentials in the repo or in Actions secrets; the Vercel GitHub App authenticates.
 - §FR-1.7.6 — Manual `bunx vercel --prod` remains available as break-glass only.
-- §FR-1.7.7 — `check` is a required GitHub status check on `master`, and a Vercel Deployment Check on that workflow holds production promotion.
+- §FR-1.7.7 — `check` is a required GitHub status check on `master` and `qa` (the same ruleset covers `qa`), and a Vercel Deployment Check on that workflow holds production promotion.
 - §NFR-2.2.3 — CI/CD stays within GitHub Actions' free tier where possible.
 - §NFR-2.4.4 — CI workers run Playwright's Chromium installer on every run, after restoring the browser cache if available, so E2E does not depend on a pre-existing cache.
 
@@ -34,7 +34,7 @@ Automated CI on every pull request and push to `qa` and `master` through GitHub 
   - Keep `bun run setup:browsers` after the Playwright cache restore so CI works on cold caches.
   - `permissions: contents: read` — checkout is all `GITHUB_TOKEN` needs now that nothing deploys.
 - **Production gate (load-bearing, §FR-1.7.7):**
-  - GitHub branch protection requires `check` on `master`. That blocks a red `qa` -> `master` release. It does not pause Vercel.
+  - GitHub branch protection requires `check` on `master` and `qa`. The same ruleset covers `qa`. That blocks a red pull request. It does not pause Vercel.
   - Vercel Deployment Checks include the `check` workflow (Project Settings → Deployment Checks → GitHub). Vercel still builds when the production branch updates; the check holds the production alias until `check` is green.
   - Branch protection is also what enforces §FR-1.7.1's "PR cannot merge until CI is green."
 - **Vercel Git Integration:**
@@ -51,7 +51,7 @@ Automated CI on every pull request and push to `qa` and `master` through GitHub 
 
 - **CI green path:** open a no-op PR; confirm `check` runs all commands and reports green.
 - **CI red path:** push a deliberate Biome violation on a branch; confirm the PR cannot merge because `check` is red.
-- **Gate check:** confirm `check` is a required status check on `master`, and that the Vercel project lists `check` under Deployment Checks. Without the Vercel half, a push to the production branch promotes while CI is still running.
+- **Gate check:** confirm `check` is a required status check on `master` and `qa` (the same ruleset covers `qa`), and that the Vercel project lists `check` under Deployment Checks. Without the Vercel half, a push to the production branch promotes while CI is still running.
 - **CD path:** merge a trivial visible content change to `master`; confirm Vercel reports a successful production deploy, `curl -sI https://moster.dev` returns 200 (after DNS cutover), and the live page reflects the change.
 - **Config-applied check:** after the first production deploy, `bun run test:e2e:production` — it asserts both deep-link rewrites and the `vercel.json` security headers, which is the only automated proof that `vercel.json` took effect.
 - **Lockfile drift:** push a branch that adds a dep without updating `bun.lock`; confirm `bun install --frozen-lockfile` fails CI.
