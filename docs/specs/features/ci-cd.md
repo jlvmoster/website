@@ -40,7 +40,7 @@ Automated CI on every pull request and push to `qa` and `master` through GitHub 
 - **Vercel Git Integration:**
   - Install the [Vercel GitHub App](https://github.com/apps/vercel) and link the repo to the Vercel project. No tokens, org ids, or project ids are stored anywhere in GitHub.
   - Push to `master` → production deploy. Push to any PR branch → preview deploy.
-  - Preview URLs are **not** an automated acceptance surface as configured: the project has Deployment Protection set to `all_except_custom_domains`, so `*.vercel.app` URLs redirect to Vercel's login page and `bun run test:e2e:production` fails on every assertion. Pointing it at a preview would require a Protection Bypass for Automation secret; not worth adding until something needs it.
+  - Preview URLs are **not** an automated acceptance surface in CI: Deployment Protection is `all_except_custom_domains`, so `*.vercel.app` URLs redirect to Vercel's login page and `bun run test:e2e:production` fails on every assertion. A local or QA run can pass `VERCEL_SHARE_URL` (a share link) so `globalSetup` saves the `_vercel_jwt` cookie; CI does not set that variable. A Protection Bypass for Automation secret is not required.
   - Vercel builds from the repo root, so the committed `vercel.json` (rewrites + security headers) applies. A build that uploads only `dist/` would _not_ pick up `vercel.json` — that is why nothing in this repo runs `vercel deploy dist`.
 - **Failure semantics:**
   - CI failure on a feature pull request blocks the merge into `qa`. Production deploys only after a `qa` -> `master` release lands on `master`.
