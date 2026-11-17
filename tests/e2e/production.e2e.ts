@@ -94,8 +94,38 @@ test("production applies dark mode via prefers-color-scheme", async ({
   expect(lightBg).not.toBe(darkBg);
 });
 
-test("production returns the SPA shell for unknown paths", async ({ page }) => {
+test("production returns 200 for known routes and 404 for unknown paths", async ({
+  page,
+}) => {
+  const known = [
+    "/",
+    "/about",
+    "/articles",
+    "/articles/hello-world",
+    "/projects",
+    "/uses",
+  ];
+  for (const path of known) {
+    await test.step(path, async () => {
+      const response = await page.goto(path);
+      expect(response?.status()).toBe(200);
+    });
+  }
+
+  await test.step("/about/", async () => {
+    const redirect = await page.request.get("/about/", { maxRedirects: 0 });
+    expect(redirect.status()).toBe(308);
+    const location = redirect.headers().location ?? "";
+    expect(new URL(location, "http://127.0.0.1").pathname).toBe("/about");
+
+    const followed = await page.goto("/about/");
+    expect(followed?.status()).toBe(200);
+    await expect(page).toHaveURL(/\/about$/);
+  });
+
   const response = await page.goto("/some-unknown-path");
-  expect(response?.status()).toBe(200);
-  await expect(page.locator("#root")).toBeAttached();
+  expect(response?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", { name: "Page not found." }),
+  ).toBeVisible();
 });

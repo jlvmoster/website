@@ -73,7 +73,7 @@ The Bun docs' default recommendation for DOM-style tests is `@happy-dom/global-r
    - **Hero copy verbatim**: substring `"It's my pleasure to invite you into my portfolio."` is visible (the "my pleasure" guard).
    - **Social links**: three anchors with `href` matching `github.com/jlvmoster`, `instagram.com/jlvmoster`, `linkedin.com/in/jlvmoster`.
    - **Theme toggle**: click cycles `html.dark`; reload persists the choice via `localStorage["theme"]`.
-   - **Dev-server fallback**: `await page.goto("/some-unknown-path")` returns 200 and renders NotFoundPage — keeps local dev behavior SPA-compatible. The Workers Static Assets fallback is verified in `built.e2e.ts` against `bun run preview`.
+   - **Dev-server fallback**: `await page.goto("/some-unknown-path")` returns 200 and renders NotFoundPage — the dev server is not Vercel. Unknown paths return HTTP 404 in `built.e2e.ts` against `bun run preview`.
 5. **Out of scope** (don't add): full-DOM snapshots, visual regression, multi-browser matrix, `@happy-dom/global-registrator`, `@testing-library/react`.
 6. **Add the built-output and production v2 E2E assertions** to `tests/e2e/built.e2e.ts` and `tests/e2e/production.e2e.ts`:
    - Hard-refresh on `/about`, `/articles`, `/articles/hello-world`, `/projects`, `/uses` returns 200 and the right page renders.

@@ -48,9 +48,9 @@ These are the canonical implementations of the requirements that involve config 
 
 Both are short committed files and are their own canonical form — read them rather than a copy here, which only drifts. What matters about each:
 
-- **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), a catch-all `rewrites` entry to `/index.html`, and the security headers that used to live in `src/worker.ts`. Files present under the output directory are matched before rewrites apply, so hashed assets and `public/` files still win and only client routes fall through to the shell (§FR-1.4.3).
+- **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), rewrites for the registered client routes (`/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`) to `/index.html`, and the security headers that used to live in `src/worker.ts`. Files present under the output directory are matched before rewrites apply, so hashed assets and `public/` files still win. A miss is not rewritten: Vercel serves root `404.html` with HTTP 404 (§FR-1.4.3).
 - **The file's location is load-bearing.** Vercel reads `vercel.json` from the root of whatever is deployed. Git Integration deploys the repo root, so it applies. Uploading a built directory instead (`vercel deploy dist`) produces a deployment with no `vercel.json` at its root: every rewrite and header disappears, deep links 404, and nothing in CI notices. See `features/hosting.md`.
-- **`scripts/preview.ts`** is a 13-line `Bun.serve` that returns the requested file from `dist/` if it exists and `dist/index.html` otherwise. That single fallback is the entire feature; it mirrors the rewrite but _not_ the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
+- **`scripts/preview.ts`** is a `Bun.serve` that returns the requested file from `dist/` if it exists, applies the `vercel.json` rewrites at HTTP 200, and otherwise returns `dist/404.html` at HTTP 404. It mirrors those routing rules but _not_ the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
 
 ### 4.3 `scripts/build.ts` (programmatic build + public/ copy)
 
@@ -72,13 +72,14 @@ if (!result.success) {
 }
 
 await cp("public", "dist", { recursive: true });
+await cp("dist/index.html", "dist/404.html");
 ```
 
-The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic choice. Bun's HTML bundler only emits files reachable from the HTML / CSS / JS import graph; it does **not** auto-copy a `public/` directory. Anything that has to ship without being imported — `favicon.ico`, `robots.txt`, OG images referenced only by meta tags resolved at runtime — lives in `public/` and gets copied by this step.
+The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic choice. Bun's HTML bundler only emits files reachable from the HTML / CSS / JS import graph; it does **not** auto-copy a `public/` directory. Anything that has to ship without being imported — `favicon.ico`, `robots.txt`, OG images referenced only by meta tags resolved at runtime — lives in `public/` and gets copied by this step. The following `cp` of `index.html` to `404.html` is what Vercel serves, status 404, when no file and no rewrite matches.
 
 ### 4.4 Routing & app shell
 
-`react-router-dom` was picked because it is the conventional, well-known SPA router (vs. tiny alternatives like `wouter`), declarative, no SSR overhead, and plays cleanly with Vercel's SPA rewrite to `index.html` — the host returns the SPA shell for any non-asset path, and the client router resolves the URL after mount.
+`react-router-dom` was picked because it is the conventional, well-known SPA router (vs. tiny alternatives like `wouter`), declarative, no SSR overhead, and plays cleanly with Vercel's rewrites to `index.html` — the host returns the SPA shell for registered client routes, and `404.html` (the same shell, HTTP 404) when nothing matches. The client router resolves the URL after mount.
 
 ```tsx
 // src/main.tsx
@@ -398,7 +399,7 @@ Detailed spec: `docs/specs/features/document-metadata.md`.
 ├── scripts/
 │   ├── dev.ts              # Bun.serve with HMR
 │   ├── build.ts            # bun build → dist/
-│   └── preview.ts          # Bun.serve of dist/ with SPA fallback
+│   └── preview.ts          # Bun.serve of dist/: known routes 200, else 404.html
 ├── tests/
 ├── docs/
 │   └── specs/
