@@ -47,19 +47,19 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 
 ## Commands
 
-| Purpose                                        | Command                                                                                                                 |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Install deps (also runs `husky` via `prepare`) | `bun install`                                                                                                           |
-| Install browser deps                           | `bun run setup:browsers` (`playwright install chromium`)                                                                |
-| Dev server (HMR)                               | `bun run dev` (`scripts/dev.ts` + `Bun.serve`)                                                                          |
-| Production build                               | `bun run build` (`scripts/build.ts` → `dist/`)                                                                          |
-| Local built preview                            | `bun run preview` (`scripts/preview.ts` serves `dist/`)                                                                 |
-| Deploy                                         | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md` |
-| Type + lint check                              | `bun run check` (`biome check && tsc --noEmit`)                                                                         |
-| Unit tests                                     | `bun test`                                                                                                              |
-| E2E (dev server)                               | `bun run test:e2e` against `bun run dev`                                                                                |
-| E2E (built artifact)                           | `bun run test:e2e:built` against `bun run preview`                                                                      |
-| E2E (production)                               | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev`                                          |
+| Purpose                                        | Command                                                                                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Install deps (also runs `husky` via `prepare`) | `bun install`                                                                                                                   |
+| Install browser deps                           | `bun run setup:browsers` (`playwright install chromium`)                                                                        |
+| Dev server (HMR)                               | `bun run dev` (`scripts/dev.ts` + `Bun.serve`)                                                                                  |
+| Production build                               | `bun run build` (`scripts/build.ts` → `dist/`)                                                                                  |
+| Local built preview                            | `bun run preview` (`scripts/preview.ts` serves `dist/`)                                                                         |
+| Deploy                                         | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md`         |
+| Type + lint check                              | `bun run check` (`biome check && tsc --noEmit`)                                                                                 |
+| Unit tests                                     | `bun test`                                                                                                                      |
+| E2E (dev server)                               | `bun run test:e2e` against `bun run dev`                                                                                        |
+| E2E (built artifact)                           | `bun run test:e2e:built` against `bun run preview`                                                                              |
+| E2E (production)                               | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev`; `VERCEL_SHARE_URL` for an SSO-protected preview |
 
 ## Key files
 
@@ -122,7 +122,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - **Unit / integration:** `bun test`. Files: `*.test.ts` colocated with source or under `tests/`. The smoke spec wraps `<App />` in `<MemoryRouter initialEntries={["/"]}>` (since `BrowserRouter` is mounted in `src/main.tsx`, outside `App`) and asserts the verbatim hero substring + three social URLs.
 - **Browser smoke (dev E2E):** `bun run test:e2e` runs `tests/e2e/site.e2e.ts` against `bun run dev` (wired via `playwright.config.ts`).
 - **Built artifact acceptance:** `bun run test:e2e:built` runs `tests/e2e/built.e2e.ts` after `bun run build`, served through `bun run preview` (wired via `playwright.built.config.ts`).
-- **Production acceptance:** `bun run test:e2e:production` runs `tests/e2e/production.e2e.ts` against `PRODUCTION_URL` or `https://moster.dev` (wired via `playwright.production.config.ts`). It owns the `vercel.json` security-header assertions — `scripts/preview.ts` mirrors the SPA rewrite but not the headers, so built E2E cannot cover them. Only point it at a custom domain: the Vercel project has Deployment Protection enabled for `all_except_custom_domains`, so a `*.vercel.app` preview URL 302s to Vercel's login page and the whole suite fails. Checking a preview deployment needs a Protection Bypass for Automation secret first; nothing needs that yet.
+- **Production acceptance:** `bun run test:e2e:production` runs `tests/e2e/production.e2e.ts` against `PRODUCTION_URL` or `https://moster.dev` (wired via `playwright.production.config.ts`). It owns the `vercel.json` security-header assertions — `scripts/preview.ts` mirrors the SPA rewrite but not the headers, so built E2E cannot cover them. Deployment Protection is `all_except_custom_domains`, so a `*.vercel.app` preview URL 302s to Vercel's login page unless `VERCEL_SHARE_URL` is a share link (`https://<host>/?_vercel_share=<token>`). That link is opened once in `globalSetup`, and the `_vercel_jwt` cookie is saved under gitignored `playwright/.auth/` for `use.storageState`. The token is not logged. Unset, the suite is unchanged.
   - Each fresh machine or CI worker must run `bun run setup:browsers` (`playwright install chromium`) once before the first run.
   - Keep specs thin: every route loads, hero copy verbatim on `/`, three social links resolve, theme toggle cycles + persists, `/about` portrait + mailto render, `/articles` list + detail navigation, hard-refresh on each deep link returns 200, footer on every route. Don't snapshot the whole DOM.
 - **Interactive verification during a task:** use the `mcp__plugin_playwright_playwright__*` MCP tools to drive a browser ad-hoc rather than writing throwaway specs. Per the global rule, UI changes must be exercised in a browser before being reported as complete.
