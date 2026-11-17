@@ -112,6 +112,17 @@ test("production returns 200 for known routes and 404 for unknown paths", async 
     });
   }
 
+  await test.step("/about/", async () => {
+    const redirect = await page.request.get("/about/", { maxRedirects: 0 });
+    expect(redirect.status()).toBe(308);
+    const location = redirect.headers().location ?? "";
+    expect(new URL(location, "http://127.0.0.1").pathname).toBe("/about");
+
+    const followed = await page.goto("/about/");
+    expect(followed?.status()).toBe(200);
+    await expect(page).toHaveURL(/\/about$/);
+  });
+
   const response = await page.goto("/some-unknown-path");
   expect(response?.status()).toBe(404);
   await expect(

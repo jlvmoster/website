@@ -99,6 +99,17 @@ test("known routes return 200 and unknown paths return the not-found page at 404
   const asset = await page.request.get("/images/avatar.jpg");
   expect(asset.status()).toBe(200);
 
+  await test.step("/about/", async () => {
+    const redirect = await page.request.get("/about/", { maxRedirects: 0 });
+    expect(redirect.status()).toBe(308);
+    const location = redirect.headers().location ?? "";
+    expect(new URL(location, "http://127.0.0.1").pathname).toBe("/about");
+
+    const response = await page.goto("/about/");
+    expect(response?.status()).toBe(200);
+    await expect(page).toHaveURL(/\/about$/);
+  });
+
   const nested = await page.request.get("/articles/hello-world/more");
   expect(nested.status()).toBe(404);
 

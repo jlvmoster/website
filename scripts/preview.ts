@@ -7,6 +7,7 @@ type Rewrite = { source: string; destination: string };
 
 const config = (await Bun.file("vercel.json").json()) as {
   rewrites?: Rewrite[];
+  trailingSlash?: boolean;
 };
 
 const rewrites = (config.rewrites ?? []).map((rewrite) => ({
@@ -30,7 +31,21 @@ function rewriteSource(source: string): RegExp {
 const server = Bun.serve({
   port: Number(process.env.PORT ?? 4173),
   async fetch(req) {
-    const pathname = new URL(req.url).pathname;
+    const url = new URL(req.url);
+    const { pathname } = url;
+    // Same rule as vercel.json trailingSlash: false. `/` is unchanged.
+    if (
+      config.trailingSlash === false &&
+      pathname.length > 1 &&
+      pathname.endsWith("/")
+    ) {
+      url.pathname = pathname.slice(0, -1);
+      return new Response(null, {
+        status: 308,
+        headers: { Location: `${url.pathname}${url.search}` },
+      });
+    }
+
     const filePath = pathname === "/" ? "/index.html" : pathname;
     const file = Bun.file(DIST + filePath);
     if (await file.exists()) return new Response(file);

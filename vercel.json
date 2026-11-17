@@ -4,6 +4,7 @@
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "installCommand": "bun install",
+  "trailingSlash": false,
   "rewrites": [
     { "source": "/about", "destination": "/index.html" },
     { "source": "/articles", "destination": "/index.html" },
