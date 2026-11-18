@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("home page loads with the React root attached", async ({ page }) => {
   const response = await page.goto("/");
@@ -90,6 +91,18 @@ test("page navbar hides on scroll", async ({ page }) => {
     el.getBoundingClientRect().toJSON(),
   );
   expect(hiddenNavbar.bottom).toBeLessThanOrEqual(1);
+});
+
+test("mobile menu links paint above the hero avatar", async ({ page }) => {
+  await test.step("home", async () => {
+    await expectMobileMenuAboveAvatar(page, "/");
+  });
+  await test.step("home scrolled 400px", async () => {
+    await expectMobileMenuAboveAvatar(page, "/", 400);
+  });
+  await test.step("/uses", async () => {
+    await expectMobileMenuAboveAvatar(page, "/uses");
+  });
 });
 
 test("mobile menu opens and navigates", async ({ page }) => {

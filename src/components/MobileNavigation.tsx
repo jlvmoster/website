@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { navItems } from "../content/nav";
 import { clsx } from "../lib/clsx";
@@ -33,55 +34,59 @@ export function MobileNavigation({ className }: { className?: string }) {
         Menu
         <ChevronDownIcon className="ml-3 h-2 w-2 stroke-zinc-500 transition-[stroke] duration-200 group-hover:stroke-zinc-700 dark:group-hover:stroke-zinc-400" />
       </button>
-      {open ? (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="fixed inset-0 cursor-pointer bg-zinc-800/40 backdrop-blur-xs dark:bg-black/80"
-            aria-label="Close menu"
-            onClick={() => setOpen(false)}
-          />
-          <div className="fixed inset-x-4 top-8 z-50 origin-top rounded-3xl bg-white p-8 ring-1 ring-zinc-900/5 dark:bg-zinc-900 dark:ring-zinc-800">
-            <div className="flex flex-row-reverse items-center justify-between">
+      {open
+        ? createPortal(
+            // Outside the translated header shell, which paints under the hero avatar.
+            <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
               <button
                 type="button"
+                className="fixed inset-0 cursor-pointer bg-zinc-800/40 backdrop-blur-xs dark:bg-black/80"
                 aria-label="Close menu"
-                className="-m-1 cursor-pointer rounded-md p-1 transition-colors duration-200 ease-out hover:text-zinc-800 dark:hover:text-zinc-200"
                 onClick={() => setOpen(false)}
-              >
-                <CloseIcon className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
-              </button>
-              <h2 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Navigation
-              </h2>
-            </div>
-            <nav className="mt-6">
-              <ul className="-my-2 divide-y divide-zinc-100 text-base text-zinc-800 dark:divide-zinc-100/5 dark:text-zinc-300">
-                {navItems.map((item) => {
-                  const active =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        to={item.href}
-                        className={clsx(
-                          "block cursor-pointer py-2 transition-colors duration-200 ease-out",
-                          active ? "text-accent" : "hover:text-accent",
-                        )}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      ) : null}
+              />
+              <div className="fixed inset-x-4 top-8 z-50 origin-top rounded-3xl bg-white p-8 ring-1 ring-zinc-900/5 dark:bg-zinc-900 dark:ring-zinc-800">
+                <div className="flex flex-row-reverse items-center justify-between">
+                  <button
+                    type="button"
+                    aria-label="Close menu"
+                    className="-m-1 cursor-pointer rounded-md p-1 transition-colors duration-200 ease-out hover:text-zinc-800 dark:hover:text-zinc-200"
+                    onClick={() => setOpen(false)}
+                  >
+                    <CloseIcon className="h-6 w-6 text-zinc-500 dark:text-zinc-400" />
+                  </button>
+                  <h2 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                    Navigation
+                  </h2>
+                </div>
+                <nav className="mt-6">
+                  <ul className="-my-2 divide-y divide-zinc-100 text-base text-zinc-800 dark:divide-zinc-100/5 dark:text-zinc-300">
+                    {navItems.map((item) => {
+                      const active =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`);
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            to={item.href}
+                            className={clsx(
+                              "block cursor-pointer py-2 transition-colors duration-200 ease-out",
+                              active ? "text-accent" : "hover:text-accent",
+                            )}
+                            aria-current={active ? "page" : undefined}
+                            onClick={() => setOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

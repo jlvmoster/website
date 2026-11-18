@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { knownArticleSlug, knownArticleTitle } from "./known-article-slug";
+import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("production serves the SPA shell over HTTPS", async ({ page }) => {
   const response = await page.goto("/");
@@ -126,6 +127,20 @@ test("unknown article slugs return 404 and a known slug returns 200", async ({
   await expect(
     page.getByRole("heading", { name: "Article not found." }),
   ).toBeVisible();
+});
+
+test("production mobile menu links paint above the hero avatar", async ({
+  page,
+}) => {
+  await test.step("home", async () => {
+    await expectMobileMenuAboveAvatar(page, "/");
+  });
+  await test.step("home scrolled 400px", async () => {
+    await expectMobileMenuAboveAvatar(page, "/", 400);
+  });
+  await test.step("/uses", async () => {
+    await expectMobileMenuAboveAvatar(page, "/uses");
+  });
 });
 
 test("production returns 200 for known routes and 404 for unknown paths", async ({
