@@ -133,7 +133,7 @@ test("route changes reset scroll to the top", async ({ page }) => {
 test("article back button returns to the articles page", async ({ page }) => {
   await page.goto("/articles/hello-world");
 
-  await page.getByRole("button", { name: "Go back to articles" }).click();
+  await page.getByRole("link", { name: "Go back to articles" }).click();
   await expect(page).toHaveURL(/\/articles$/);
 });
 
@@ -142,6 +142,23 @@ test("home writing column links to the articles archive", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Writing" })).toBeVisible();
   await page.getByRole("link", { name: "View all" }).click();
   await expect(page).toHaveURL(/\/articles$/);
+});
+
+test("article card navigates without a full document reload", async ({
+  page,
+}) => {
+  await page.goto("/articles");
+  await page.evaluate(() => {
+    (window as unknown as { __spa: number }).__spa = 1;
+  });
+
+  await page.getByRole("link", { name: "Hello, world" }).click();
+  await expect(page).toHaveURL(/\/articles\/hello-world$/);
+
+  const spa = await page.evaluate(
+    () => (window as unknown as { __spa?: number }).__spa,
+  );
+  expect(spa).toBe(1);
 });
 
 test("article detail shows dek and reading time without a more-writing row", async ({
@@ -243,6 +260,74 @@ test("theme toggle switches back to light when system is dark", async ({
   } finally {
     await context.close();
   }
+});
+
+test("moon icon stroke is accent on a light OS and zinc-400 on hover when the OS is dark", async ({
+  browser,
+  baseURL,
+}) => {
+  const readMoonStroke = async (
+    colorScheme: "light" | "dark",
+    hover: boolean,
+  ) => {
+    const context = await browser.newContext({ baseURL, colorScheme });
+    const page = await context.newPage();
+    try {
+      await page.addInitScript(() => {
+        localStorage.setItem("theme", "dark");
+      });
+      await page.goto("/");
+      const toggle = page.getByRole("button", {
+        name: "Switch to light theme",
+      });
+      if (hover) {
+        await toggle.hover();
+        await page.evaluate(() =>
+          Promise.all(
+            document.getAnimations().map((animation) => animation.finished),
+          ),
+        );
+      }
+      return await toggle
+        .locator("svg")
+        .nth(1)
+        .locator("path")
+        .evaluate((path) => {
+          const accentProbe = document.createElement("span");
+          accentProbe.style.color = getComputedStyle(document.documentElement)
+            .getPropertyValue("--accent")
+            .trim();
+          const svg = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg",
+          );
+          const zinc = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          zinc.setAttribute("class", "stroke-zinc-400");
+          svg.append(zinc);
+          document.body.append(accentProbe, svg);
+          const accent = getComputedStyle(accentProbe).color;
+          const zincStroke = getComputedStyle(zinc).stroke;
+          accentProbe.remove();
+          svg.remove();
+          return {
+            accent,
+            stroke: getComputedStyle(path).stroke,
+            zincStroke,
+          };
+        });
+    } finally {
+      await context.close();
+    }
+  };
+
+  const lightOs = await readMoonStroke("light", false);
+  expect(lightOs.stroke).toBe(lightOs.accent);
+
+  const darkOsHover = await readMoonStroke("dark", true);
+  expect(darkOsHover.stroke).toBe(darkOsHover.zincStroke);
 });
 
 // Bun.serve in scripts/dev.ts is not Vercel. Unknown paths stay 200 here so
