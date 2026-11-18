@@ -43,7 +43,7 @@ test("hello world", () => {
 
 This repo is Jalo's personal website.
 
-Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-dom` with six routes (`/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`). `src/pages/` holds the routed components; `src/components/` ships the LayoutShell + Header (with scaling avatar on Home) + Footer + theme toggle + the Card/Button/SimpleLayout/Section/Prose/Container primitives. `src/content/articles/` hosts typed TSX article modules (no MDX). `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler; `vercel.json` + `scripts/preview.ts` handle Vercel static hosting and local built-artifact preview (routes that are not files rewrite to the SPA shell at HTTP 200; known article slugs are `articles/<slug>/index.html`; a root `404.html` answers every other path, including an unknown article slug, with HTTP 404 and the client not-found page). `.github/workflows/ci.yml` runs check + dev/built E2E on PR and push — it does not deploy; Vercel Git Integration builds and promotes `master`. See `README.md` for the user-facing summary.
+Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-dom` with six routes (`/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`). `src/pages/` holds the routed components; `src/components/` ships the LayoutShell + Header (with scaling avatar on Home) + Footer + theme toggle + the Card/SimpleLayout/Section/Prose/Container primitives. `src/content/articles/` hosts typed TSX article modules (no MDX). `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler; `vercel.json` + `scripts/preview.ts` handle Vercel static hosting and local built-artifact preview (routes that are not files rewrite to the SPA shell at HTTP 200; known article slugs are `articles/<slug>/index.html`; a root `404.html` answers every other path, including an unknown article slug, with HTTP 404 and the client not-found page). `.github/workflows/ci.yml` runs check + dev/built E2E on PR and push — it does not deploy; Vercel Git Integration builds and promotes `master`. See `README.md` for the user-facing summary.
 
 ## Commands
 
@@ -64,7 +64,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 ## Key files
 
 - `src/pages/` — one routed component per URL (HomePage, AboutPage, ArticlesPage, ArticlePage, ProjectsPage, UsesPage, NotFoundPage). Page bodies live here, not in `src/components/`.
-- `src/components/` — handwritten primitives (LayoutShell, Header, Footer, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons) plus `home/` subfolder for Resume/ArticleCard.
+- `src/components/` — handwritten primitives (LayoutShell, Header, Footer, Container, Card, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons) plus `home/` subfolder for Resume/ArticleCard.
 - `src/content/articles/index.ts` — article loader (`getAllArticles()`, `getArticleBySlug()`); each article is `src/content/articles/<slug>.tsx` exporting `meta` + default component. Adding an article is two edits: drop the TSX file, register it in the `modules` record.
 - `src/content/{projects,uses,resume}.ts` — typed data for the Projects, Uses, and Home-Resume surfaces.
 - `src/lib/useTheme.ts` — three-state theme hook (`light` / `dark` / `system`), `localStorage["theme"]` persisted, subscribes to `prefers-color-scheme` changes when in system mode.
@@ -101,7 +101,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - Prose blocks use `@tailwindcss/typography` via the `<Prose>` wrapper (`prose dark:prose-invert`). Max-width ~65ch.
 - No third-party UI component libraries (no shadcn, Radix, MUI, HeadlessUI). Handwritten components in `src/components/`. The mobile-nav popover is ~80 lines of handwritten React; backdrop click + Esc keydown both close it.
 - Routing: `react-router-dom` v7 with `BrowserRouter` wrap in `src/main.tsx`. In-app links use `<Link>` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`. The router table lives in `src/App.tsx`.
-- `<Card>` is a compound component with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, and `.Link`. `Card.Link` swaps between `<Link>` and external `<a>` based on whether the href starts with `http` or `mailto:`. Lift article/project/uses cards from this primitive — don't roll your own card shape.
+- `<Card>` is a compound component with `.Title`, `.Description`, `.Eyebrow`, `.Cta`, and `.Link`. `Card.Link` is an `<a>`. Href values starting with `http` or `mailto:` open in a new tab. Lift article/project/uses cards from this primitive — don't roll your own card shape.
 - **Hero copy is canonical and must be preserved verbatim:** _"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."_ Lives in `src/pages/HomePage.tsx`. Do not paraphrase "my pleasure" away — it's a deliberate Chick-fil-A tie-in.
 - Images live under `public/images/` and ride along via `scripts/build.ts`'s `cp public dist`. Referenced as string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, `/cv.pdf`). React does not import them.
 - When building or restyling UI, invoke the `frontend-design` skill before generating code. It produces distinctive, non-generic components that fit the minimal aesthetic.
@@ -125,7 +125,7 @@ Plugins enabled in `.claude/settings.json`: official marketplace plugins `claude
 Built-in subagents to lean on:
 
 - **`Explore`** — locating code under `src/`.
-- **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Vercel Function).
+- **`Plan`** — before non-trivial work (new section, adding routing, switching a route from static to a Vercel Function).
 
 Repo-local skills in `.claude/skills/`:
 
@@ -133,7 +133,6 @@ Repo-local skills in `.claude/skills/`:
 
 Skills worth authoring **only when the workflow recurs** (don't pre-build):
 
-- `new-post` — scaffold an MDX file under `src/content/` with frontmatter, once the blog ships.
 - `deploy-check` — chain `bun run check && bun run build && bun run test:e2e:built` as a one-shot pre-push gate. Nothing deploys locally, so there's no CLI step.
 
 ## Hard rules specific to this repo

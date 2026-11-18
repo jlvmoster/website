@@ -1,5 +1,4 @@
 import { resume } from "../../content/resume";
-import { Button } from "../Button";
 import { ArrowDownIcon, BriefcaseIcon } from "../icons";
 
 export function Resume() {
@@ -28,21 +27,24 @@ export function Resume() {
               <dd className="ml-auto text-xs text-zinc-500 dark:text-zinc-400">
                 <time dateTime={role.start}>{role.start}</time>{" "}
                 <span aria-hidden="true">—</span>{" "}
-                <time dateTime={role.end}>{role.end}</time>
+                {role.end === "Present" ? (
+                  <time>{role.end}</time>
+                ) : (
+                  <time dateTime={role.end}>{role.end}</time>
+                )}
               </dd>
             </dl>
           </li>
         ))}
       </ol>
-      <Button
+      <a
         href="/cv.pdf"
-        variant="secondary"
-        className="group mt-6 w-full"
         download
+        className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm outline-offset-2 transition-[color,background-color,transform,box-shadow] duration-200 ease-out active:scale-[0.97] active:transition-none motion-reduce:active:scale-100 bg-zinc-50 font-medium text-zinc-900 hover:bg-zinc-100 active:bg-zinc-100 active:text-zinc-900/60 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 dark:active:bg-zinc-800/50 dark:active:text-zinc-50/70 group mt-6 w-full"
       >
         Download CV
         <ArrowDownIcon className="h-4 w-4 stroke-zinc-400 transition group-active:stroke-zinc-600 dark:group-hover:stroke-zinc-50 dark:group-active:stroke-zinc-50" />
-      </Button>
+      </a>
     </div>
   );
 }

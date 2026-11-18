@@ -34,14 +34,6 @@ export function LinkedInIcon(props: IconProps) {
   );
 }
 
-export function XIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
-      <path d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5685 21H20.8131L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z" />
-    </svg>
-  );
-}
-
 export function MailIcon(props: IconProps) {
   return (
     <svg
@@ -127,12 +119,12 @@ export function SunIcon(props: IconProps) {
     >
       <path
         d="M8 12.25A4.25 4.25 0 0 1 12.25 8v0a4.25 4.25 0 0 1 4.25 4.25v0a4.25 4.25 0 0 1-4.25 4.25v0A4.25 4.25 0 0 1 8 12.25v0Z"
-        className="fill-zinc-100 stroke-zinc-500 dark:fill-zinc-100/10 dark:stroke-zinc-500"
+        className="fill-zinc-100 stroke-zinc-500"
       />
       <path
         d="M12.25 3v1.5M21.5 12.25H20M18.791 18.791l-1.06-1.06M18.791 5.709l-1.06 1.06M12.25 20v1.5M4.5 12.25H3M5.709 18.791l1.06-1.06M5.709 5.709l1.06 1.06"
         fill="none"
-        className="stroke-zinc-500 dark:stroke-zinc-500"
+        className="stroke-zinc-500"
       />
     </svg>
   );

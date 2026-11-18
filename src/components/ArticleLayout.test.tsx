@@ -27,7 +27,7 @@ test("article body may use Link and useParams without throwing", () => {
                 date: "2026-05-18",
               }}
               readingMinutes={readingTimeMinutes(
-                "Why this site exists and what's coming.",
+                "This is the first post on moster.dev. It's a placeholder while the site fills out — expect notes on the data platforms I work on, the tools I rely on, and the occasional latte digression.",
               )}
             >
               <RouterPost />

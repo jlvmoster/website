@@ -133,7 +133,7 @@ test("route changes reset scroll to the top", async ({ page }) => {
 test("article back button returns to the articles page", async ({ page }) => {
   await page.goto("/articles/hello-world");
 
-  await page.getByRole("button", { name: "Go back to articles" }).click();
+  await page.getByRole("link", { name: "Go back to articles" }).click();
   await expect(page).toHaveURL(/\/articles$/);
 });
 

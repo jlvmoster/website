@@ -59,7 +59,7 @@ src/
   main.tsx                # React root + BrowserRouter wrap
   App.tsx                 # LayoutShell + Routes table
   pages/                  # HomePage, AboutPage, ArticlesPage, ArticlePage, ProjectsPage, UsesPage, NotFoundPage
-  components/             # LayoutShell, Header, Footer, Container, Card, Button, SimpleLayout, Section, Prose,
+  components/             # LayoutShell, Header, Footer, Container, Card, SimpleLayout, Section, Prose,
                           # Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons
   components/home/        # Resume, ArticleCard
   content/articles/       # index.ts (loader + types) + <slug>.tsx (typed TS modules; no MDX)

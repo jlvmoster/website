@@ -1,5 +1,4 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { clsx } from "../lib/clsx";
 import { ChevronRightIcon } from "./icons";
 
@@ -31,24 +30,19 @@ export function Card<T extends ElementType = "div">({
 type CardLinkProps = ComponentPropsWithoutRef<"a"> & { href: string };
 
 Card.Link = function CardLink({ children, href, ...props }: CardLinkProps) {
-  if (isExternal(href)) {
-    return (
-      <>
-        <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-95 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
-        <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-          <span className="absolute -inset-x-4 -inset-y-6 z-20 sm:-inset-x-6 sm:rounded-2xl" />
-          <span className="relative z-10">{children}</span>
-        </a>
-      </>
-    );
-  }
+  const external = isExternal(href);
   return (
     <>
       <div className="absolute -inset-x-4 -inset-y-6 z-0 scale-95 bg-zinc-50 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-95 sm:-inset-x-6 sm:rounded-2xl dark:bg-zinc-800/50" />
-      <Link to={href} {...props}>
+      <a
+        href={href}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noopener noreferrer" : undefined}
+        {...props}
+      >
         <span className="absolute -inset-x-4 -inset-y-6 z-20 sm:-inset-x-6 sm:rounded-2xl" />
         <span className="relative z-10">{children}</span>
-      </Link>
+      </a>
     </>
   );
 };
