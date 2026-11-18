@@ -41,32 +41,28 @@ test("hello world", () => {
 
 # Project: moster.dev
 
-This repo is Jalo's personal website. **The authoritative requirements doc is `docs/specs/requirements.md` — read it before any non-trivial change.** It covers the deployment model, file layout, page composition, growth path, and the resolved decisions (domain, socials, hero copy, typography, theme toggle, palette).
+This repo is Jalo's personal website.
 
 Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-dom` with six routes (`/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`). `src/pages/` holds the routed components; `src/components/` ships the LayoutShell + Header (with scaling avatar on Home) + Footer + theme toggle + the Card/Button/SimpleLayout/Section/Prose/Container primitives. `src/content/articles/` hosts typed TSX article modules (no MDX). `scripts/dev.ts` + `scripts/build.ts` drive the Bun HTML bundler; `vercel.json` + `scripts/preview.ts` handle Vercel static hosting and local built-artifact preview (routes that are not files rewrite to the SPA shell at HTTP 200; known article slugs are `articles/<slug>/index.html`; a root `404.html` answers every other path, including an unknown article slug, with HTTP 404 and the client not-found page). `.github/workflows/ci.yml` runs check + dev/built E2E on PR and push — it does not deploy; Vercel Git Integration builds and promotes `master`. See `README.md` for the user-facing summary.
 
 ## Commands
 
-| Purpose                                        | Command                                                                                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Install deps (also runs `husky` via `prepare`) | `bun install`                                                                                                                   |
-| Install browser deps                           | `bun run setup:browsers` (`playwright install chromium`)                                                                        |
-| Dev server (HMR)                               | `bun run dev` (`scripts/dev.ts` + `Bun.serve`)                                                                                  |
-| Production build                               | `bun run build` (`scripts/build.ts` → `dist/`)                                                                                  |
-| Local built preview                            | `bun run preview` (`scripts/preview.ts` serves `dist/`)                                                                         |
-| Deploy                                         | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod`, see `docs/specs/features/ci-cd.md`         |
-| Type + lint check                              | `bun run check` (`biome check && tsc --noEmit`)                                                                                 |
-| Unit tests                                     | `bun test`                                                                                                                      |
-| E2E (dev server)                               | `bun run test:e2e` against `bun run dev`                                                                                        |
-| E2E (built artifact)                           | `bun run test:e2e:built` against `bun run preview`                                                                              |
-| E2E (production)                               | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev`; `VERCEL_SHARE_URL` for an SSO-protected preview |
+| Purpose                                        | Command                                                                                                                                       |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install deps (also runs `husky` via `prepare`) | `bun install`                                                                                                                                 |
+| Install browser deps                           | `bun run setup:browsers` (`playwright install chromium`)                                                                                      |
+| Dev server (HMR)                               | `bun run dev` (`scripts/dev.ts` + `Bun.serve`)                                                                                                |
+| Production build                               | `bun run build` (`scripts/build.ts` → `dist/`)                                                                                                |
+| Local built preview                            | `bun run preview` (`scripts/preview.ts` serves `dist/`)                                                                                       |
+| Deploy                                         | none — Vercel Git Integration deploys `master`; break-glass is `bunx vercel --prod` from a linked checkout, only when Git Integration is down |
+| Type + lint check                              | `bun run check` (`biome check && tsc --noEmit`)                                                                                               |
+| Unit tests                                     | `bun test`                                                                                                                                    |
+| E2E (dev server)                               | `bun run test:e2e` against `bun run dev`                                                                                                      |
+| E2E (built artifact)                           | `bun run test:e2e:built` against `bun run preview`                                                                                            |
+| E2E (production)                               | `bun run test:e2e:production` against `PRODUCTION_URL` or `https://moster.dev`; `VERCEL_SHARE_URL` for an SSO-protected preview               |
 
 ## Key files
 
-- `docs/specs/requirements.md` — authoritative requirements doc (read first).
-- `docs/specs/architecture.md` — rationale, code shapes, and operational notes (router config, LayoutShell, Header scroll math, theme toggle hook, article content model, primitives, iconography).
-- `docs/specs/features/*.md` — per-feature implementation specs (Hero, Theming, ThemeToggle, Routing, LayoutShell, Header, HomePage, ArticlesPage, ContentModel, Iconography, Hosting, BuildPipeline, Tooling, Testing, CI/CD). Read the relevant one before touching a feature.
-- `docs/tasks/README.md` — ordered, 13-step implementation playbook. Each task lists prereqs, steps, and a verification block.
 - `src/pages/` — one routed component per URL (HomePage, AboutPage, ArticlesPage, ArticlePage, ProjectsPage, UsesPage, NotFoundPage). Page bodies live here, not in `src/components/`.
 - `src/components/` — handwritten primitives (LayoutShell, Header, Footer, Container, Card, Button, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons) plus `home/` subfolder for Resume/ArticleCard.
 - `src/content/articles/index.ts` — article loader (`getAllArticles()`, `getArticleBySlug()`); each article is `src/content/articles/<slug>.tsx` exporting `meta` + default component. Adding an article is two edits: drop the TSX file, register it in the `modules` record.
@@ -79,20 +75,13 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
 - `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
-- `.github/workflows/ci.yml` — single `check` job on PRs + pushes, no deploy job; canonical YAML in architecture §8.1.
+- `.github/workflows/ci.yml` — single `check` job on PRs + pushes, no deploy job.
 - `vercel.json` — Vercel static SPA config (build, output `dist/`, SPA rewrites, security headers).
 - `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.
 - `.vercel/` — _(gitignored)_ local Vercel link metadata; do not commit.
 - `README.md` — user-facing project summary (stack, quickstart, deploy flow); keep in sync when the project layout changes.
 - `CHANGELOG.md` — reader-facing release notes (output of the `changelog-generator` skill); append a new dated section per release rather than rewriting prior entries.
 - `.husky/` — pre-commit hook installed automatically by `prepare` on `bun install`.
-
-## Docs conventions
-
-- **Three layers under `docs/specs/`:** `requirements.md` is _what must be true_ (every requirement has an ID like `§FR-1.2.1.a`); `architecture.md` is _why + canonical code shapes_; `features/*.md` are per-feature implementation specs that cite requirements via those §IDs.
-- **Implementation playbook in `docs/tasks/`** is a separate layer: _order and gates_, not spec content. Numbered tasks (`01-…` through `13-…`) sequence the work and cite feature specs by path; they must not restate spec content. When a task is ambiguous, the spec is authoritative.
-- **Feature-spec template** (used by every file under `features/`): Goal → Requirements covered → File layout → Behavior & edge cases → Test plan → Open questions. Match it when adding a new feature spec.
-- **Open questions** at the bottom of each feature spec are unresolved decisions, not idle musings. Surface them (and resolve them) when implementing that feature.
 
 ## Conductor workspace layout
 
@@ -105,9 +94,10 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - Stack: Bun + React 19 + `react-router-dom` v7 + Tailwind v4 SPA, multi-page client routing, deployed to Vercel as static files from `dist/`.
 - Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.).
 - **Use the `--accent` token utility class (`text-accent`, `hover:text-accent`, `from-accent/0`)** for the brand color across hover states, active links, and links; do not hard-code palette-specific accent pairs. The accent value swaps automatically via the class-based dark mode.
+- `--accent` is `#e51636` in light and `#ff4f5e` in dark.
 - Class-based dark mode: `@custom-variant dark (&:where(.dark, .dark *));` is declared in `globals.css`, so `dark:` utilities key off `html.dark` (not `prefers-color-scheme`). The theme toggle owns that class.
 - Theme toggle: three states (`light` / `dark` / `system`), persisted to `localStorage["theme"]`, default `system`. An inline anti-flicker `<script>` in `src/index.html` `<head>` resolves the theme synchronously before React mounts.
-- System font stack only — no hosted fonts. Sans/serif/mono families are listed in `docs/specs/requirements.md` §1.3.3.
+- System font stacks only — no hosted fonts. Sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif. Serif: ui-serif, Georgia, Cambria, "Times New Roman", serif. Mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace.
 - Prose blocks use `@tailwindcss/typography` via the `<Prose>` wrapper (`prose dark:prose-invert`). Max-width ~65ch.
 - No third-party UI component libraries (no shadcn, Radix, MUI, HeadlessUI). Handwritten components in `src/components/`. The mobile-nav popover is ~80 lines of handwritten React; backdrop click + Esc keydown both close it.
 - Routing: `react-router-dom` v7 with `BrowserRouter` wrap in `src/main.tsx`. In-app links use `<Link>` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`. The router table lives in `src/App.tsx`.
@@ -115,7 +105,8 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - **Hero copy is canonical and must be preserved verbatim:** _"Hi, I'm Jalo and I'm a Software Engineer at Chick-fil-A. It's my pleasure to invite you into my portfolio."_ Lives in `src/pages/HomePage.tsx`. Do not paraphrase "my pleasure" away — it's a deliberate Chick-fil-A tie-in.
 - Images live under `public/images/` and ride along via `scripts/build.ts`'s `cp public dist`. Referenced as string URLs (`/images/avatar.jpg`, `/images/portrait.jpg`, `/images/logos/<n>.svg`, `/cv.pdf`). React does not import them.
 - When building or restyling UI, invoke the `frontend-design` skill before generating code. It produces distinctive, non-generic components that fit the minimal aesthetic.
-- **Per-route document metadata uses React 19's native support, not `react-helmet`.** Each page in `src/pages/` renders its own `<title>` and `<meta name="description">` directly in the returned tree. React 19 deduplicates `<title>` (so the static `<title>` in `src/index.html` is the pre-hydration fallback, replaced on mount) but **does not** dedupe `<meta>` — that's why `src/index.html` ships no static `<meta name="description">`. Article detail derives its tags from `article.title` / `article.description`. Spec: `docs/specs/features/document-metadata.md`. Adding a new route = add a `<title>` + `<meta name="description">` at the top of the returned tree.
+- **Per-route document metadata uses React 19's native support, not `react-helmet`.** Each page in `src/pages/` renders its own `<title>` and `<meta name="description">` directly in the returned tree. React 19 deduplicates `<title>` (so the static `<title>` in `src/index.html` is the pre-hydration fallback, replaced on mount) but **does not** dedupe `<meta>` — that's why `src/index.html` ships no static `<meta name="description">`. Article detail derives its tags from `article.title` / `article.description`. Adding a new route = add a `<title>` + `<meta name="description">` at the top of the returned tree.
+- Titles use `"<Page> — Jalo Moster"` (Home may be a longer one-liner; article detail uses `article.title`; 404 and article-not-found set their own).
 
 ## Testing
 
@@ -133,7 +124,7 @@ Plugins enabled in `.claude/settings.json`: official marketplace plugins `claude
 
 Built-in subagents to lean on:
 
-- **`Explore`** — locating code under `src/` or facts in `docs/specs/requirements.md`.
+- **`Explore`** — locating code under `src/`.
 - **`Plan`** — before non-trivial work (new section, adding routing, introducing MDX, switching a route from static to a Vercel Function).
 
 Repo-local skills in `.claude/skills/`:
@@ -144,12 +135,11 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 
 - `new-post` — scaffold an MDX file under `src/content/` with frontmatter, once the blog ships.
 - `deploy-check` — chain `bun run check && bun run build && bun run test:e2e:built` as a one-shot pre-push gate. Nothing deploys locally, so there's no CLI step.
-- `requirements-sync` — flag a diff between `docs/specs/requirements.md` and the implemented state if requirements start drifting.
 
 ## Hard rules specific to this repo
 
 - Never paraphrase the hero copy. "my pleasure" stays verbatim in `src/pages/HomePage.tsx`.
-- Never reintroduce Cloudflare Workers or Pages hosting; the requirements doc deliberately chose Vercel.
+- Never reintroduce Cloudflare Workers or Pages hosting; hosting is Vercel.
 - Never add Next.js, Vite, MDX runtime, or a third-party UI component library (shadcn, Radix, MUI, HeadlessUI). `react-router-dom`, `clsx`, and `@tailwindcss/typography` are utilities/plugins and are permitted.
 - Never reintroduce media-query dark mode. Dark mode is class-based (`html.dark`); the theme toggle owns that class. The `prefers-color-scheme` media query is only consulted when the user choice is `"system"`.
 - Use the `--accent` token (and the `text-accent` / `fill-accent` / `from-accent/0` utilities) for the brand color. Don't hand-write palette-specific accent pairs.
