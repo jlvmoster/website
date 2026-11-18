@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { knownArticleSlug, knownArticleTitle } from "./known-article-slug";
+import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("built artifact serves the SPA shell", async ({ page }) => {
   const response = await page.goto("/");
@@ -167,6 +168,20 @@ test("built artifact sets per-route document titles", async ({ page }) => {
     await page.goto(route.path);
     await expect(page).toHaveTitle(route.title);
   }
+});
+
+test("built mobile menu links paint above the hero avatar", async ({
+  page,
+}) => {
+  await test.step("home", async () => {
+    await expectMobileMenuAboveAvatar(page, "/");
+  });
+  await test.step("home scrolled 400px", async () => {
+    await expectMobileMenuAboveAvatar(page, "/", 400);
+  });
+  await test.step("/uses", async () => {
+    await expectMobileMenuAboveAvatar(page, "/uses");
+  });
 });
 
 test("built artifact serves /cv.pdf as a PDF", async ({ request }) => {
