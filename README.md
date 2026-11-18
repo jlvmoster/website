@@ -113,4 +113,4 @@ GitHub branch protection should require `check` before a pull request merges. Ve
 
 ## Growth path
 
-Designed-in but not built: `/api/contact` as a Vercel Function, `/api/og` image generation, RSS feed at `/feed.xml`, Vercel Analytics, and edge data via Vercel KV/Blob.
+Designed-in but not built: `/api/contact` as a Vercel Function, `/api/og` image generation, RSS feed at `/feed.xml`, and edge data via Vercel KV/Blob.
