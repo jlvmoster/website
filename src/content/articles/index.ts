@@ -5,7 +5,6 @@ export type ArticleMeta = {
   title: string;
   description: string;
   date: string;
-  author?: string;
 };
 
 export type ArticleWithSlug = ArticleMeta & {

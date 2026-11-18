@@ -62,20 +62,13 @@ export function useTheme() {
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
-      const systemTheme = mq.matches ? "dark" : "light";
       setPrefersDark(mq.matches);
-      if (choice === "system") {
-        applyChoice("system");
-      } else if (resolvedTheme === systemTheme) {
-        persistChoice("system");
-        applyChoice("system");
-        setChoice("system");
-      }
+      if (choice === "system") applyChoice("system");
     };
     setPrefersDark(mq.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
-  }, [choice, resolvedTheme]);
+  }, [choice]);
 
-  return { choice, resolvedTheme, setTheme: chooseTheme } as const;
+  return { resolvedTheme, setTheme: chooseTheme } as const;
 }

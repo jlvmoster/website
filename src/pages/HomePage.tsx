@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Container } from "../components/Container";
-import { EmptyState } from "../components/EmptyState";
 import { ArticleCard } from "../components/home/ArticleCard";
 import { Resume } from "../components/home/Resume";
 import {
@@ -72,16 +71,9 @@ export function HomePage() {
               </Link>
             </div>
             <div className="mt-8 flex flex-col gap-12">
-              {articles.length === 0 ? (
-                <EmptyState
-                  title="First post coming soon"
-                  description="Write-ups will show up here as soon as the first one ships."
-                />
-              ) : (
-                articles.map((article) => (
-                  <ArticleCard key={article.slug} article={article} />
-                ))
-              )}
+              {articles.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
+              ))}
             </div>
           </div>
           <div className="space-y-10 lg:pl-16 xl:pl-24">

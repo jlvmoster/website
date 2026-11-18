@@ -5,7 +5,7 @@ import { navItems } from "../content/nav";
 import { clsx } from "../lib/clsx";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 
-export function MobileNavigation({ className }: { className?: string }) {
+export function MobileNavigation() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -22,10 +22,7 @@ export function MobileNavigation({ className }: { className?: string }) {
     <>
       <button
         type="button"
-        className={clsx(
-          className,
-          "group flex cursor-pointer items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition-[box-shadow,background-color,transform] duration-200 ease-out active:scale-[0.97] motion-reduce:active:scale-100 dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20",
-        )}
+        className="group flex cursor-pointer items-center rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-zinc-800 shadow-lg ring-1 shadow-zinc-800/5 ring-zinc-900/5 backdrop-blur-sm transition-[box-shadow,background-color,transform] duration-200 ease-out active:scale-[0.97] motion-reduce:active:scale-100 dark:bg-zinc-800/90 dark:text-zinc-200 dark:ring-white/10 dark:hover:ring-white/20"
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-haspopup="dialog"

@@ -1,5 +1,4 @@
 import { Card } from "../components/Card";
-import { EmptyState } from "../components/EmptyState";
 import { SimpleLayout } from "../components/SimpleLayout";
 import { type ArticleWithSlug, getAllArticles } from "../content/articles";
 import { formatDate } from "../lib/formatDate";
@@ -49,16 +48,9 @@ export function ArticlesPage() {
       />
       <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
         <div className="flex max-w-3xl flex-col space-y-12">
-          {articles.length === 0 ? (
-            <EmptyState
-              title="First post coming soon"
-              description="Notes on data systems and tooling will land here as they ship."
-            />
-          ) : (
-            articles.map((article) => (
-              <Article key={article.slug} article={article} />
-            ))
-          )}
+          {articles.map((article) => (
+            <Article key={article.slug} article={article} />
+          ))}
         </div>
       </div>
     </SimpleLayout>

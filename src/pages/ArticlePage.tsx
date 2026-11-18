@@ -1,8 +1,18 @@
+import { isValidElement, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArticleLayout } from "../components/ArticleLayout";
 import { Container } from "../components/Container";
 import { getAdjacentArticles, getArticleBySlug } from "../content/articles";
 import { readingTimeMinutes } from "../lib/readingTime";
+
+function textOf(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join(" ");
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return textOf(node.props.children);
+  }
+  return "";
+}
 
 export function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -30,9 +40,11 @@ export function ArticlePage() {
     );
   }
 
-  const Body = article.Component;
+  const Body = article.Component as () => ReactNode;
   const { previous, next } = getAdjacentArticles(article.slug);
-  const readingMinutes = readingTimeMinutes(article.description);
+  // shortcut: articles are hook-free functions, call one to read its text; switch to a text export if an article uses hooks
+  const body = Body();
+  const readingMinutes = readingTimeMinutes(textOf(body));
   return (
     <ArticleLayout
       article={article}
@@ -42,7 +54,7 @@ export function ArticlePage() {
     >
       <title>{`${article.title} — Jalo Moster`}</title>
       <meta name="description" content={article.description} />
-      <Body />
+      {body}
     </ArticleLayout>
   );
 }

@@ -133,7 +133,7 @@ test("route changes reset scroll to the top", async ({ page }) => {
 test("article back button returns to the articles page", async ({ page }) => {
   await page.goto("/articles/hello-world");
 
-  await page.getByRole("button", { name: "Go back to articles" }).click();
+  await page.getByRole("link", { name: "Go back to articles" }).click();
   await expect(page).toHaveURL(/\/articles$/);
 });
 
@@ -142,6 +142,23 @@ test("home writing column links to the articles archive", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Writing" })).toBeVisible();
   await page.getByRole("link", { name: "View all" }).click();
   await expect(page).toHaveURL(/\/articles$/);
+});
+
+test("article card navigates without a full document reload", async ({
+  page,
+}) => {
+  await page.goto("/articles");
+  await page.evaluate(() => {
+    (window as unknown as { __spa: number }).__spa = 1;
+  });
+
+  await page.getByRole("link", { name: "Hello, world" }).click();
+  await expect(page).toHaveURL(/\/articles\/hello-world$/);
+
+  const spa = await page.evaluate(
+    () => (window as unknown as { __spa?: number }).__spa,
+  );
+  expect(spa).toBe(1);
 });
 
 test("article detail shows dek and reading time without a more-writing row", async ({
