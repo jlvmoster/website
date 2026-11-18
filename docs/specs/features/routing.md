@@ -16,9 +16,10 @@ Single source of truth for the router config and the SPA-fallback handshake with
 - `src/main.tsx` — `BrowserRouter` wrap.
 - `src/App.tsx` — `<Routes>` + LayoutShell.
 - `src/pages/*.tsx` — one file per route.
-- `vercel.json` — rewrites for `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
+- `vercel.json` — rewrites for `/about`, `/articles`, `/projects`, `/uses`. No `/articles/:slug` rewrite.
+- `scripts/build.ts` — copies the shell to `dist/articles/<slug>/index.html` for each article slug.
 - `scripts/dev.ts` — serves `index.html` for unknown paths during HMR (HTTP 200; not the Vercel status contract).
-- `scripts/preview.ts` — file, then rewrite, then `404.html` at HTTP 404.
+- `scripts/preview.ts` — directory index or file, then rewrite, then `404.html` at HTTP 404.
 
 ## Behavior & edge cases
 
@@ -31,8 +32,8 @@ Single source of truth for the router config and the SPA-fallback handshake with
   - `/projects` → `<ProjectsPage />`
   - `/uses` → `<UsesPage />`
   - `*` → `<NotFoundPage />`
-- Hard refresh on `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, or `/uses` returns 200; the client router then renders the right page. `/` is the `index.html` file. The other five are rewrites.
-- Hard refresh on any other path returns 404. The response body is `404.html` (a copy of the shell), so NotFoundPage still renders. `/articles/<slug>` stays 200 even when that slug has no article; ArticlePage renders its own not-found state.
+- Hard refresh on `/`, `/about`, `/articles`, a known `/articles/<slug>`, `/projects`, or `/uses` returns 200; the client router then renders the right page. `/` is the `index.html` file. A known article slug is `articles/<slug>/index.html`. `/about`, `/articles`, `/projects`, and `/uses` are rewrites.
+- Hard refresh on any other path returns 404. The response body is `404.html` (a copy of the shell). An unknown `/articles/<slug>` is that 404, and ArticlePage renders its own not-found state. Any other miss renders NotFoundPage.
 - `<NotFoundPage>` is a minimal component (heading + link back to `/`).
 - `<Link>` for in-app navigation. External links (`href` starts with `http`) use plain `<a target="_blank" rel="noopener noreferrer">`.
 
@@ -41,6 +42,7 @@ Single source of truth for the router config and the SPA-fallback handshake with
 - **E2E**:
   - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses` returns 200 and the right page renders.
   - Hard-refresh on `/articles/hello-world` renders the article detail.
+  - `/articles/this-slug-does-not-exist` returns 404 and ArticlePage renders its not-found state.
   - Client-side `<Link>` navigation doesn't trigger a full page load — verify by setting `window.__navMarker = "kept"` in the page, clicking a Link, and asserting the marker survives.
   - `/some-unknown-path` returns 404 and renders NotFoundPage.
 

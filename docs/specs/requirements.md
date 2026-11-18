@@ -19,7 +19,7 @@ This document is the authoritative source of truth for what the implementation m
 - **FR-1.1.3** Each page is a routed component under `src/pages/`; sections are subcomponents that can be lifted to their own route later without rewriting.
 - **FR-1.1.4** Client-side routing uses `react-router-dom`. The router lives in `src/main.tsx`/`src/App.tsx` and routes are statically declared. (Note: the v1 wording of this ID has been flipped — routing is now in.)
 - **FR-1.1.5** Routes registered with `react-router-dom`: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`. A wildcard route renders a minimal NotFoundPage.
-- **FR-1.1.6** Deep links to the registered routes serve the SPA shell with HTTP 200 (§FR-1.4.3) and react-router resolves the route client-side. A path that matches no file and no rewrite is HTTP 404 and still renders NotFoundPage.
+- **FR-1.1.6** Deep links to the registered routes that exist as files or rewrites serve the SPA shell with HTTP 200 (§FR-1.4.3) and react-router resolves the route client-side. A path that matches no file and no rewrite is HTTP 404. The client wildcard renders NotFoundPage when the path matches no client route. An unknown `/articles/<slug>` still matches ArticlePage, which renders its own not-found state.
 - **FR-1.1.7** Navigation between routes does not trigger a full document load. In-app links use `Link` from `react-router-dom`; external links use plain `<a target="_blank" rel="noopener noreferrer">`.
 - **FR-1.1.8** The Header is fixed across all routes. Home (`/`) shows a large avatar that scales from 96px to 36px on scroll; other routes show the avatar at 36px from page load.
 - **FR-1.1.9** The Footer is present across all routes and contains NavLinks for About / Articles / Projects / Uses plus a copyright line.
@@ -63,14 +63,14 @@ This document is the authoritative source of truth for what the implementation m
 
 - **FR-1.4.1** The site deploys to Vercel as a static SPA built from `dist/` (not Cloudflare Workers, not Cloudflare Pages, not Next.js).
 - **FR-1.4.2** Hosting configuration lives in `vercel.json` (build command, output directory, SPA rewrites, security headers). There is no Worker entrypoint.
-- **FR-1.4.3** SPA fallback covers the registered routes only. `/` is `index.html`. `/about`, `/articles`, `/articles/:slug`, `/projects`, and `/uses` rewrite to `/index.html` (HTTP 200). The build copies that shell to `dist/404.html`. Vercel serves a root `404.html` with HTTP 404 when no file and no rewrite matches, and the client wildcard renders NotFoundPage. `cleanUrls` stays off.
+- **FR-1.4.3** SPA fallback covers routes that are not files. `/` is `index.html`. `/about`, `/articles`, `/projects`, and `/uses` rewrite to `/index.html` (HTTP 200). The build copies that shell to `dist/404.html`, and to `dist/articles/<slug>/index.html` for every slug in the articles `modules` record, so a known `/articles/<slug>` is a static file (HTTP 200). `trailingSlash` is `false` and `cleanUrls` stays off (a `articles/<slug>.html` file would not be served at `/articles/<slug>`). An unknown `/articles/<slug>` matches no file and no rewrite, so Vercel serves root `404.html` with HTTP 404. The same 404 shell answers every other miss.
 - **FR-1.4.4** The site is served from the custom domain `moster.dev` with automatic HTTPS (configured in the Vercel project after DNS cutover).
 - **FR-1.4.5** Future dynamic routes (contact form, OG images, RSS) use Vercel serverless or Edge Functions under `/api/*`, not a Cloudflare Worker.
 
 ### 1.5 Build and dev loop
 
 - **FR-1.5.1** `bun run dev` starts a local server via `Bun.serve` with HMR (`scripts/dev.ts`).
-- **FR-1.5.2** `bun run build` invokes `scripts/build.ts`, which calls `Bun.build()` on `src/index.html`, writes to `dist/`, copies `public/` → `dist/` (the HTML bundler does not auto-copy `public/`), and copies `dist/index.html` to `dist/404.html`.
+- **FR-1.5.2** `bun run build` invokes `scripts/build.ts`, which calls `Bun.build()` on `src/index.html`, writes to `dist/`, copies `public/` → `dist/` (the HTML bundler does not auto-copy `public/`), copies `dist/index.html` to `dist/404.html`, and copies it to `dist/articles/<slug>/index.html` for each article slug.
 - **FR-1.5.3** `bun run preview` serves the built `dist/` locally via `scripts/preview.ts` (`Bun.serve`), matching production for deep links: known routes HTTP 200, unknown paths HTTP 404 with the not-found shell.
 - **FR-1.5.4** There is no committed deploy script. Vercel owns the production build, so break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
 - **FR-1.5.5** `bun run check` runs `biome check && tsc --noEmit`.
@@ -121,7 +121,7 @@ This document is the authoritative source of truth for what the implementation m
 
 - **NFR-2.4.1** At least one smoke test exists under `tests/` (per the build checklist).
 - **NFR-2.4.2** Browser smoke E2E specs live under `tests/e2e/` and run with `bunx playwright test` against `bun run dev`.
-- **NFR-2.4.3** E2E coverage minimum: every route loads (page-load + hard-refresh deep link), hero copy renders verbatim on `/`, all three social links resolve on `/` and `/about`, theme toggle cycles and persists across reload, portrait image renders on `/about`, footer renders on every route, known-route deep links return HTTP 200, and an unknown path returns HTTP 404 and renders NotFoundPage.
+- **NFR-2.4.3** E2E coverage minimum: every route loads (page-load + hard-refresh deep link), hero copy renders verbatim on `/`, all three social links resolve on `/` and `/about`, theme toggle cycles and persists across reload, portrait image renders on `/about`, footer renders on every route, known-route deep links return HTTP 200, a known article slug returns HTTP 200, an unknown article slug returns HTTP 404, and an unknown path returns HTTP 404 and renders NotFoundPage.
 - **NFR-2.4.4** A fresh machine or CI worker can fully recreate the test environment with `bun install && bun run setup:browsers`; E2E must not depend on a pre-existing Playwright browser cache.
 
 ### 2.5 Performance budgets
@@ -181,7 +181,7 @@ The v2 release is complete when _all_ of the following hold:
 - [ ] `bun test` passes; smoke test asserts the verbatim hero substring.
 - [ ] Playwright E2E suite passes the minimum coverage (§NFR-2.4.3).
 - [ ] All six routes load: `/`, `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`.
-- [ ] Hard-refresh on a known deep link (`/about`, `/articles`, `/articles/<slug>`, `/projects`, `/uses`) returns 200 via the Vercel SPA rewrite. Hard-refresh on an unknown path returns 404 and renders NotFoundPage.
+- [ ] Hard-refresh on a known deep link (`/about`, `/articles`, `/projects`, `/uses`) returns 200 via the Vercel SPA rewrite. A known `/articles/<slug>` returns 200 because the build emitted `articles/<slug>/index.html`. Hard-refresh on an unknown path, including an unknown article slug, returns 404 and renders the not-found shell.
 - [ ] Hero copy matches §1.2.1.a verbatim on `/`; the three social links in §1.2.1.b each open the correct URL on `/` and `/about`.
 - [ ] Theme toggle switches light ↔ dark; `html.dark` flips appropriately and `localStorage["theme"]` persists across reload.
 - [ ] Avatar is present in the Header on every route. On `/` the avatar starts at 96px and scales to 36px on scroll.

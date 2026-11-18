@@ -31,6 +31,7 @@ Local dev server with HMR, production build that emits `dist/`, and the `public/
   - On build failure, prints every log and `process.exit(1)` — no partial dist left around.
   - Then `cp("public", "dist", { recursive: true })` — **mandatory**; the HTML bundler does not auto-copy `public/`.
   - Then `cp("dist/index.html", "dist/404.html")` so Vercel has a root 404 page.
+  - Then the same shell is copied to `dist/articles/<slug>/index.html` for each slug from `getAllArticles()`, so a known article URL is a file and an unknown slug 404s.
 - `public/` contents at v1:
   - `favicon.ico` — small favicon, referenced from `index.html` via `<link rel="icon" href="/favicon.ico">`.
   - `robots.txt` — `User-agent: *` + `Allow: /` (open by default; switch to `Disallow: /` only if you want to delay indexing).

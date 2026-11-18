@@ -49,7 +49,7 @@ bun run dev              # http://localhost:3000 with HMR
 | `/uses`           | Section-based list of hardware, AI tools, and skills & plugins.                                            |
 | `*`               | Minimal NotFoundPage.                                                                                      |
 
-Hard-refresh on a known route returns 200 from Vercel (`/` is `index.html`; the other routes rewrite to it) and the client router resolves the URL after mount. Any other path returns HTTP 404 with the same shell, so the in-app not-found page still renders.
+Hard-refresh on a known route returns 200 from Vercel (`/` is `index.html`; a known `/articles/<slug>` is `articles/<slug>/index.html`; `/about`, `/articles`, `/projects`, and `/uses` rewrite to `index.html`) and the client router resolves the URL after mount. Any other path, including an unknown article slug, returns HTTP 404 with the same shell, so the in-app not-found page still renders.
 
 ## Project layout
 
@@ -68,7 +68,7 @@ src/
   styles/globals.css      # Tailwind v4 + @plugin typography + zinc/red tokens + class-based dark
 scripts/
   dev.ts                  # Bun.serve dev loop with HMR + SPA fallback (unknown paths stay 200)
-  build.ts                # Bun.build + public/ copy + dist/404.html
+  build.ts                # Bun.build + public/ copy + dist/404.html + per-slug shells
   preview.ts              # Bun.serve of dist/: known routes 200, other paths 404
 tests/
   smoke.test.ts           # bun test — renders App in MemoryRouter, asserts hero copy + socials
@@ -97,7 +97,7 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 
 - **Unit:** `bun test` — specs colocated with source or under `tests/`. The smoke spec renders `<App />` inside `<MemoryRouter initialEntries={["/"]}>` and asserts the verbatim hero substring + three social URLs.
 - **Dev E2E:** `bun run test:e2e` against `bun run dev`. Coverage: every route loads, hero copy renders verbatim on `/`, theme toggle cycles + persists, footer renders on every route. The dev server is not Vercel, so unknown paths there stay HTTP 200.
-- **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `bun run preview`, and checks known routes return 200 while an unknown path returns 404 and renders the not-found page. `scripts/preview.ts` applies the `vercel.json` rewrites and the 404 status; it does not send the security headers. To run the same suite against a deployment that applies `vercel.json` itself: `E2E_BASE_URL=https://<host> bun run test:e2e:built`. A `*.vercel.app` preview sits behind Deployment Protection and redirects to login until a bypass is configured.
+- **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `bun run preview`, and checks known routes return 200, a known article slug returns 200, an unknown article slug returns 404, and another unknown path returns 404 and renders the not-found page. `scripts/preview.ts` applies the `vercel.json` rewrites, directory indexes, and the 404 status; it does not send the security headers. To run the same suite against a deployment that applies `vercel.json` itself: `E2E_BASE_URL=https://<host> bun run test:e2e:built`. A `*.vercel.app` preview sits behind Deployment Protection and redirects to login until a bypass is configured.
 - **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`, plus the `vercel.json` security headers — `scripts/preview.ts` does not serve those, so this is the only place they're verified. Deployment Protection sends `*.vercel.app` preview URLs to a login page. Set `VERCEL_SHARE_URL` to a share link (`https://<host>/?_vercel_share=<token>`) and Playwright opens it once, saves the `_vercel_jwt` cookie under gitignored `playwright/.auth/`, and reuses that state for the suite. The token is not logged. Leave the variable unset and the command behaves as before.
 - A fresh machine can recreate the full test environment with `bun install && bun run setup:browsers`.
 
