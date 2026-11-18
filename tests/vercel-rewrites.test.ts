@@ -7,10 +7,11 @@ test("vercel.json rewrites only the registered client routes to the SPA shell", 
   expect(config.cleanUrls ?? false).toBe(false);
   expect(config.trailingSlash).toBe(false);
   expect(config.routes).toBeUndefined();
+  // Known /articles/<slug> paths are files emitted by the build, not a rewrite.
+  // A :slug rewrite would answer every unknown slug with HTTP 200.
   expect(config.rewrites).toEqual([
     { source: "/about", destination: "/index.html" },
     { source: "/articles", destination: "/index.html" },
-    { source: "/articles/:slug", destination: "/index.html" },
     { source: "/projects", destination: "/index.html" },
     { source: "/uses", destination: "/index.html" },
   ]);

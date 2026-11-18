@@ -8,7 +8,6 @@
   "rewrites": [
     { "source": "/about", "destination": "/index.html" },
     { "source": "/articles", "destination": "/index.html" },
-    { "source": "/articles/:slug", "destination": "/index.html" },
     { "source": "/projects", "destination": "/index.html" },
     { "source": "/uses", "destination": "/index.html" }
   ],

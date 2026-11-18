@@ -41,8 +41,8 @@ Wire up a unit-test smoke check and the minimum Playwright E2E coverage required
   - Out of scope per the requirements: full-DOM snapshots, visual regression, multi-browser matrix.
   - Additional v2 assertions:
     - Navigate to each route (`/about`, `/articles`, `/projects`, `/uses`) via Header NavLinks; verify no full reload (scroll-position trick) and URL updates.
-    - Hard-refresh on `/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`: each returns 200 and the page renders.
-    - `/some-unknown-path` returns 404 and renders NotFoundPage (`tests/e2e/built.e2e.ts`, or the same suite with `E2E_BASE_URL` pointed at a deployment).
+    - Hard-refresh on `/about`, `/articles`, `/projects`, `/uses`, and a known `/articles/<slug>`: each returns 200 and the page renders. An unknown article slug returns 404.
+    - `/some-unknown-path` returns 404 and renders NotFoundPage (`tests/e2e/built.e2e.ts`, or the same suite with `E2E_BASE_URL` pointed at a deployment). The same article status checks are in `tests/e2e/production.e2e.ts`.
     - Theme toggle: click cycles `html.dark`; reload persists the choice via `localStorage["theme"]`.
     - `/about` renders an `<img src="/images/portrait.jpg">`.
     - `/articles` renders ≥ 1 article card; clicking it navigates to `/articles/:slug`.
