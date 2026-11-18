@@ -45,6 +45,37 @@ test("HomePage renders per-route title and description", () => {
   );
 });
 
+test("UsesPage lists i-have-adhd between ponytail and context7, and Mobbin with the UI/UX skills", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      MemoryRouter,
+      { initialEntries: ["/uses"] },
+      createElement(App),
+    ),
+  );
+
+  const ponytail = html.indexOf('href="https://ponytail.dev/"');
+  const adhd = html.indexOf('href="https://github.com/ayghri/i-have-adhd"');
+  const context7 = html.indexOf('href="https://context7.com/"');
+  expect(ponytail).toBeGreaterThan(-1);
+  expect(adhd).toBeGreaterThan(ponytail);
+  expect(context7).toBeGreaterThan(adhd);
+  expect(html).toContain("ADHD-friendly output skill.");
+
+  const proMax = html.indexOf('href="https://uupm.cc/"');
+  const taste = html.indexOf('href="https://github.com/Leonxlnx/taste-skill"');
+  const impeccable = html.indexOf(
+    'href="https://github.com/pbakaus/impeccable"',
+  );
+  const mobbin = html.indexOf('href="https://mobbin.com/"');
+  const emil = html.indexOf('href="https://github.com/emilkowalski/skills"');
+  expect(proMax).toBeGreaterThan(-1);
+  expect(taste).toBeGreaterThan(proMax);
+  expect(impeccable).toBeGreaterThan(taste);
+  expect(mobbin).toBeGreaterThan(impeccable);
+  expect(emil).toBeGreaterThan(mobbin);
+});
+
 test("AboutPage renders per-route title and description", () => {
   const html = renderToStaticMarkup(
     createElement(
