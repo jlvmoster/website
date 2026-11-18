@@ -144,6 +144,23 @@ test("home writing column links to the articles archive", async ({ page }) => {
   await expect(page).toHaveURL(/\/articles$/);
 });
 
+test("article card navigates without a full document reload", async ({
+  page,
+}) => {
+  await page.goto("/articles");
+  await page.evaluate(() => {
+    (window as unknown as { __spa: number }).__spa = 1;
+  });
+
+  await page.getByRole("link", { name: "Hello, world" }).click();
+  await expect(page).toHaveURL(/\/articles\/hello-world$/);
+
+  const spa = await page.evaluate(
+    () => (window as unknown as { __spa?: number }).__spa,
+  );
+  expect(spa).toBe(1);
+});
+
 test("article detail shows dek and reading time without a more-writing row", async ({
   page,
 }) => {
