@@ -82,6 +82,12 @@ export const uses: UsesCategory[] = [
           "Complexity-focused code review skill. Keeps diffs lean and flags YAGNI before it ships.",
       },
       {
+        title: "i-have-adhd",
+        href: "https://github.com/ayghri/i-have-adhd",
+        description:
+          "ADHD-friendly output skill. Leads with the next action and numbers multi-step work.",
+      },
+      {
         title: "context7",
         href: "https://context7.com/",
         description:
@@ -100,6 +106,10 @@ export const uses: UsesCategory[] = [
           {
             label: "Impeccable",
             href: "https://github.com/pbakaus/impeccable",
+          },
+          {
+            label: "Mobbin",
+            href: "https://mobbin.com/",
           },
           {
             label: "emilkowalski/skills",
