@@ -81,9 +81,6 @@ public/
   images/avatar.jpg       # Header avatar
   images/portrait.jpg     # About-page portrait
   images/logos/           # Resume + Projects company logos
-docs/
-  specs/                  # requirements, architecture, per-feature specs
-  tasks/                  # numbered implementation playbook (01–13)
 vercel.json               # Vercel static SPA config (rewrites + headers)
 ```
 
@@ -112,12 +109,8 @@ GitHub branch protection should require `check` before a pull request merges. Ve
 
 ## Docs
 
-- [`docs/specs/requirements.md`](./docs/specs/requirements.md) — authoritative requirements (every requirement has an ID like `§FR-1.2.1.a`).
-- [`docs/specs/architecture.md`](./docs/specs/architecture.md) — rationale and canonical code shapes (router config, LayoutShell, Header scroll math, theme toggle, content model, primitives, iconography).
-- [`docs/specs/features/*.md`](./docs/specs/features/) — per-feature implementation specs.
-- [`docs/tasks/README.md`](./docs/tasks/README.md) — 13-step implementation playbook.
 - [`CLAUDE.md`](./CLAUDE.md) — conventions and hard rules for agent-driven work in this repo.
 
 ## Growth path
 
-Designed-in but not built: `/api/contact` as a Vercel Function, `/api/og` image generation, RSS feed at `/feed.xml`, Vercel Analytics, and edge data via Vercel KV/Blob. See [`docs/specs/requirements.md` §3](./docs/specs/requirements.md).
+Designed-in but not built: `/api/contact` as a Vercel Function, `/api/og` image generation, RSS feed at `/feed.xml`, Vercel Analytics, and edge data via Vercel KV/Blob.
