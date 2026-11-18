@@ -262,6 +262,74 @@ test("theme toggle switches back to light when system is dark", async ({
   }
 });
 
+test("moon icon stroke is accent on a light OS and zinc-400 on hover when the OS is dark", async ({
+  browser,
+  baseURL,
+}) => {
+  const readMoonStroke = async (
+    colorScheme: "light" | "dark",
+    hover: boolean,
+  ) => {
+    const context = await browser.newContext({ baseURL, colorScheme });
+    const page = await context.newPage();
+    try {
+      await page.addInitScript(() => {
+        localStorage.setItem("theme", "dark");
+      });
+      await page.goto("/");
+      const toggle = page.getByRole("button", {
+        name: "Switch to light theme",
+      });
+      if (hover) {
+        await toggle.hover();
+        await page.evaluate(() =>
+          Promise.all(
+            document.getAnimations().map((animation) => animation.finished),
+          ),
+        );
+      }
+      return await toggle
+        .locator("svg")
+        .nth(1)
+        .locator("path")
+        .evaluate((path) => {
+          const accentProbe = document.createElement("span");
+          accentProbe.style.color = getComputedStyle(document.documentElement)
+            .getPropertyValue("--accent")
+            .trim();
+          const svg = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg",
+          );
+          const zinc = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          zinc.setAttribute("class", "stroke-zinc-400");
+          svg.append(zinc);
+          document.body.append(accentProbe, svg);
+          const accent = getComputedStyle(accentProbe).color;
+          const zincStroke = getComputedStyle(zinc).stroke;
+          accentProbe.remove();
+          svg.remove();
+          return {
+            accent,
+            stroke: getComputedStyle(path).stroke,
+            zincStroke,
+          };
+        });
+    } finally {
+      await context.close();
+    }
+  };
+
+  const lightOs = await readMoonStroke("light", false);
+  expect(lightOs.stroke).toBe(lightOs.accent);
+
+  const darkOsHover = await readMoonStroke("dark", true);
+  expect(darkOsHover.stroke).toBe(darkOsHover.zincStroke);
+});
+
 // Bun.serve in scripts/dev.ts is not Vercel. Unknown paths stay 200 here so
 // HMR still paints NotFoundPage. The HTTP 404 contract is tests/e2e/built.e2e.ts.
 test("dev server serves the SPA shell for unknown paths", async ({ page }) => {
