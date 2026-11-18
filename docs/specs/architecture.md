@@ -48,9 +48,9 @@ These are the canonical implementations of the requirements that involve config 
 
 Both are short committed files and are their own canonical form — read them rather than a copy here, which only drifts. What matters about each:
 
-- **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), rewrites for the registered client routes (`/about`, `/articles`, `/articles/:slug`, `/projects`, `/uses`) to `/index.html`, and the security headers that used to live in `src/worker.ts`. Files present under the output directory are matched before rewrites apply, so hashed assets and `public/` files still win. A miss is not rewritten: Vercel serves root `404.html` with HTTP 404 (§FR-1.4.3).
+- **`vercel.json`** declares `outputDirectory: "dist"` (mandatory — the framework-less default is `public/`, which exists here but holds only copy-along assets), rewrites for the registered client routes that are not files (`/about`, `/articles`, `/projects`, `/uses`) to `/index.html`, and the security headers that used to live in `src/worker.ts`. There is no `/articles/:slug` rewrite. Files present under the output directory are matched before rewrites apply, so hashed assets, `public/` files, and `articles/<slug>/index.html` still win. A miss is not rewritten: Vercel serves root `404.html` with HTTP 404 (§FR-1.4.3).
 - **The file's location is load-bearing.** Vercel reads `vercel.json` from the root of whatever is deployed. Git Integration deploys the repo root, so it applies. Uploading a built directory instead (`vercel deploy dist`) produces a deployment with no `vercel.json` at its root: every rewrite and header disappears, deep links 404, and nothing in CI notices. See `features/hosting.md`.
-- **`scripts/preview.ts`** is a `Bun.serve` that returns the requested file from `dist/` if it exists, applies the `vercel.json` rewrites at HTTP 200, and otherwise returns `dist/404.html` at HTTP 404. It mirrors those routing rules but _not_ the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
+- **`scripts/preview.ts`** is a `Bun.serve` that returns the requested file from `dist/` if it exists, including `path/index.html` for a slashless directory URL, applies the `vercel.json` rewrites at HTTP 200, and otherwise returns `dist/404.html` at HTTP 404. It mirrors those routing rules but _not_ the headers, which is why header coverage lives in `tests/e2e/production.e2e.ts` against the real origin.
 
 ### 4.3 `scripts/build.ts` (programmatic build + public/ copy)
 
@@ -73,9 +73,10 @@ if (!result.success) {
 
 await cp("public", "dist", { recursive: true });
 await cp("dist/index.html", "dist/404.html");
+// plus dist/articles/<slug>/index.html for each getAllArticles() slug
 ```
 
-The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic choice. Bun's HTML bundler only emits files reachable from the HTML / CSS / JS import graph; it does **not** auto-copy a `public/` directory. Anything that has to ship without being imported — `favicon.ico`, `robots.txt`, OG images referenced only by meta tags resolved at runtime — lives in `public/` and gets copied by this step. The following `cp` of `index.html` to `404.html` is what Vercel serves, status 404, when no file and no rewrite matches.
+The explicit `cp("public", "dist", …)` step is **mandatory**, not a stylistic choice. Bun's HTML bundler only emits files reachable from the HTML / CSS / JS import graph; it does **not** auto-copy a `public/` directory. Anything that has to ship without being imported — `favicon.ico`, `robots.txt`, OG images referenced only by meta tags resolved at runtime — lives in `public/` and gets copied by this step. The following `cp` of `index.html` to `404.html` is what Vercel serves, status 404, when no file and no rewrite matches. The per-slug copy is what makes a known `/articles/<slug>` a file (HTTP 200) without a wildcard rewrite.
 
 ### 4.4 Routing & app shell
 

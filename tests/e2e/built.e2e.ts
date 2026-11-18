@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { knownArticleSlug, knownArticleTitle } from "./known-article-slug";
 
 test("built artifact serves the SPA shell", async ({ page }) => {
   const response = await page.goto("/");
@@ -117,6 +118,39 @@ test("known routes return 200 and unknown paths return the not-found page at 404
   expect(missing?.status()).toBe(404);
   await expect(
     page.getByRole("heading", { name: "Page not found." }),
+  ).toBeVisible();
+});
+
+test("unknown article slugs return 404 and a known slug returns 200", async ({
+  page,
+}) => {
+  const slug = knownArticleSlug();
+  const title = knownArticleTitle(slug);
+
+  const known = await page.goto(`/articles/${slug}`);
+  expect(known?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: title, level: 1 }),
+  ).toBeVisible();
+
+  const slashed = await page.request.get(`/articles/${slug}/`, {
+    maxRedirects: 0,
+  });
+  expect(slashed.status()).toBe(308);
+  expect(
+    new URL(slashed.headers().location ?? "", "http://127.0.0.1").pathname,
+  ).toBe(`/articles/${slug}`);
+
+  const articles = await page.request.get("/articles/", { maxRedirects: 0 });
+  expect(articles.status()).toBe(308);
+  expect(
+    new URL(articles.headers().location ?? "", "http://127.0.0.1").pathname,
+  ).toBe("/articles");
+
+  const missing = await page.goto("/articles/this-slug-does-not-exist");
+  expect(missing?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", { name: "Article not found." }),
   ).toBeVisible();
 });
 
