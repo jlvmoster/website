@@ -65,7 +65,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 
 - `src/pages/` — one routed component per URL (HomePage, AboutPage, ArticlesPage, ArticlePage, ProjectsPage, UsesPage, NotFoundPage). Page bodies live here, not in `src/components/`.
 - `src/components/` — handwritten primitives (LayoutShell, Header, Footer, Container, Card, SimpleLayout, Section, Prose, Avatar, ThemeToggle, MobileNavigation, ArticleLayout, SocialLink, icons) plus `home/` subfolder for Resume/ArticleCard.
-- `src/content/articles/index.ts` — article loader (`getAllArticles()`, `getArticleBySlug()`); each article is `src/content/articles/<slug>.tsx` exporting `meta` + default component. Adding an article is two edits: drop the TSX file, register it in the `modules` record.
+- `src/content/articles/index.ts` — article loader (`getAllArticles()`, `getArticleBySlug()`); each article is `src/content/articles/<slug>.tsx` exporting `meta`, `readingMinutes`, and a default component. Adding an article is two edits: drop the TSX file, register it in the `modules` record.
 - `src/content/{projects,uses,resume}.ts` — typed data for the Projects, Uses, and Home-Resume surfaces.
 - `src/lib/useTheme.ts` — three-state theme hook (`light` / `dark` / `system`), `localStorage["theme"]` persisted, subscribes to `prefers-color-scheme` changes when in system mode.
 - `src/lib/{clsx,formatDate}.ts` — small utilities (six-liner `clsx`, Spotlight-shape `formatDate`).
@@ -145,7 +145,7 @@ Skills worth authoring **only when the workflow recurs** (don't pre-build):
 - Use the `--accent` token (and the `text-accent` / `fill-accent` / `from-accent/0` utilities) for the brand color. Don't hand-write palette-specific accent pairs.
 - Hosting config is `vercel.json`. Local built-artifact preview is `scripts/preview.ts` (no Wrangler).
 - Never add a deploy job to `.github/workflows/ci.yml` or a `deploy` script to `package.json`. Vercel Git Integration is the single production path; a second one races it, and `vercel deploy dist` ships a deployment with no `vercel.json` (no rewrites, no security headers).
-- Articles are typed TSX modules under `src/content/articles/<slug>.tsx`. No MDX, no markdown parsing, no runtime globbing. Adding an article = drop the TSX + register in `src/content/articles/index.ts`'s `modules` record.
+- Articles are typed TSX modules under `src/content/articles/<slug>.tsx`. No MDX, no markdown parsing, no runtime globbing. Each module exports `meta`, `readingMinutes`, and a default component. Adding an article = drop the TSX + register in `src/content/articles/index.ts`'s `modules` record.
 - Never add `react-helmet` or `react-helmet-async`. Per-route `<title>` / `<meta>` go directly in the page component via React 19 native head support (see Frontend conventions).
 
 ## Git conventions

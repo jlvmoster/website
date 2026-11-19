@@ -4,6 +4,8 @@ export const meta = {
   date: "2026-05-18",
 };
 
+export const readingMinutes = 1;
+
 export default function HelloWorld() {
   return (
     <p>
