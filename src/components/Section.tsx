@@ -8,8 +8,7 @@ type SectionProps = {
 };
 
 export function Section({ title, id, children }: SectionProps) {
-  const generatedId = useId();
-  const headingId = id ?? generatedId;
+  const headingId = useId();
   return (
     <section
       id={id}
