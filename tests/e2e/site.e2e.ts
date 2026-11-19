@@ -262,7 +262,7 @@ test("theme toggle switches back to light when system is dark", async ({
   }
 });
 
-test("moon icon stroke is accent on a light OS and zinc-400 on hover when the OS is dark", async ({
+test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover when the OS is dark", async ({
   browser,
   baseURL,
 }) => {
@@ -324,7 +324,11 @@ test("moon icon stroke is accent on a light OS and zinc-400 on hover when the OS
   };
 
   const lightOs = await readMoonStroke("light", false);
-  expect(lightOs.stroke).toBe(lightOs.accent);
+  const darkOs = await readMoonStroke("dark", false);
+  expect(lightOs.stroke).toBe(darkOs.stroke);
+
+  const lightOsHover = await readMoonStroke("light", true);
+  expect(lightOsHover.stroke).toBe(lightOsHover.zincStroke);
 
   const darkOsHover = await readMoonStroke("dark", true);
   expect(darkOsHover.stroke).toBe(darkOsHover.zincStroke);

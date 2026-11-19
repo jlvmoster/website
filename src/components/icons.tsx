@@ -138,6 +138,7 @@ export function MoonIcon(props: IconProps) {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="fill-zinc-700 stroke-zinc-500 transition-[stroke] dark:group-hover:stroke-zinc-400"
       />
     </svg>
   );
