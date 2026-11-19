@@ -10,15 +10,24 @@ export type ArticleMeta = {
 export type ArticleWithSlug = ArticleMeta & {
   slug: string;
   Component: ComponentType;
+  readingMinutes: number;
 };
 
-const modules: Record<string, { meta: ArticleMeta; default: ComponentType }> = {
+const modules: Record<
+  string,
+  { meta: ArticleMeta; default: ComponentType; readingMinutes: number }
+> = {
   "hello-world": helloWorld,
 };
 
 export function getAllArticles(): ArticleWithSlug[] {
   return Object.entries(modules)
-    .map(([slug, m]) => ({ slug, Component: m.default, ...m.meta }))
+    .map(([slug, m]) => ({
+      slug,
+      Component: m.default,
+      ...m.meta,
+      readingMinutes: m.readingMinutes,
+    }))
     .sort((a, b) => +new Date(b.date) - +new Date(a.date));
 }
 
