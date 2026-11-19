@@ -74,7 +74,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 - `.claude/skills/changelog-generator/SKILL.md` — repo-local skill for release-note generation.
 - `.claude/settings.json` — enabled plugins and Bash permission allowlist.
 - `.github/CODEOWNERS` — requires `@jlvmoster` review on every PR.
-- `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3.
+- `.github/dependabot.yml` — weekly grouped Bun-ecosystem updates (open-PR limit 5); source of `Bump …` PRs like #3. PR #85 made Dependabot version-update PRs target qa, and security PRs open on master and get retargeted to qa.
 - `.github/workflows/ci.yml` — single `check` job on PRs + pushes, no deploy job.
 - `vercel.json` — Vercel static SPA config (build, output `dist/`, SPA rewrites, security headers).
 - `playwright.config.ts`, `playwright.built.config.ts`, `playwright.production.config.ts` — browser E2E targets for dev server, built artifact, and production acceptance checks.

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { knownArticleSlug, knownArticleTitle } from "./known-article-slug";
+import { knownArticleTitle } from "./known-article-slug";
 import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("production serves the SPA shell over HTTPS", async ({ page }) => {
@@ -99,7 +99,7 @@ test("production applies dark mode via prefers-color-scheme", async ({
 test("unknown article slugs return 404 and a known slug returns 200", async ({
   page,
 }) => {
-  const slug = knownArticleSlug();
+  const slug = "hello-world";
   const title = knownArticleTitle(slug);
 
   const known = await page.goto(`/articles/${slug}`);

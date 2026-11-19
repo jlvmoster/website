@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { knownArticleSlug, knownArticleTitle } from "./known-article-slug";
+import { knownArticleTitle } from "./known-article-slug";
 import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("built artifact serves the SPA shell", async ({ page }) => {
@@ -125,7 +125,7 @@ test("known routes return 200 and unknown paths return the not-found page at 404
 test("unknown article slugs return 404 and a known slug returns 200", async ({
   page,
 }) => {
-  const slug = knownArticleSlug();
+  const slug = "hello-world";
   const title = knownArticleTitle(slug);
 
   const known = await page.goto(`/articles/${slug}`);

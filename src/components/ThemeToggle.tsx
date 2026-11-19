@@ -17,7 +17,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(nextTheme)}
     >
       <SunIcon className="h-6 w-6 transition dark:hidden" />
-      <MoonIcon className="hidden h-6 w-6 fill-zinc-700 stroke-zinc-500 transition not-[@media_(prefers-color-scheme:dark)]:fill-accent/10 not-[@media_(prefers-color-scheme:dark)]:stroke-accent dark:block [@media(prefers-color-scheme:dark)]:group-hover:stroke-zinc-400" />
+      <MoonIcon className="hidden h-6 w-6 transition dark:block" />
     </button>
   );
 }
