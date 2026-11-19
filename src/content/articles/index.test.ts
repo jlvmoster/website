@@ -13,6 +13,7 @@ function stub(slug: string, date: string): ArticleWithSlug {
     title: slug,
     description: slug,
     date,
+    readingMinutes: 1,
     Component: NullArticle,
   };
 }
