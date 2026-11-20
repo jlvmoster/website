@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { knownArticleTitle } from "./known-article-slug";
 import { expectMobileMenuAboveAvatar } from "./mobile-menu-stack";
 
 test("built artifact serves the SPA shell", async ({ page }) => {
@@ -126,12 +125,11 @@ test("unknown article slugs return 404 and a known slug returns 200", async ({
   page,
 }) => {
   const slug = "hello-world";
-  const title = knownArticleTitle(slug);
 
   const known = await page.goto(`/articles/${slug}`);
   expect(known?.status()).toBe(200);
   await expect(
-    page.getByRole("heading", { name: title, level: 1 }),
+    page.getByRole("heading", { name: "Hello, world", level: 1 }),
   ).toBeVisible();
 
   const slashed = await page.request.get(`/articles/${slug}/`, {
