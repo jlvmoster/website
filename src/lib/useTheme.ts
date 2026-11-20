@@ -32,6 +32,9 @@ function applyChoice(choice: ThemeChoice) {
   const prefersDark = systemPrefersDark();
   const isDark = choice === "dark" || (choice === "system" && prefersDark);
   document.documentElement.classList.toggle("dark", isDark);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", isDark ? "#09090b" : "#fafafa");
 }
 
 function persistChoice(choice: ThemeChoice) {
