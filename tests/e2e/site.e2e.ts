@@ -262,7 +262,43 @@ test("theme toggle switches back to light when system is dark", async ({
   }
 });
 
-test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover when the OS is dark", async ({
+test("theme-color meta follows the saved theme instead of the OS scheme", async ({
+  browser,
+  baseURL,
+}) => {
+  const readThemeColor = async (
+    colorScheme: "light" | "dark",
+    choice: "light" | "dark",
+  ) => {
+    const context = await browser.newContext({ baseURL, colorScheme });
+    const page = await context.newPage();
+    try {
+      await page.goto("/");
+      await page.evaluate((stored: string) => {
+        localStorage.setItem("theme", stored);
+      }, choice);
+      await page.reload();
+      await expect(
+        page.getByRole("button", {
+          name:
+            choice === "light"
+              ? "Switch to dark theme"
+              : "Switch to light theme",
+        }),
+      ).toBeVisible();
+      return await page
+        .locator("head > meta[name='theme-color']")
+        .getAttribute("content");
+    } finally {
+      await context.close();
+    }
+  };
+
+  expect(await readThemeColor("dark", "light")).toBe("#fafafa");
+  expect(await readThemeColor("light", "dark")).toBe("#09090b");
+});
+
+test("moon icon stroke matches, and is zinc-400 on hover, on a light or dark OS", async ({
   browser,
   baseURL,
 }) => {
@@ -293,10 +329,6 @@ test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover wh
         .nth(1)
         .locator("path")
         .evaluate((path) => {
-          const accentProbe = document.createElement("span");
-          accentProbe.style.color = getComputedStyle(document.documentElement)
-            .getPropertyValue("--accent")
-            .trim();
           const svg = document.createElementNS(
             "http://www.w3.org/2000/svg",
             "svg",
@@ -307,13 +339,10 @@ test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover wh
           );
           zinc.setAttribute("class", "stroke-zinc-400");
           svg.append(zinc);
-          document.body.append(accentProbe, svg);
-          const accent = getComputedStyle(accentProbe).color;
+          document.body.append(svg);
           const zincStroke = getComputedStyle(zinc).stroke;
-          accentProbe.remove();
           svg.remove();
           return {
-            accent,
             stroke: getComputedStyle(path).stroke,
             zincStroke,
           };

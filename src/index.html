@@ -9,12 +9,11 @@
       property="og:description"
       content="Personal site of Jalo Moster — Software Engineer at Chick-fil-A."
     />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafa" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#09090b" />
+    <meta name="theme-color" content="#fafafa" />
     <link rel="stylesheet" href="./styles/globals.css" />
     <script>
       (() => {
-        var c, d;
+        var c, d, meta;
         try {
           c = localStorage.getItem("theme") || "system";
           d =
@@ -22,6 +21,8 @@
             (c === "system" &&
               window.matchMedia("(prefers-color-scheme: dark)").matches);
           document.documentElement.classList.toggle("dark", d);
+          meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", d ? "#09090b" : "#fafafa");
         } catch (_e) {}
       })();
     </script>
