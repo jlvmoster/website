@@ -262,7 +262,7 @@ test("theme toggle switches back to light when system is dark", async ({
   }
 });
 
-test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover when the OS is dark", async ({
+test("moon icon stroke matches, and is zinc-400 on hover, on a light or dark OS", async ({
   browser,
   baseURL,
 }) => {
@@ -293,10 +293,6 @@ test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover wh
         .nth(1)
         .locator("path")
         .evaluate((path) => {
-          const accentProbe = document.createElement("span");
-          accentProbe.style.color = getComputedStyle(document.documentElement)
-            .getPropertyValue("--accent")
-            .trim();
           const svg = document.createElementNS(
             "http://www.w3.org/2000/svg",
             "svg",
@@ -307,13 +303,10 @@ test("moon icon stroke matches on a light or dark OS and is zinc-400 on hover wh
           );
           zinc.setAttribute("class", "stroke-zinc-400");
           svg.append(zinc);
-          document.body.append(accentProbe, svg);
-          const accent = getComputedStyle(accentProbe).color;
+          document.body.append(svg);
           const zincStroke = getComputedStyle(zinc).stroke;
-          accentProbe.remove();
           svg.remove();
           return {
-            accent,
             stroke: getComputedStyle(path).stroke,
             zincStroke,
           };
