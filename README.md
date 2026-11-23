@@ -25,29 +25,29 @@ bun run dev              # http://localhost:3000 with HMR
 
 ## Scripts
 
-| Command                       | What it does                                                                                                                                         |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run dev`                 | Local dev server with HMR (`scripts/dev.ts` → `Bun.serve`).                                                                                          |
-| `bun run build`               | Bundles `src/index.html` to `dist/` and copies `public/` over (`scripts/build.ts`).                                                                  |
-| `bun run preview`             | Serves built `dist/` locally with SPA fallback (`scripts/preview.ts`).                                                                               |
-| `bun run check`               | `biome check && tsc --noEmit`.                                                                                                                       |
-| `bun test`                    | Unit / integration tests.                                                                                                                            |
-| `bun run test:e2e`            | Browser E2E against the Bun dev server.                                                                                                              |
-| `bun run test:e2e:built`      | Browser E2E against a freshly built `dist/` served by `bun run preview`.                                                                             |
-| `bun run test:e2e:production` | Browser E2E against `PRODUCTION_URL` or `https://moster.dev`. Set `VERCEL_SHARE_URL` to a Vercel share link to run against an SSO-protected preview. |
-| `bun run setup:browsers`      | `playwright install chromium`.                                                                                                                       |
+| Command                       | What it does                                                                                                                                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run dev`                 | Local dev server with HMR (`scripts/dev.ts` → `Bun.serve`).                                                                                                                                              |
+| `bun run build`               | Bundles `src/index.html` to `dist/` and copies `public/` over (`scripts/build.ts`).                                                                                                                      |
+| `bun run preview`             | Serves built `dist/` locally (`scripts/preview.ts`): four literal rewrites (`/about`, `/articles`, `/projects`, and `/uses` to `index.html`), per-slug article HTML, and `404.html` for everything else. |
+| `bun run check`               | `biome check && tsc --noEmit`.                                                                                                                                                                           |
+| `bun test`                    | Unit / integration tests.                                                                                                                                                                                |
+| `bun run test:e2e`            | Browser E2E against the Bun dev server.                                                                                                                                                                  |
+| `bun run test:e2e:built`      | Browser E2E against a freshly built `dist/` served by `bun run preview`.                                                                                                                                 |
+| `bun run test:e2e:production` | Browser E2E against `PRODUCTION_URL` or `https://moster.dev`. Set `VERCEL_SHARE_URL` to a Vercel share link to run against an SSO-protected preview.                                                     |
+| `bun run setup:browsers`      | `playwright install chromium`.                                                                                                                                                                           |
 
 ## Routes
 
-| Path              | What                                                                                                       |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- |
-| `/`               | Hero (verbatim "my pleasure" copy + three socials), 4 most-recent articles, Resume timeline + Download CV. |
-| `/about`          | Portrait + multi-paragraph bio + social column with mailto.                                                |
-| `/articles`       | Reverse-chronological list of typed TSX article modules.                                                   |
-| `/articles/:slug` | Individual article rendered via `ArticleLayout` + `<Prose>` (back-arrow navigates to `/articles`).         |
-| `/projects`       | Three-column grid of project cards (logo, title, description, external link).                              |
-| `/uses`           | Section-based list of hardware, AI tools, and skills & plugins.                                            |
-| `*`               | Minimal NotFoundPage.                                                                                      |
+| Path              | What                                                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `/`               | Hero (verbatim "my pleasure" copy, three socials, and mailto), 4 most-recent articles, Resume timeline + Download CV. |
+| `/about`          | Portrait + multi-paragraph bio + social column with mailto.                                                           |
+| `/articles`       | Reverse-chronological list of typed TSX article modules.                                                              |
+| `/articles/:slug` | Individual article rendered via `ArticleLayout` + `<Prose>` (back-arrow navigates to `/articles`).                    |
+| `/projects`       | Three-column grid of project cards (logo, title, description, external link).                                         |
+| `/uses`           | Section-based list of hardware, AI tools, and skills & plugins.                                                       |
+| `*`               | Minimal NotFoundPage.                                                                                                 |
 
 Hard-refresh on a known route returns 200 from Vercel (`/` is `index.html`; a known `/articles/<slug>` is `articles/<slug>/index.html`; `/about`, `/articles`, `/projects`, and `/uses` rewrite to `index.html`) and the client router resolves the URL after mount. Any other path, including an unknown article slug, returns HTTP 404 with the same shell, so the in-app not-found page still renders.
 
@@ -92,7 +92,7 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 
 ## Testing
 
-- **Unit:** `bun test` — specs colocated with source or under `tests/`. The smoke spec renders `<App />` inside `<MemoryRouter initialEntries={["/"]}>` and asserts the verbatim hero substring + three social URLs.
+- **Unit:** `bun test` — specs colocated with source or under `tests/`. The smoke spec renders `<App />` inside `<MemoryRouter initialEntries={["/"]}>` and asserts the verbatim hero substring + four URLs, including the mailto.
 - **Dev E2E:** `bun run test:e2e` against `bun run dev`. Coverage: every route loads, hero copy renders verbatim on `/`, theme toggle cycles + persists. The dev server is not Vercel, so unknown paths there stay HTTP 200.
 - **Built E2E:** `bun run test:e2e:built` builds `dist/`, serves it through `bun run preview`, and checks known routes return 200, a known article slug returns 200, an unknown article slug returns 404, and another unknown path returns 404 and renders the not-found page. `scripts/preview.ts` applies the `vercel.json` rewrites, directory indexes, and the 404 status; it does not send the security headers. To run the same suite against a deployment that applies `vercel.json` itself: `E2E_BASE_URL=https://<host> bun run test:e2e:built`. A `*.vercel.app` preview sits behind Deployment Protection and redirects to login until a bypass is configured.
 - **Production E2E:** `bun run test:e2e:production` runs the same acceptance checks against `PRODUCTION_URL` or `https://moster.dev`, plus the `vercel.json` security headers — `scripts/preview.ts` does not serve those, so this is the only place they're verified. Deployment Protection sends `*.vercel.app` preview URLs to a login page. Set `VERCEL_SHARE_URL` to a share link (`https://<host>/?_vercel_share=<token>`) and Playwright opens it once, saves the `_vercel_jwt` cookie under gitignored `playwright/.auth/`, and reuses that state for the suite. The token is not logged. Leave the variable unset and the command behaves as before.
@@ -103,7 +103,7 @@ Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, 
 Two systems, one job each:
 
 - **GitHub Actions** runs the `check` job on every pull request and push to `qa` and `master`: `bun install --frozen-lockfile`, `setup:browsers`, `check`, `build`, `bun test`, `bunx playwright test`, `bun run test:e2e:built`. Feature pull requests target `qa`. It never deploys.
-- **Vercel Git Integration** deploys. Push to `master` → production; push to a PR branch → preview. Vercel builds from the repo root so the committed `vercel.json` (SPA rewrites + security headers) applies.
+- **Vercel Git Integration** deploys. Push to `master` → production; push to a PR branch → preview. Vercel builds from the repo root so the committed `vercel.json` (four literal rewrites + security headers) applies.
 
 GitHub branch protection should require `check` before a pull request merges. Vercel does not read that ruleset: add the `check` workflow under the project's Deployment Checks or a push to the production branch promotes while CI is still running. Confirm the Production Branch is `master`. No deploy credentials exist in the repo or in Actions secrets — the Vercel GitHub App authenticates. Break-glass is `bunx vercel --prod` from a `vercel link`-ed checkout.
 
