@@ -41,8 +41,6 @@
   --color-accent: var(--accent);
   --color-panel: var(--panel);
   --color-ring: var(--ring);
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
 }
 
 html {
