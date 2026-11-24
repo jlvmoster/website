@@ -92,7 +92,7 @@ Current state: v2 redesign complete. Multi-page React 19 SPA via `react-router-d
 ## Frontend conventions
 
 - Stack: Bun + React 19 + `react-router-dom` v7 + Tailwind v4 SPA, multi-page client routing, deployed to Vercel as static files from `dist/`.
-- Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.).
+- Tailwind v4 with CSS variables defined in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. The `@theme` block exposes each `--color-*` token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.). `--font-sans` and `--font-serif` are `:root` variables, not exposed through `@theme`.
 - **Use the `--accent` token utility class (`text-accent`, `hover:text-accent`, `from-accent/0`)** for the brand color across hover states, active links, and links; do not hard-code palette-specific accent pairs. The accent value swaps automatically via the class-based dark mode.
 - `--accent` is `#e51636` in light and `#ff4f5e` in dark.
 - Class-based dark mode: `@custom-variant dark (&:where(.dark, .dark *));` is declared in `globals.css`, so `dark:` utilities key off `html.dark` (not `prefers-color-scheme`). The theme toggle owns that class.
