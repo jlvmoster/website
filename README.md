@@ -88,7 +88,7 @@ vercel.json               # Vercel static SPA config (rewrites + headers)
 
 The Header toggle switches between the resolved light and dark themes and persists the choice in `localStorage["theme"]`. First load defaults to `system`, so the OS preference is honored until the user chooses light or dark. An inline anti-flicker script in `src/index.html` runs synchronously before React mounts, so the right theme class lands on `<html>` before first paint — no FOUC.
 
-Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. Values map to a zinc base with a Chick-fil-A red accent (`#e51636` / `#ff4f5e`). The `@theme` block exposes each token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.) so the toggle is a single `html.dark` class swap. Typography uses system font stacks only.
+Design tokens are exposed as CSS variables in `src/styles/globals.css`: `--bg`, `--fg`, `--muted`, `--accent`, `--panel`, `--ring`, `--font-sans`, `--font-serif`. Values map to a zinc base with a Chick-fil-A red accent (`#e51636` / `#ff4f5e`). The `@theme` block exposes each `--color-*` token as a Tailwind utility (`bg-bg`, `text-fg`, `text-accent`, etc.) so the toggle is a single `html.dark` class swap. `--font-sans` and `--font-serif` are `:root` variables, not exposed through `@theme`. Typography uses system font stacks only.
 
 ## Testing
 
